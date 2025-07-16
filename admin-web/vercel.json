@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "server-vercel.js",
+      "src": "server-mongodb.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server-vercel.js"
+      "dest": "/server-mongodb.js"
     }
   ],
   "env": {

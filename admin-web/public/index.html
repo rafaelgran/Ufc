@@ -25,7 +25,7 @@
         }
         
         .card {
-            background-color: #2a2a2a;
+            background-color: #2a2a2a;  
             border: 1px solid #444;
             border-radius: 10px;
         }
@@ -70,28 +70,69 @@
             box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
         }
         
-        .table {
-            color: white;
+        /* Melhorar contraste dos labels */
+        .form-label {
+            color: var(--ufc-gold);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
-        .table th {
-            background-color: var(--ufc-red);
-            border-color: #555;
-        }
-        
-        .table td {
-            border-color: #555;
-        }
-        
+        /* Melhorar contraste do texto das abas */
         .nav-tabs .nav-link {
-            color: #ccc;
+            color: #e0e0e0;
             border: none;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--ufc-gold);
+            background-color: rgba(255, 215, 0, 0.1);
         }
         
         .nav-tabs .nav-link.active {
             background-color: var(--ufc-red);
             color: white;
             border: none;
+            font-weight: 600;
+        }
+        
+        /* Melhorar contraste dos textos nas tabelas */
+        .table {
+            color: #f0f0f0;
+        }
+        
+        .table th {
+            background-color: var(--ufc-red);
+            border-color: #555;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .table td {
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        
+        /* Melhorar contraste dos textos nos cards */
+        .card-body {
+            color: #e0e0e0;
+        }
+        
+        .card-header h5 {
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Melhorar contraste dos placeholders */
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        
+        /* Melhorar contraste dos textos de status */
+        .text-muted {
+            color: #bbb !important;
         }
         
         .fight-card {

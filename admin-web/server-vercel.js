@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // In-memory data for Vercel
 let events = [

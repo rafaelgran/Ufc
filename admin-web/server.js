@@ -17,9 +17,60 @@ const io = socketIo(server, {
 // Database setup
 let db;
 const useSQLite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+const isVercel = process.env.VERCEL === '1';
 
-if (useSQLite) {
-  // Use SQLite for local development
+if (isVercel || !useSQLite) {
+  // Use in-memory database for Vercel or PostgreSQL for production
+  const sqlite3 = require('sqlite3').verbose();
+  db = new sqlite3.Database(':memory:'); // Use in-memory database for Vercel
+  
+  // Initialize SQLite tables
+  db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      date TEXT NOT NULL,
+      location TEXT,
+      venue TEXT,
+      mainEvent TEXT,
+      status TEXT DEFAULT 'upcoming',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+    
+    db.run(`CREATE TABLE IF NOT EXISTS fighters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      nickname TEXT,
+      record TEXT,
+      weightClass TEXT,
+      ranking INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+    
+    db.run(`CREATE TABLE IF NOT EXISTS fights (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      eventId INTEGER,
+      fighter1Id INTEGER,
+      fighter2Id INTEGER,
+      weightClass TEXT,
+      round INTEGER DEFAULT 1,
+      timeRemaining INTEGER DEFAULT 300,
+      status TEXT DEFAULT 'scheduled',
+      winnerId INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (eventId) REFERENCES events (id),
+      FOREIGN KEY (fighter1Id) REFERENCES fighters (id),
+      FOREIGN KEY (fighter2Id) REFERENCES fighters (id)
+    )`);
+    
+    // Insert sample data for Vercel
+    if (isVercel) {
+      db.run(`INSERT OR IGNORE INTO events (id, name, date, location, venue, mainEvent, status) VALUES 
+        (1, 'UFC 316', '2024-06-15T20:00:00', 'Newark, NJ - United States', 'Prudential Center', 'Merab Dvalishvili vs Sean O''Malley', 'scheduled')`);
+    }
+  });
+} else {
+  // Use SQLite file for local development
   const sqlite3 = require('sqlite3').verbose();
   db = new sqlite3.Database('./ufc_events.db');
   
@@ -62,62 +113,6 @@ if (useSQLite) {
       FOREIGN KEY (fighter2Id) REFERENCES fighters (id)
     )`);
   });
-} else {
-  // Use PostgreSQL for production
-  const { Pool } = require('pg');
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  });
-  
-  // Initialize PostgreSQL tables
-  pool.query(`
-    CREATE TABLE IF NOT EXISTS events (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      date TIMESTAMP NOT NULL,
-      location VARCHAR(255),
-      venue VARCHAR(255),
-      mainEvent TEXT,
-      status VARCHAR(50) DEFAULT 'upcoming',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  
-  pool.query(`
-    CREATE TABLE IF NOT EXISTS fighters (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      nickname VARCHAR(255),
-      record VARCHAR(50),
-      weightClass VARCHAR(100),
-      ranking INTEGER,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  
-  pool.query(`
-    CREATE TABLE IF NOT EXISTS fights (
-      id SERIAL PRIMARY KEY,
-      eventId INTEGER REFERENCES events(id),
-      fighter1Id INTEGER REFERENCES fighters(id),
-      fighter2Id INTEGER REFERENCES fighters(id),
-      weightClass VARCHAR(100),
-      round INTEGER DEFAULT 1,
-      timeRemaining INTEGER DEFAULT 300,
-      status VARCHAR(50) DEFAULT 'scheduled',
-      winnerId INTEGER REFERENCES fighters(id),
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  
-  // Create a database interface that matches SQLite
-  db = {
-    all: (sql, params, callback) => pool.query(sql, params, (err, result) => callback(err, result?.rows)),
-    get: (sql, params, callback) => pool.query(sql, params, (err, result) => callback(err, result?.rows?.[0])),
-    run: (sql, params, callback) => pool.query(sql, params, (err, result) => callback(err, { lastID: result?.rows?.[0]?.id })),
-    serialize: (callback) => callback()
-  };
 }
 
 // Middleware

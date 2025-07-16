@@ -170,29 +170,36 @@
         
         /* Tabelas clean */
         .table {
-            color: var(--ufc-text);
+            color: var(--ufc-white);
             border-radius: 6px;
             overflow: hidden;
+            background: var(--ufc-gray);
         }
         
         .table th {
-            background: var(--ufc-light-gray);
+            background: var(--ufc-dark);
             border: none;
-            color: var(--ufc-white);
+            color: var(--ufc-accent);
             font-weight: 600;
             padding: 12px;
             font-size: 0.85rem;
+            border-bottom: 2px solid var(--ufc-accent);
         }
         
         .table td {
             border: none;
-            border-bottom: 1px solid #404040;
-            color: var(--ufc-text);
+            border-bottom: 1px solid var(--ufc-light-gray);
+            color: var(--ufc-white);
             padding: 12px;
             vertical-align: middle;
+            background: var(--ufc-gray);
         }
         
         .table tbody tr:hover {
+            background: var(--ufc-light-gray);
+        }
+        
+        .table tbody tr:hover td {
             background: var(--ufc-light-gray);
         }
         

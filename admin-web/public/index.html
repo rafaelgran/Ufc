@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFC Events Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --ufc-red: #d20a0a;
+            --ufc-gold: #ffd700;
+            --ufc-dark: #1a1a1a;
+        }
+        
+        body {
+            background-color: var(--ufc-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--ufc-red), #8b0000);
+            border-bottom: 3px solid var(--ufc-gold);
+        }
+        
+        .card {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--ufc-red), #8b0000);
+            color: white;
+            border-bottom: 2px solid var(--ufc-gold);
+        }
+        
+        .btn-primary {
+            background-color: var(--ufc-red);
+            border-color: var(--ufc-red);
+        }
+        
+        .btn-primary:hover {
+            background-color: #8b0000;
+            border-color: #8b0000;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        .btn-warning {
+            background-color: var(--ufc-gold);
+            border-color: var(--ufc-gold);
+            color: var(--ufc-dark);
+        }
+        
+        .form-control, .form-select {
+            background-color: #3a3a3a;
+            border: 1px solid #555;
+            color: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #3a3a3a;
+            border-color: var(--ufc-gold);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+        }
+        
+        .table {
+            color: white;
+        }
+        
+        .table th {
+            background-color: var(--ufc-red);
+            border-color: #555;
+        }
+        
+        .table td {
+            border-color: #555;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #ccc;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--ufc-red);
+            color: white;
+            border: none;
+        }
+        
+        .fight-card {
+            background: linear-gradient(135deg, #333, #444);
+            border: 2px solid #555;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .fighter-info {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .fighter-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--ufc-gold);
+        }
+        
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--ufc-gold);
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--ufc-gold);
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-scheduled { background-color: #6c757d; }
+        .status-live { background-color: #dc3545; }
+        .status-finished { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-fist-raised me-2"></i>
+                UFC Events Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-clock me-1"></i>
+                    <span id="current-time"></span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">
+                    <i class="fas fa-calendar-alt me-2"></i>Eventos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fighters-tab" data-bs-toggle="tab" data-bs-target="#fighters" type="button" role="tab">
+                    <i class="fas fa-user-friends me-2"></i>Lutadores
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fights-tab" data-bs-toggle="tab" data-bs-target="#fights" type="button" role="tab">
+                    <i class="fas fa-fist-raised me-2"></i>Lutas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="live-tab" data-bs-toggle="tab" data-bs-target="#live" type="button" role="tab">
+                    <i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="adminTabContent">
+            <!-- Events Tab -->
+            <div class="tab-pane fade show active" id="events" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-plus me-2"></i>Novo Evento</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="eventForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nome do Evento</label>
+                                        <input type="text" class="form-control" id="eventName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Data</label>
+                                        <input type="datetime-local" class="form-control" id="eventDate" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Local</label>
+                                        <input type="text" class="form-control" id="eventLocation">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Arena</label>
+                                        <input type="text" class="form-control" id="eventVenue">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Evento Principal</label>
+                                        <input type="text" class="form-control" id="eventMainEvent">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Criar Evento
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-list me-2"></i>Eventos</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="eventsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fighters Tab -->
+            <div class="tab-pane fade" id="fighters" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-user-plus me-2"></i>Novo Lutador</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="fighterForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nome</label>
+                                        <input type="text" class="form-control" id="fighterName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Apelido</label>
+                                        <input type="text" class="form-control" id="fighterNickname">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Record (V-D-E)</label>
+                                        <input type="text" class="form-control" id="fighterRecord" placeholder="ex: 25-5-0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Categoria de Peso</label>
+                                        <select class="form-select" id="fighterWeightClass">
+                                            <option value="">Selecione...</option>
+                                            <option value="Flyweight">Flyweight</option>
+                                            <option value="Bantamweight">Bantamweight</option>
+                                            <option value="Featherweight">Featherweight</option>
+                                            <option value="Lightweight">Lightweight</option>
+                                            <option value="Welterweight">Welterweight</option>
+                                            <option value="Middleweight">Middleweight</option>
+                                            <option value="Light Heavyweight">Light Heavyweight</option>
+                                            <option value="Heavyweight">Heavyweight</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Ranking</label>
+                                        <input type="number" class="form-control" id="fighterRanking" min="1" max="15">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">URL da Foto</label>
+                                        <input type="url" class="form-control" id="fighterPhoto">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Adicionar Lutador
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-users me-2"></i>Lutadores</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="fightersList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fights Tab -->
+            <div class="tab-pane fade" id="fights" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-plus me-2"></i>Nova Luta</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="fightForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Evento</label>
+                                        <select class="form-select" id="fightEvent" required></select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lutador 1</label>
+                                        <select class="form-select" id="fighter1" required></select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lutador 2</label>
+                                        <select class="form-select" id="fighter2" required></select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Categoria de Peso</label>
+                                        <select class="form-select" id="fightWeightClass" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="Flyweight">Flyweight</option>
+                                            <option value="Bantamweight">Bantamweight</option>
+                                            <option value="Featherweight">Featherweight</option>
+                                            <option value="Lightweight">Lightweight</option>
+                                            <option value="Welterweight">Welterweight</option>
+                                            <option value="Middleweight">Middleweight</option>
+                                            <option value="Light Heavyweight">Light Heavyweight</option>
+                                            <option value="Heavyweight">Heavyweight</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Número de Rounds</label>
+                                        <select class="form-select" id="fightRounds" required>
+                                            <option value="3">3 Rounds</option>
+                                            <option value="5">5 Rounds</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Criar Luta
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-list me-2"></i>Lutas</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="fightsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Control Tab -->
+            <div class="tab-pane fade" id="live" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Selecionar Luta</label>
+                                            <select class="form-select" id="liveFightSelect">
+                                                <option value="">Selecione uma luta...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div id="liveFightControl" style="display: none;">
+                                            <div class="fight-card">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="fighter-info">
+                                                            <img id="liveFighter1Photo" src="https://via.placeholder.com/80" class="fighter-photo">
+                                                            <h6 id="liveFighter1Name">Lutador 1</h6>
+                                                            <small id="liveFighter1Record">Record</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="vs-divider">VS</div>
+                                                        <div class="timer-display" id="liveTimer">05:00</div>
+                                                        <div class="text-center">
+                                                            <span class="status-badge" id="liveStatus">Aguardando</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="fighter-info">
+                                                            <img id="liveFighter2Photo" src="https://via.placeholder.com/80" class="fighter-photo">
+                                                            <h6 id="liveFighter2Name">Lutador 2</h6>
+                                                            <small id="liveFighter2Record">Record</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col-12 text-center">
+                                                        <button class="btn btn-success me-2" id="startFightBtn">
+                                                            <i class="fas fa-play me-2"></i>Iniciar Luta
+                                                        </button>
+                                                        <button class="btn btn-warning me-2" id="pauseFightBtn" style="display: none;">
+                                                            <i class="fas fa-pause me-2"></i>Pausar
+                                                        </button>
+                                                        <button class="btn btn-warning me-2" id="resumeFightBtn" style="display: none;">
+                                                            <i class="fas fa-play me-2"></i>Retomar
+                                                        </button>
+                                                        <button class="btn btn-danger" id="endFightBtn">
+                                                            <i class="fas fa-stop me-2"></i>Finalizar Luta
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

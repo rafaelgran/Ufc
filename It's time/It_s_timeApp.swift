@@ -11,7 +11,7 @@ import SwiftUI
 struct Its_timeApp: App {
     var body: some Scene {
         WindowGroup {
-            EventListView()
+            ContentView()
                 .preferredColorScheme(.dark)
         }
     }

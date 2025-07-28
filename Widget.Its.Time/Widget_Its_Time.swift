@@ -191,32 +191,63 @@ struct UFCWidgetEntryView: View {
         }
         .containerBackground(for: .widget) {
             ZStack {
-                // Base black background
-                Color.black
-                
-                // Dynamic gradient background - LEFT SIDE ONLY
-                if entry.isChampionship {
-                    // Golden gradient for championship fights - left side only
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.06), // Golden glow
-                            Color.clear
-                        ]),
-                        center: .topLeading,
-                        startRadius: 50,
-                        endRadius: 200
-                    )
+                // Dynamic background based on color scheme
+                if colorScheme == .dark {
+                    // Dark mode background
+                    Color.black
+                    
+                    // Dynamic gradient background - LEFT SIDE ONLY
+                    if entry.isChampionship {
+                        // Golden gradient for championship fights - left side only
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.06), // Golden glow
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 50,
+                            endRadius: 200
+                        )
+                    } else {
+                        // Red gradient for regular fights - left side only
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.06), // Red glow (#F13C54)
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 50,
+                            endRadius: 200
+                        )
+                    }
                 } else {
-                    // Red gradient for regular fights - left side only
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.06), // Red glow (#F13C54)
-                            Color.clear
-                        ]),
-                        center: .topLeading,
-                        startRadius: 50,
-                        endRadius: 200
-                    )
+                    // Light mode background
+                    Color.white
+                    
+                    // Subtle gradient for light mode
+                    if entry.isChampionship {
+                        // Golden gradient for championship fights - light mode (darker for better contrast)
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.6, green: 0.4, blue: 0.0).opacity(0.2), // Much darker golden glow for maximum contrast
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 50,
+                            endRadius: 200
+                        )
+                    } else {
+                        // Red gradient for regular fights - light mode
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.1), // Red glow (#F13C54)
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 50,
+                            endRadius: 200
+                        )
+                    }
                 }
             }
         }
@@ -229,7 +260,7 @@ struct UFCWidgetEntryView: View {
                 Text(entry.eventName)
                     .font(.rajdhani(size: 16, weight: .bold))
                     .foregroundColor(entry.isChampionship ? 
-                        (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.6, green: 0.4, blue: 0.0)) : // Darker golden for light mode
+                        (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // Much darker golden for light mode
                         Color(red: 0.945, green: 0.235, blue: 0.329)) // #F13C54 for bout
                     .lineLimit(1)
                 
@@ -284,7 +315,7 @@ struct UFCWidgetEntryView: View {
             Text(entry.eventName)
                 .font(.rajdhani(size: 18, weight: .bold))
                 .foregroundColor(entry.isChampionship ? 
-                    (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.6, green: 0.4, blue: 0.0)) : // Darker golden for light mode
+                    (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // Much darker golden for light mode
                     Color(red: 0.945, green: 0.235, blue: 0.329)) // #F13C54 for bout
                 .lineLimit(1)
             VStack(alignment: .leading, spacing: -6) {

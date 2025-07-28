@@ -180,16 +180,8 @@ struct UFCWidgetEntryView: View {
     }
     
     var body: some View {
-        // Widget content with original padding
-        VStack(spacing: 0) {
-            if family == .systemSmall {
-                smallWidgetLayout
-            } else {
-                mediumWidgetLayout
-            }
-        }
-        .background(
-            // Dynamic gradient background - COMPLETELY SEPARATE from content
+        ZStack {
+            // Dynamic gradient background - FULL WIDGET AREA
             GeometryReader { geometry in
                 ZStack {
                     // Base black background
@@ -204,7 +196,7 @@ struct UFCWidgetEntryView: View {
                             ]),
                             center: .topLeading,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
                         )
                         
                         RadialGradient(
@@ -214,7 +206,7 @@ struct UFCWidgetEntryView: View {
                             ]),
                             center: .topTrailing,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
                         )
                     } else {
                         // Reddish-purple gradient for regular fights - full coverage
@@ -225,7 +217,7 @@ struct UFCWidgetEntryView: View {
                             ]),
                             center: .topLeading,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
                         )
                         
                         RadialGradient(
@@ -235,14 +227,24 @@ struct UFCWidgetEntryView: View {
                             ]),
                             center: .topTrailing,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
                         )
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped(antialiased: false)
                 .ignoresSafeArea()
             }
-        )
+            
+            // Widget content - OVERLAY on top of gradient
+            VStack(spacing: 0) {
+                if family == .systemSmall {
+                    smallWidgetLayout
+                } else {
+                    mediumWidgetLayout
+                }
+            }
+        }
         .containerBackground(for: .widget) {
             Color.clear
         }

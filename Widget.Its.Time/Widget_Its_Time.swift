@@ -188,46 +188,26 @@ struct UFCWidgetEntryView: View {
                     Color.black
                     
                     if entry.isChampionship {
-                        // Golden gradient for championship fights - full coverage
+                        // Golden gradient for championship fights - smooth and centered
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.3), // Golden glow
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.15), // Golden glow - softer
                                 Color.clear
                             ]),
-                            center: .topLeading,
+                            center: .top,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
-                        )
-                        
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.25), // Golden glow
-                                Color.clear
-                            ]),
-                            center: .topTrailing,
-                            startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.2
                         )
                     } else {
-                        // Reddish-purple gradient for regular fights - full coverage
+                        // Reddish-purple gradient for regular fights - smooth and centered
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.3), // Purple glow
+                                Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.15), // Purple glow - softer
                                 Color.clear
                             ]),
-                            center: .topLeading,
+                            center: .top,
                             startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
-                        )
-                        
-                        RadialGradient(
-                            gradient: Gradient(colors: [
-                                Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.25), // Purple glow
-                                Color.clear
-                            ]),
-                            center: .topTrailing,
-                            startRadius: 0,
-                            endRadius: max(geometry.size.width, geometry.size.height) * 2.0
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.2
                         )
                     }
                 }

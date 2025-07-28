@@ -180,8 +180,16 @@ struct UFCWidgetEntryView: View {
     }
     
     var body: some View {
-        ZStack {
-            // Dynamic gradient background - FULL WIDGET AREA
+        // Widget content with original padding
+        VStack(spacing: 0) {
+            if family == .systemSmall {
+                smallWidgetLayout
+            } else {
+                mediumWidgetLayout
+            }
+        }
+        .background(
+            // Dynamic gradient background - COMPLETELY SEPARATE from content
             GeometryReader { geometry in
                 ZStack {
                     // Base black background
@@ -232,18 +240,9 @@ struct UFCWidgetEntryView: View {
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
+                .ignoresSafeArea()
             }
-            .ignoresSafeArea()
-            
-            // Widget content - OVERLAY on top of gradient
-            VStack(spacing: 0) {
-                if family == .systemSmall {
-                    smallWidgetLayout
-                } else {
-                    mediumWidgetLayout
-                }
-            }
-        }
+        )
         .containerBackground(for: .widget) {
             Color.clear
         }
@@ -291,7 +290,8 @@ struct UFCWidgetEntryView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding(16) // Standard padding for content
+        .padding(.leading, -20)
+        .padding(.vertical, 16)
     }
     
     private var mediumWidgetLayout: some View {
@@ -300,7 +300,7 @@ struct UFCWidgetEntryView: View {
             Spacer()
             countdown
         }
-        .padding(16) // Standard padding for content
+        .padding(16)
     }
     
     private var eventInfo: some View {
@@ -329,6 +329,7 @@ struct UFCWidgetEntryView: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
         }
+        .padding(.leading, -10)
         .padding(.vertical, 16)
     }
 

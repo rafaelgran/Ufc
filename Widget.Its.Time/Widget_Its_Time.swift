@@ -180,15 +180,68 @@ struct UFCWidgetEntryView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            if family == .systemSmall {
-                smallWidgetLayout
-            } else {
-                mediumWidgetLayout
+        ZStack {
+            // Dynamic gradient background based on championship status
+            ZStack {
+                // Base black background
+                Color.black
+                
+                if entry.isChampionship {
+                    // Golden gradient for championship fights
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.25), // Golden glow
+                            Color.clear
+                        ]),
+                        center: .topLeading,
+                        startRadius: 20,
+                        endRadius: 100
+                    )
+                    
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.2), // Golden glow
+                            Color.clear
+                        ]),
+                        center: .topTrailing,
+                        startRadius: 20,
+                        endRadius: 100
+                    )
+                } else {
+                    // Red gradient for regular fights
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.25), // Red glow (#F13C54)
+                            Color.clear
+                        ]),
+                        center: .topLeading,
+                        startRadius: 20,
+                        endRadius: 100
+                    )
+                    
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.2), // Red glow (#F13C54)
+                            Color.clear
+                        ]),
+                        center: .topTrailing,
+                        startRadius: 20,
+                        endRadius: 100
+                    )
+                }
+            }
+            
+            // Widget content
+            VStack(spacing: 0) {
+                if family == .systemSmall {
+                    smallWidgetLayout
+                } else {
+                    mediumWidgetLayout
+                }
             }
         }
         .containerBackground(for: .widget) {
-            Color.black
+            Color.clear
         }
     }
     
@@ -250,7 +303,7 @@ struct UFCWidgetEntryView: View {
     private var eventInfo: some View {
         VStack(alignment: .leading, spacing: -2) {
             Text(entry.eventName)
-                .font(.rajdhani(size: 20, weight: .bold))
+                .font(.rajdhani(size: 18, weight: .bold))
                 .foregroundColor(entry.isChampionship ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.945, green: 0.235, blue: 0.329)) // Golden for championship, #F13C54 for bout
                 .lineLimit(1)
             VStack(alignment: .leading, spacing: -6) {

@@ -187,49 +187,50 @@ struct UFCWidgetEntryView: View {
                 Color.black
                 
                 if entry.isChampionship {
-                    // Golden gradient for championship fights
+                    // Golden gradient for championship fights - full coverage
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.3), // Golden glow
+                            Color.clear
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: 200
+                    )
+                    
                     RadialGradient(
                         gradient: Gradient(colors: [
                             Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.25), // Golden glow
                             Color.clear
                         ]),
-                        center: .topLeading,
-                        startRadius: 20,
-                        endRadius: 100
-                    )
-                    
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.2), // Golden glow
-                            Color.clear
-                        ]),
                         center: .topTrailing,
-                        startRadius: 20,
-                        endRadius: 100
+                        startRadius: 0,
+                        endRadius: 200
                     )
                 } else {
-                    // Red gradient for regular fights
+                    // Reddish-purple gradient for regular fights - full coverage
                     RadialGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.25), // Red glow (#F13C54)
+                            Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.3), // Purple glow
                             Color.clear
                         ]),
                         center: .topLeading,
-                        startRadius: 20,
-                        endRadius: 100
+                        startRadius: 0,
+                        endRadius: 200
                     )
                     
                     RadialGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.2), // Red glow (#F13C54)
+                            Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.25), // Purple glow
                             Color.clear
                         ]),
                         center: .topTrailing,
-                        startRadius: 20,
-                        endRadius: 100
+                        startRadius: 0,
+                        endRadius: 200
                     )
                 }
             }
+            .ignoresSafeArea()
             
             // Widget content
             VStack(spacing: 0) {

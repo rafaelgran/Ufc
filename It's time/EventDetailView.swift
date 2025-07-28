@@ -498,6 +498,9 @@ struct EventDetailCountdownCardView: View {
     private func parseEventDate() -> Date? {
         let formatter = DateFormatter()
         
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+        
         let dateFormats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
             "yyyy-MM-dd'T'HH:mm:ssZ",

@@ -19,6 +19,9 @@ struct UFCEvent: Identifiable, Codable {
     var formattedDate: String {
         let formatter = DateFormatter()
         
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+        
         // Try multiple date formats
         let dateFormats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
@@ -44,6 +47,9 @@ struct UFCEvent: Identifiable, Codable {
     
     var timeRemaining: (days: Int, hours: Int, minutes: Int) {
         let formatter = DateFormatter()
+        
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
         
         // Try multiple date formats
         let dateFormats = [
@@ -72,6 +78,9 @@ struct UFCEvent: Identifiable, Codable {
     
     var isUpcoming: Bool {
         let formatter = DateFormatter()
+        
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
         
         // Try multiple date formats
         let dateFormats = [

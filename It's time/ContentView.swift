@@ -216,6 +216,10 @@ struct ContentView: View {
     
     private func parseEventDate(_ dateString: String) -> Date? {
         let formatter = DateFormatter()
+        
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+        
         let dateFormats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
             "yyyy-MM-dd'T'HH:mm:ssZ",
@@ -275,6 +279,10 @@ struct ContentView: View {
         // Sort by parsed date, not string date
         let sortedEvents = upcomingEvents.sorted { event1, event2 in
             let formatter = DateFormatter()
+            
+            // Configure timezone para GMT-3 (horário de Brasília)
+            formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+            
             let dateFormats = [
                 "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
                 "yyyy-MM-dd'T'HH:mm:ssZ",
@@ -697,6 +705,9 @@ struct CountdownCardView: View {
     private func parseEventDate() -> Date? {
         let formatter = DateFormatter()
         
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
+        
         // Try multiple date formats
         let dateFormats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
@@ -888,6 +899,9 @@ struct EventListItemView: View {
     
     private func parseEventDate() -> Date? {
         let formatter = DateFormatter()
+        
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
         
         // Try multiple date formats
         let dateFormats = [

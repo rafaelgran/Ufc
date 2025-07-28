@@ -174,6 +174,8 @@ struct UFCWidgetEntryView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd, HH:mm"
         formatter.locale = Locale(identifier: "en_US")
+        // Configure timezone para GMT-3 (horário de Brasília)
+        formatter.timeZone = TimeZone(identifier: "America/Sao_Paulo")
         return formatter.string(from: date)
     }
     

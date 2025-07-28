@@ -224,12 +224,12 @@ struct UFCWidgetEntryView: View {
                     // Light mode background
                     Color.white
                     
-                    // Subtle gradient for light mode
+                    // Subtle gradient for light mode - same golden color as dark mode
                     if entry.isChampionship {
-                        // Golden gradient for championship fights - light mode (darker for better contrast)
+                        // Golden gradient for championship fights - same as dark mode
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 0.6, green: 0.4, blue: 0.0).opacity(0.2), // Much darker golden glow for maximum contrast
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.1), // Same golden glow as dark mode
                                 Color.clear
                             ]),
                             center: .topLeading,
@@ -322,15 +322,15 @@ struct UFCWidgetEntryView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(formatFighterName(entry.fighter1Name))
                         .font(.rajdhani(size: 32, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                         .lineLimit(1)
                     Text("vs")
                         .font(.rajdhani(size: 32, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 }
                 Text(formatFighterName(entry.fighter2Name))
                     .font(.rajdhani(size: 32, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                     .lineLimit(1)
             }
             .padding(.bottom, 4)
@@ -358,7 +358,7 @@ struct UFCWidgetEntryView: View {
             HStack(alignment: .center, spacing: 8) {
                 Text("\(entry.daysRemaining)")
                     .font(.rajdhani(size: 32, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Days")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
@@ -366,7 +366,7 @@ struct UFCWidgetEntryView: View {
             HStack(alignment: .center, spacing: 8) {
                 Text("\(entry.hoursRemaining)")
                     .font(.rajdhani(size: 32, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Hrs")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
@@ -374,7 +374,7 @@ struct UFCWidgetEntryView: View {
             HStack(alignment: .center, spacing: 8) {
                 Text("\(entry.minutesRemaining)")
                     .font(.rajdhani(size: 32, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Mins")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)

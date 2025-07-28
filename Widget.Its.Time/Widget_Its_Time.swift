@@ -226,10 +226,10 @@ struct UFCWidgetEntryView: View {
                     
                     // Subtle gradient for light mode
                     if entry.isChampionship {
-                        // Golden gradient for championship fights - light mode
+                        // Golden gradient for championship fights - light mode (darker for better contrast)
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.1), // Golden glow
+                                Color(red: 0.8, green: 0.6, blue: 0.0).opacity(0.15), // Darker golden glow for better contrast
                                 Color.clear
                             ]),
                             center: .topLeading,

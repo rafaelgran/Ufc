@@ -193,9 +193,9 @@ struct UFCWidgetEntryView: View {
                 // Base black background
                 Color.black
                 
-                // Dynamic gradient background - SAME STYLE AS INTERNAL PAGE
+                // Dynamic gradient background - LEFT SIDE ONLY
                 if entry.isChampionship {
-                    // Golden gradient for championship fights - same as internal page
+                    // Golden gradient for championship fights - left side only
                     RadialGradient(
                         gradient: Gradient(colors: [
                             Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.2), // Golden glow
@@ -205,34 +205,14 @@ struct UFCWidgetEntryView: View {
                         startRadius: 50,
                         endRadius: 200
                     )
-                    
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.15), // Golden glow
-                            Color.clear
-                        ]),
-                        center: .topTrailing,
-                        startRadius: 50,
-                        endRadius: 200
-                    )
                 } else {
-                    // Red gradient for regular fights - same as internal page
+                    // Red gradient for regular fights - left side only
                     RadialGradient(
                         gradient: Gradient(colors: [
                             Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.2), // Red glow (#F13C54)
                             Color.clear
                         ]),
                         center: .topLeading,
-                        startRadius: 50,
-                        endRadius: 200
-                    )
-                    
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.15), // Red glow (#F13C54)
-                            Color.clear
-                        ]),
-                        center: .topTrailing,
                         startRadius: 50,
                         endRadius: 200
                     )

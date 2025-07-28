@@ -8,288 +8,562 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --ufc-dark: #0a0a0a;
-            --ufc-darker: #000000;
-            --ufc-gray: #1a1a1a;
-            --ufc-light-gray: #2a2a2a;
-            --ufc-white: #ffffff;
-            --ufc-text: #e5e5e5;
-            --ufc-text-muted: #a0a0a0;
-            --ufc-accent: #fbbf24;
-            --ufc-red: #ef4444;
-            --ufc-green: #10b981;
+            --ufc-red: #d20a11;
+            --ufc-dark: #1a1a1a;
+            --ufc-gray: #2a2a2a;
+            --ufc-light-gray: #3a3a3a;
+            --ufc-accent: #ffcc40;
         }
         
         body {
             background: var(--ufc-dark);
-            color: var(--ufc-text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            line-height: 1.6;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .navbar {
-            background: var(--ufc-gray);
-            border-bottom: 1px solid var(--ufc-light-gray);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: var(--ufc-gray) !important;
+            border-bottom: 3px solid var(--ufc-red);
         }
         
         .navbar-brand {
-            font-weight: 600;
             color: var(--ufc-accent) !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid var(--ufc-red);
+        }
+        
+        .nav-tabs .nav-link {
+            color: #fff;
+            border: none;
+            background: transparent;
+            border-radius: 0;
+            padding: 12px 20px;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--ufc-accent);
+            background: var(--ufc-light-gray);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: white;
+            background: var(--ufc-red);
+            border: none;
         }
         
         .card {
             background: var(--ufc-gray);
             border: 1px solid var(--ufc-light-gray);
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         
         .card-header {
             background: var(--ufc-light-gray);
             border-bottom: 1px solid var(--ufc-light-gray);
-            border-radius: 8px 8px 0 0;
-            padding: 1rem 1.5rem;
-        }
-        
-        .card-header h5 {
-            color: var(--ufc-white);
+            color: var(--ufc-accent);
             font-weight: 600;
-            margin: 0;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-            color: var(--ufc-text);
         }
         
         .btn-primary {
-            background: var(--ufc-accent);
+            background: var(--ufc-red);
             border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            padding: 10px 20px;
-            color: var(--ufc-dark);
         }
         
         .btn-primary:hover {
-            background: #f59e0b;
-            transform: translateY(-1px);
-        }
-        
-        .btn-success {
-            background: var(--ufc-green);
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            color: var(--ufc-white);
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-            transform: translateY(-1px);
+            background: #b0090e;
         }
         
         .btn-warning {
-            background: #f59e0b;
+            background: var(--ufc-accent);
             border: none;
-            border-radius: 6px;
-            font-weight: 500;
             color: var(--ufc-dark);
         }
         
         .btn-warning:hover {
-            background: #d97706;
-            transform: translateY(-1px);
-        }
-        
-        .btn-danger {
-            background: var(--ufc-red);
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            color: var(--ufc-white);
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-1px);
+            background: #e6b800;
         }
         
         .form-control, .form-select {
             background: var(--ufc-light-gray);
-            border: 1px solid #404040;
-            border-radius: 6px;
-            color: var(--ufc-white);
-            padding: 10px 12px;
+            border: 1px solid #555;
+            color: white;
         }
         
         .form-control:focus, .form-select:focus {
             background: var(--ufc-light-gray);
             border-color: var(--ufc-accent);
-            color: var(--ufc-white);
-            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
-            outline: none;
         }
         
-        /* Labels clean */
-        .form-label {
-            color: var(--ufc-white);
-            font-weight: 500;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Abas simples */
-        .nav-tabs {
-            border-bottom: 1px solid var(--ufc-light-gray);
-        }
-        
-        .nav-tabs .nav-link {
-            color: var(--ufc-text-muted);
-            border: none;
-            border-radius: 6px 6px 0 0;
-            font-weight: 500;
-            padding: 10px 20px;
-            margin-right: 2px;
-            background: transparent;
-        }
-        
-        .nav-tabs .nav-link:hover {
-            color: var(--ufc-white);
-            background: var(--ufc-light-gray);
-        }
-        
-        .nav-tabs .nav-link.active {
-            background: var(--ufc-accent);
-            color: var(--ufc-dark);
-            border: none;
-            font-weight: 600;
-        }
-        
-        /* Tabelas clean */
-        .table {
-            color: var(--ufc-white);
-            border-radius: 6px;
-            overflow: hidden;
+        /* Fighters Categories Sidebar Styles */
+        .list-group-item {
             background: var(--ufc-gray);
+            border: 1px solid var(--ufc-light-gray);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .list-group-item:hover {
+            background: var(--ufc-light-gray);
+            color: var(--ufc-accent);
+            border-color: var(--ufc-accent);
+        }
+        
+        .list-group-item.active {
+            background: var(--ufc-red);
+            border-color: var(--ufc-red);
+            color: white;
+        }
+        
+        .list-group-item.active:hover {
+            background: #b0090e;
+            border-color: #b0090e;
+        }
+        
+        .list-group-item .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .list-group-item.active .badge {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white;
+        }
+        
+        .list-group-item i {
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .col-md-3 {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        .form-control:focus {
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(255, 204, 64, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        
+        .form-label {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .card-body p {
+            color: #fff;
+        }
+        
+        .card-body p strong {
+            color: var(--ufc-accent);
+        }
+        
+        .card-body p span {
+            color: #fff;
+        }
+        
+        .table {
+            color: white;
         }
         
         .table th {
-            background: var(--ufc-dark);
-            border: none;
+            background: var(--ufc-light-gray);
+            border-color: #555;
             color: var(--ufc-accent);
-            font-weight: 600;
-            padding: 12px;
-            font-size: 0.85rem;
-            border-bottom: 2px solid var(--ufc-accent);
         }
         
         .table td {
-            border: none;
-            border-bottom: 1px solid var(--ufc-light-gray);
-            color: var(--ufc-white);
-            padding: 12px;
+            border-color: #555;
             vertical-align: middle;
-            background: var(--ufc-gray);
         }
         
-        .table tbody tr:hover {
-            background: var(--ufc-light-gray);
-        }
-        
-        .table tbody tr:hover td {
-            background: var(--ufc-light-gray);
-        }
-        
-        /* Status badges simples */
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .status-scheduled { 
-            background: var(--ufc-text-muted);
-            color: var(--ufc-white);
-        }
-        .status-live { 
-            background: var(--ufc-red);
-            color: var(--ufc-white);
-        }
-        .status-finished { 
-            background: var(--ufc-green);
-            color: var(--ufc-white);
-        }
-        
-        /* Placeholders */
-        .form-control::placeholder {
-            color: var(--ufc-text-muted);
-        }
-        
-        /* Textos de status */
-        .text-muted {
-            color: var(--ufc-text-muted) !important;
-        }
-        
-        /* Fight card simples */
-        .fight-card {
+        .event-card {
             background: var(--ufc-gray);
             border: 1px solid var(--ufc-light-gray);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: var(--ufc-accent);
+        }
+        
+        .event-card.selected {
+            border-color: var(--ufc-red);
+            background: var(--ufc-light-gray);
+        }
+        
+        .event-title {
+            color: var(--ufc-accent);
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .event-date {
+            color: #fff;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .event-location {
+            color: #fff;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .event-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-upcoming {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-scheduled {
+            background: #007bff;
+            color: white;
+        }
+        
+        .status-finished {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .status-live {
+            background: var(--ufc-red);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .event-actions {
+            margin-top: 15px;
+        }
+        
+        .event-actions .btn {
+            margin-right: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .filter-switch {
+            background: var(--ufc-light-gray);
+            border-radius: 25px;
+            padding: 4px;
+            display: inline-flex;
+            margin-bottom: 20px;
+        }
+        
+        .filter-switch button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-switch button.active {
+            background: var(--ufc-accent);
+            color: var(--ufc-dark);
+            font-weight: 600;
+        }
+        
+        .event-details {
+            background: var(--ufc-light-gray);
             border-radius: 8px;
             padding: 20px;
-            margin: 16px 0;
+            margin-top: 20px;
         }
         
-        .fighter-info {
+        .fights-list {
+            margin-top: 15px;
+        }
+        
+        .fight-item {
+            background: var(--ufc-gray);
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .fight-fighters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .fighter {
             text-align: center;
-            padding: 16px;
+            flex: 1;
         }
         
-        .fighter-photo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--ufc-accent);
+        .fighter-name {
+            font-weight: 600;
+            color: var(--ufc-accent);
+        }
+        
+        .fighter-record {
+            font-size: 0.8rem;
+            color: #fff;
         }
         
         .vs-divider {
+            color: #ccc;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+        
+        .fight-details {
+            text-align: center;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .modal-content {
+            background: var(--ufc-gray);
+            color: white;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--ufc-light-gray);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--ufc-light-gray);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #fff;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #fff;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--ufc-light-gray);
+        }
+        
+        .empty-state p {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        
+        /* Fighter category styles */
+        .fighter-category-card {
+            transition: all 0.3s ease;
+        }
+        
+        .fighter-category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fighter-category-header {
+            background: linear-gradient(135deg, var(--ufc-light-gray) 0%, var(--ufc-gray) 100%);
+            border-bottom: 2px solid var(--ufc-red);
+        }
+        
+        .fighter-category-title {
+            color: var(--ufc-accent);
+            font-weight: 600;
+        }
+        
+        .fighter-count-badge {
+            background: var(--ufc-red) !important;
+            color: white !important;
+        }
+        
+        .ranking-badge {
+            background: var(--ufc-accent) !important;
+            color: var(--ufc-dark) !important;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .champion-badge {
+            background: #ffd700 !important;
+            color: var(--ufc-dark) !important;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 2px solid #ffed4e;
+        }
+        
+        .table-hover tbody tr:hover {
+            background: var(--ufc-light-gray);
+            transition: background 0.2s ease;
+        }
+        
+        .fighter-name-cell {
+            min-width: 250px;
+        }
+        
+        .fighter-record-cell {
+            min-width: 150px;
+        }
+        
+        .fighter-actions-cell {
+            min-width: 120px;
+        }
+        
+        /* Fighter tabs styles */
+        #fightersTabs {
+            border-bottom: 2px solid var(--ufc-red);
+            margin-bottom: 20px;
+        }
+        
+        #fightersTabs .nav-link {
+            color: #fff;
+            border: none;
+            background: transparent;
+            border-radius: 0;
+            padding: 10px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        #fightersTabs .nav-link:hover {
+            color: var(--ufc-accent);
+            background: var(--ufc-light-gray);
+        }
+        
+        #fightersTabs .nav-link.active {
+            color: white;
+            background: var(--ufc-red);
+            border: none;
+        }
+        
+        #fightersTabs .nav-link .badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+        
+        .fighter-tab-content {
+            background: var(--ufc-gray);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        /* Drag and Drop Styles */
+        .fights-draggable-container {
+            min-height: 50px;
+        }
+        
+        .fight-item {
+            background: var(--ufc-gray);
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .fight-item:hover {
+            border-color: var(--ufc-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fight-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            cursor: grabbing;
+        }
+        
+        .fight-item.drag-over {
+            border-color: var(--ufc-red);
+            background: var(--ufc-light-gray);
+        }
+        
+        .fight-item.championship-fight {
+            border: 2px solid #ffd700;
+            background: linear-gradient(135deg, var(--ufc-gray) 0%, #2a2a2a 100%);
+            position: relative;
+        }
+        
+        .fight-item.championship-fight::before {
+            content: "🏆";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ffd700;
+            color: var(--ufc-dark);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--ufc-accent);
+            font-size: 12px;
+            font-weight: bold;
         }
         
-        .timer-display {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--ufc-accent);
-            text-align: center;
-            margin: 16px 0;
-            font-family: 'Courier New', monospace;
+        .fight-order-badge {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: var(--ufc-red);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
         }
         
-        /* Scrollbar simples */
-        ::-webkit-scrollbar {
-            width: 6px;
+        .fight-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
         }
         
-        ::-webkit-scrollbar-track {
-            background: var(--ufc-dark);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--ufc-light-gray);
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--ufc-text-muted);
+        .fight-actions .btn {
+            padding: 2px 6px;
+            font-size: 0.7rem;
         }
     </style>
 </head>
@@ -312,72 +586,72 @@
     <div class="container mt-4">
         <ul class="nav nav-tabs" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">
+                <button class="nav-link active" id="events-tab" type="button" role="tab" aria-controls="events" aria-selected="true">
                     <i class="fas fa-calendar-alt me-2"></i>Eventos
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="fighters-tab" data-bs-toggle="tab" data-bs-target="#fighters" type="button" role="tab">
+                <button class="nav-link" id="fighters-tab" type="button" role="tab" aria-controls="fighters" aria-selected="false">
                     <i class="fas fa-user-friends me-2"></i>Lutadores
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="fights-tab" data-bs-toggle="tab" data-bs-target="#fights" type="button" role="tab">
-                    <i class="fas fa-fist-raised me-2"></i>Lutas
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="live-tab" data-bs-toggle="tab" data-bs-target="#live" type="button" role="tab">
+                <button class="nav-link" id="live-tab" type="button" role="tab" aria-controls="live" aria-selected="false">
                     <i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo
                 </button>
             </li>
         </ul>
 
-        <div class="tab-content mt-3" id="adminTabContent">
+        <div class="tab-content mt-4" id="adminTabContent">
             <!-- Events Tab -->
             <div class="tab-pane fade show active" id="events" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="fas fa-plus me-2"></i>Novo Evento</h5>
-                            </div>
-                            <div class="card-body">
-                                <form id="eventForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nome do Evento</label>
-                                        <input type="text" class="form-control" id="eventName" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Data</label>
-                                        <input type="datetime-local" class="form-control" id="eventDate" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Local</label>
-                                        <input type="text" class="form-control" id="eventLocation">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Arena</label>
-                                        <input type="text" class="form-control" id="eventVenue">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Evento Principal</label>
-                                        <input type="text" class="form-control" id="eventMainEvent">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-2"></i>Criar Evento
-                                    </button>
-                                </form>
-                            </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-calendar-alt me-2"></i>Gerenciar Eventos</h3>
+                    <button class="btn btn-primary" onclick="createNewEvent()">
+                        <i class="fas fa-plus me-2"></i>Novo Evento
+                    </button>
+                </div>
+                
+                <!-- Filter Switch -->
+                <div class="filter-switch">
+                    <button class="active" onclick="filterEvents('upcoming')">
+                        <i class="fas fa-clock me-2"></i>Próximos Eventos
+                    </button>
+                    <button onclick="filterEvents('past')">
+                        <i class="fas fa-history me-2"></i>Eventos Passados
+                    </button>
+                </div>
+                
+                <!-- Events List -->
+                <div id="eventsList" class="row">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Carregando eventos...
+                    </div>
+                </div>
+                
+                <!-- Event Details -->
+                <div id="eventDetails" class="event-details" style="display: none;">
+                    <h4 id="selectedEventTitle" class="mb-3"></h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Data:</strong> <span id="selectedEventDate"></span></p>
+                            <p><strong>Local:</strong> <span id="selectedEventLocation"></span></p>
+                            <p><strong>Venue:</strong> <span id="selectedEventVenue"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> <span id="selectedEventStatus"></span></p>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="fas fa-list me-2"></i>Eventos</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="eventsList"></div>
+                    
+                    <div class="fights-list">
+                        <h5 class="mb-3">Lutas do Evento</h5>
+                        <div id="eventFightsList">
+                            <div class="empty-state">
+                                <i class="fas fa-fist-raised"></i>
+                                <p>Nenhuma luta cadastrada para este evento</p>
+                                <button class="btn btn-primary btn-sm" onclick="addFightToEvent()">
+                                    <i class="fas fa-plus me-2"></i>Adicionar Luta
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -386,59 +660,82 @@
 
             <!-- Fighters Tab -->
             <div class="tab-pane fade" id="fighters" role="tabpanel">
+                <div class="mb-4">
+                    <h3><i class="fas fa-user-friends me-2"></i>Gerenciar Lutadores</h3>
+                </div>
+                
                 <div class="row">
-                    <div class="col-md-4">
+                    <!-- Sidebar with Categories -->
+                    <div class="col-md-3">
                         <div class="card">
                             <div class="card-header">
-                                <h5><i class="fas fa-user-plus me-2"></i>Novo Lutador</h5>
+                                <h5><i class="fas fa-list me-2"></i>Categorias</h5>
                             </div>
-                            <div class="card-body">
-                                <form id="fighterForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">Nome</label>
-                                        <input type="text" class="form-control" id="fighterName" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Apelido</label>
-                                        <input type="text" class="form-control" id="fighterNickname">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Record (V-D-E)</label>
-                                        <input type="text" class="form-control" id="fighterRecord" placeholder="ex: 25-5-0">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Categoria de Peso</label>
-                                        <select class="form-select" id="fighterWeightClass">
-                                            <option value="">Selecione...</option>
-                                            <option value="Flyweight">Flyweight</option>
-                                            <option value="Bantamweight">Bantamweight</option>
-                                            <option value="Featherweight">Featherweight</option>
-                                            <option value="Lightweight">Lightweight</option>
-                                            <option value="Welterweight">Welterweight</option>
-                                            <option value="Middleweight">Middleweight</option>
-                                            <option value="Light Heavyweight">Light Heavyweight</option>
-                                            <option value="Heavyweight">Heavyweight</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Ranking</label>
-                                        <input type="number" class="form-control" id="fighterRanking" min="1" max="15">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">URL da Foto</label>
-                                        <input type="url" class="form-control" id="fighterPhoto">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-2"></i>Adicionar Lutador
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" id="fightersCategoriesList">
+                                    <button class="list-group-item list-group-item-action active" data-category="all">
+                                        <i class="fas fa-users me-2"></i>Todos os Lutadores
+                                        <span class="badge bg-primary ms-auto" id="all-count">0</span>
                                     </button>
-                                </form>
+                                    <button class="list-group-item list-group-item-action" data-category="Bantamweight">
+                                        <i class="fas fa-weight me-2"></i>Bantamweight
+                                        <span class="badge bg-secondary ms-auto" id="Bantamweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Featherweight">
+                                        <i class="fas fa-weight me-2"></i>Featherweight
+                                        <span class="badge bg-secondary ms-auto" id="Featherweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Flyweight">
+                                        <i class="fas fa-weight me-2"></i>Flyweight
+                                        <span class="badge bg-secondary ms-auto" id="Flyweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Heavyweight">
+                                        <i class="fas fa-weight me-2"></i>Heavyweight
+                                        <span class="badge bg-secondary ms-auto" id="Heavyweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Light Heavyweight">
+                                        <i class="fas fa-weight me-2"></i>Light Heavyweight
+                                        <span class="badge bg-secondary ms-auto" id="Light Heavyweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Lightweight">
+                                        <i class="fas fa-weight me-2"></i>Lightweight
+                                        <span class="badge bg-secondary ms-auto" id="Lightweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Middleweight">
+                                        <i class="fas fa-weight me-2"></i>Middleweight
+                                        <span class="badge bg-secondary ms-auto" id="Middleweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Welterweight">
+                                        <i class="fas fa-weight me-2"></i>Welterweight
+                                        <span class="badge bg-secondary ms-auto" id="Welterweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Women's Bantamweight">
+                                        <i class="fas fa-venus me-2"></i>Women's Bantamweight
+                                        <span class="badge bg-secondary ms-auto" id="Women's Bantamweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Women's Flyweight">
+                                        <i class="fas fa-venus me-2"></i>Women's Flyweight
+                                        <span class="badge bg-secondary ms-auto" id="Women's Flyweight-count">0</span>
+                                    </button>
+                                    <button class="list-group-item list-group-item-action" data-category="Women's Strawweight">
+                                        <i class="fas fa-venus me-2"></i>Women's Strawweight
+                                        <span class="badge bg-secondary ms-auto" id="Women's Strawweight-count">0</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
+                    
+                    <!-- Main Content Area -->
+                    <div class="col-md-9">
                         <div class="card">
-                            <div class="card-header">
-                                <h5><i class="fas fa-users me-2"></i>Lutadores</h5>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 id="fightersCategoryTitle">
+                                    <i class="fas fa-users me-2"></i>Todos os Lutadores
+                                </h5>
+                                <button class="btn btn-primary btn-sm" onclick="openFighterModal()">
+                                    <i class="fas fa-plus me-2"></i>Novo Lutador
+                                </button>
                             </div>
                             <div class="card-body">
                                 <div id="fightersList"></div>
@@ -448,132 +745,112 @@
                 </div>
             </div>
 
-            <!-- Fights Tab -->
-            <div class="tab-pane fade" id="fights" role="tabpanel">
+            <!-- Live Control Tab -->
+            <div class="tab-pane fade" id="live" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3><i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo</h3>
+                </div>
+                <div id="liveControl"></div>
+            </div>
+
+            <!-- Event Details Page -->
+            <div class="tab-pane fade" id="event-details" role="tabpanel">
+                <div class="mb-4">
+                    <button class="btn btn-secondary mb-3" onclick="goBackToEvents()">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar aos Eventos
+                    </button>
+                    <h3 id="eventDetailsTitle"><i class="fas fa-calendar-alt me-2"></i>Detalhes do Evento</h3>
+                </div>
+                
                 <div class="row">
+                    <!-- Sidebar with Event Form -->
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5><i class="fas fa-plus me-2"></i>Nova Luta</h5>
+                                <h5><i class="fas fa-edit me-2"></i>Informações do Evento</h5>
                             </div>
                             <div class="card-body">
-                                <form id="fightForm">
+                                <form id="eventDetailsForm">
+                                    <input type="hidden" id="eventDetailsId">
                                     <div class="mb-3">
-                                        <label class="form-label">Evento</label>
-                                        <select class="form-select" id="fightEvent" required></select>
+                                        <label for="eventDetailsName" class="form-label">Nome do Evento</label>
+                                        <input type="text" class="form-control" id="eventDetailsName" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Lutador 1</label>
-                                        <select class="form-select" id="fighter1" required></select>
+                                        <label for="eventDetailsDate" class="form-label">Data e Hora</label>
+                                        <input type="datetime-local" class="form-control" id="eventDetailsDateTime" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Lutador 2</label>
-                                        <select class="form-select" id="fighter2" required></select>
+                                        <label for="eventDetailsLocation" class="form-label">Local</label>
+                                        <input type="text" class="form-control" id="eventDetailsLocation">
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Categoria de Peso</label>
-                                        <select class="form-select" id="fightWeightClass" required>
-                                            <option value="">Selecione...</option>
-                                            <option value="Flyweight">Flyweight</option>
-                                            <option value="Bantamweight">Bantamweight</option>
-                                            <option value="Featherweight">Featherweight</option>
-                                            <option value="Lightweight">Lightweight</option>
-                                            <option value="Welterweight">Welterweight</option>
-                                            <option value="Middleweight">Middleweight</option>
-                                            <option value="Light Heavyweight">Light Heavyweight</option>
-                                            <option value="Heavyweight">Heavyweight</option>
-                                        </select>
+                                        <label for="eventDetailsVenue" class="form-label">Venue</label>
+                                        <input type="text" class="form-control" id="eventDetailsVenue">
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Número de Rounds</label>
-                                        <select class="form-select" id="fightRounds" required>
-                                            <option value="3">3 Rounds</option>
-                                            <option value="5">5 Rounds</option>
-                                        </select>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Salvar Evento
+                                        </button>
+                                        <button type="button" class="btn btn-success" onclick="createNewEvent()">
+                                            <i class="fas fa-plus me-2"></i>Novo Evento
+                                        </button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteCurrentEvent()">
+                                            <i class="fas fa-trash me-2"></i>Excluir Evento
+                                        </button>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-2"></i>Criar Luta
-                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Main Content Area -->
                     <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="fas fa-list me-2"></i>Lutas</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="fightsList"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Control Tab -->
-            <div class="tab-pane fade" id="live" role="tabpanel">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label class="form-label">Selecionar Luta</label>
-                                            <select class="form-select" id="liveFightSelect">
-                                                <option value="">Selecione uma luta...</option>
-                                            </select>
-                                        </div>
+                        <!-- Fights Tabs -->
+                        <div id="eventFightsTabsContainer">
+                            <ul class="nav nav-tabs" id="eventFightsTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="main-card-tab" data-bs-toggle="tab" data-bs-target="#main-card" type="button" role="tab" aria-controls="main-card" aria-selected="true">
+                                        <i class="fas fa-crown me-2"></i>Card Principal
+                                        <span class="badge fighter-count-badge ms-2" id="main-card-count">0</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="prelims-tab" data-bs-toggle="tab" data-bs-target="#prelims" type="button" role="tab" aria-controls="prelims" aria-selected="false">
+                                        <i class="fas fa-list me-2"></i>Preliminares
+                                        <span class="badge fighter-count-badge ms-2" id="prelims-count">0</span>
+                                    </button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content mt-3" id="eventFightsTabContent">
+                                <!-- Main Card Tab -->
+                                <div class="tab-pane fade show active" id="main-card" role="tabpanel">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-crown me-2"></i>
+                                            Card Principal
+                                        </h5>
+                                        <button class="btn btn-primary btn-sm" onclick="addFightToEvent('main')">
+                                            <i class="fas fa-plus me-1"></i>Adicionar Luta
+                                        </button>
                                     </div>
-                                    <div class="col-md-8">
-                                        <div id="liveFightControl" style="display: none;">
-                                            <div class="fight-card">
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="fighter-info">
-                                                            <img id="liveFighter1Photo" src="https://via.placeholder.com/80" class="fighter-photo">
-                                                            <h6 id="liveFighter1Name">Lutador 1</h6>
-                                                            <small id="liveFighter1Record">Record</small>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="vs-divider">VS</div>
-                                                        <div class="timer-display" id="liveTimer">05:00</div>
-                                                        <div class="text-center">
-                                                            <span class="status-badge" id="liveStatus">Aguardando</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="fighter-info">
-                                                            <img id="liveFighter2Photo" src="https://via.placeholder.com/80" class="fighter-photo">
-                                                            <h6 id="liveFighter2Name">Lutador 2</h6>
-                                                            <small id="liveFighter2Record">Record</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row mt-3">
-                                                    <div class="col-12 text-center">
-                                                        <button class="btn btn-success me-2" id="startFightBtn">
-                                                            <i class="fas fa-play me-2"></i>Iniciar Luta
-                                                        </button>
-                                                        <button class="btn btn-warning me-2" id="pauseFightBtn" style="display: none;">
-                                                            <i class="fas fa-pause me-2"></i>Pausar
-                                                        </button>
-                                                        <button class="btn btn-warning me-2" id="resumeFightBtn" style="display: none;">
-                                                            <i class="fas fa-play me-2"></i>Retomar
-                                                        </button>
-                                                        <button class="btn btn-danger" id="endFightBtn">
-                                                            <i class="fas fa-stop me-2"></i>Finalizar Luta
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div id="mainCardFightsList" class="fights-draggable-container"></div>
+                                </div>
+                                
+                                <!-- Prelims Tab -->
+                                <div class="tab-pane fade" id="prelims" role="tabpanel">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-list me-2"></i>
+                                            Preliminares
+                                        </h5>
+                                        <button class="btn btn-primary btn-sm" onclick="addFightToEvent('prelim')">
+                                            <i class="fas fa-plus me-1"></i>Adicionar Luta
+                                        </button>
                                     </div>
+                                    <div id="prelimsFightsList" class="fights-draggable-container"></div>
                                 </div>
                             </div>
                         </div>
@@ -583,8 +860,406 @@
         </div>
     </div>
 
+    <!-- Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle">Novo Evento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="eventForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="eventId">
+                        <div class="mb-3">
+                            <label for="eventName" class="form-label">Nome do Evento</label>
+                            <input type="text" class="form-control" id="eventName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDate" class="form-label">Data e Hora</label>
+                            <input type="datetime-local" class="form-control" id="eventDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventLocation" class="form-label">Local</label>
+                            <input type="text" class="form-control" id="eventLocation">
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventVenue" class="form-label">Venue</label>
+                            <input type="text" class="form-control" id="eventVenue">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fighter Modal -->
+    <div class="modal fade" id="fighterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Lutador</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="fighterForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="fighterId">
+                        <div class="mb-3">
+                            <label for="fighterName" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="fighterName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighterNickname" class="form-label">Apelido</label>
+                            <input type="text" class="form-control" id="fighterNickname">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="fighterWins" class="form-label">Vitórias</label>
+                                    <input type="number" class="form-control" id="fighterWins" min="0" value="0" onchange="calculateRecord()">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="fighterLosses" class="form-label">Derrotas</label>
+                                    <input type="number" class="form-control" id="fighterLosses" min="0" value="0" onchange="calculateRecord()">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="fighterDraws" class="form-label">Empates</label>
+                                    <input type="number" class="form-control" id="fighterDraws" min="0" value="0" onchange="calculateRecord()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighterRecordDisplay" class="form-label">Record Calculado</label>
+                            <input type="text" class="form-control" id="fighterRecordDisplay" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighterWeightClass" class="form-label">Categoria</label>
+                            <select class="form-select" id="fighterWeightClass">
+                                <option value="">Selecione...</option>
+                                <option value="Bantamweight">Bantamweight</option>
+                                <option value="Featherweight">Featherweight</option>
+                                <option value="Flyweight">Flyweight</option>
+                                <option value="Heavyweight">Heavyweight</option>
+                                <option value="Light Heavyweight">Light Heavyweight</option>
+                                <option value="Lightweight">Lightweight</option>
+                                <option value="Middleweight">Middleweight</option>
+                                <option value="Welterweight">Welterweight</option>
+                                <option value="Women's Bantamweight">Women's Bantamweight</option>
+                                <option value="Women's Flyweight">Women's Flyweight</option>
+                                <option value="Women's Strawweight">Women's Strawweight</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighterCountry" class="form-label">País</label>
+                            <select class="form-select" id="fighterCountry">
+                                <option value="">Selecione um país...</option>
+                                <option value="Afghanistan">Afghanistan</option>
+                                <option value="Albania">Albania</option>
+                                <option value="Algeria">Algeria</option>
+                                <option value="Andorra">Andorra</option>
+                                <option value="Angola">Angola</option>
+                                <option value="Antigua and Barbuda">Antigua and Barbuda</option>
+                                <option value="Argentina">Argentina</option>
+                                <option value="Armenia">Armenia</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Austria">Austria</option>
+                                <option value="Azerbaijan">Azerbaijan</option>
+                                <option value="Bahamas">Bahamas</option>
+                                <option value="Bahrain">Bahrain</option>
+                                <option value="Bangladesh">Bangladesh</option>
+                                <option value="Barbados">Barbados</option>
+                                <option value="Belarus">Belarus</option>
+                                <option value="Belgium">Belgium</option>
+                                <option value="Belize">Belize</option>
+                                <option value="Benin">Benin</option>
+                                <option value="Bhutan">Bhutan</option>
+                                <option value="Bolivia">Bolivia</option>
+                                <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                                <option value="Botswana">Botswana</option>
+                                <option value="Brazil">Brazil</option>
+                                <option value="Brunei">Brunei</option>
+                                <option value="Bulgaria">Bulgaria</option>
+                                <option value="Burkina Faso">Burkina Faso</option>
+                                <option value="Burundi">Burundi</option>
+                                <option value="Cambodia">Cambodia</option>
+                                <option value="Cameroon">Cameroon</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Cape Verde">Cape Verde</option>
+                                <option value="Central African Republic">Central African Republic</option>
+                                <option value="Chad">Chad</option>
+                                <option value="Chile">Chile</option>
+                                <option value="China">China</option>
+                                <option value="Colombia">Colombia</option>
+                                <option value="Comoros">Comoros</option>
+                                <option value="Congo">Congo</option>
+                                <option value="Costa Rica">Costa Rica</option>
+                                <option value="Croatia">Croatia</option>
+                                <option value="Cuba">Cuba</option>
+                                <option value="Cyprus">Cyprus</option>
+                                <option value="Czech Republic">Czech Republic</option>
+                                <option value="Democratic Republic of the Congo">Democratic Republic of the Congo</option>
+                                <option value="Denmark">Denmark</option>
+                                <option value="Djibouti">Djibouti</option>
+                                <option value="Dominica">Dominica</option>
+                                <option value="Dominican Republic">Dominican Republic</option>
+                                <option value="East Timor">East Timor</option>
+                                <option value="Ecuador">Ecuador</option>
+                                <option value="Egypt">Egypt</option>
+                                <option value="El Salvador">El Salvador</option>
+                                <option value="England">England</option>
+                                <option value="Equatorial Guinea">Equatorial Guinea</option>
+                                <option value="Eritrea">Eritrea</option>
+                                <option value="Estonia">Estonia</option>
+                                <option value="Eswatini">Eswatini</option>
+                                <option value="Ethiopia">Ethiopia</option>
+                                <option value="Fiji">Fiji</option>
+                                <option value="Finland">Finland</option>
+                                <option value="France">France</option>
+                                <option value="Gabon">Gabon</option>
+                                <option value="Gambia">Gambia</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Ghana">Ghana</option>
+                                <option value="Greece">Greece</option>
+                                <option value="Grenada">Grenada</option>
+                                <option value="Guatemala">Guatemala</option>
+                                <option value="Guinea">Guinea</option>
+                                <option value="Guinea-Bissau">Guinea-Bissau</option>
+                                <option value="Guyana">Guyana</option>
+                                <option value="Haiti">Haiti</option>
+                                <option value="Honduras">Honduras</option>
+                                <option value="Hungary">Hungary</option>
+                                <option value="Iceland">Iceland</option>
+                                <option value="India">India</option>
+                                <option value="Indonesia">Indonesia</option>
+                                <option value="Iran">Iran</option>
+                                <option value="Iraq">Iraq</option>
+                                <option value="Ireland">Ireland</option>
+                                <option value="Israel">Israel</option>
+                                <option value="Italy">Italy</option>
+                                <option value="Ivory Coast">Ivory Coast</option>
+                                <option value="Jamaica">Jamaica</option>
+                                <option value="Japan">Japan</option>
+                                <option value="Jordan">Jordan</option>
+                                <option value="Kazakhstan">Kazakhstan</option>
+                                <option value="Kenya">Kenya</option>
+                                <option value="Kiribati">Kiribati</option>
+                                <option value="Kuwait">Kuwait</option>
+                                <option value="Kyrgyzstan">Kyrgyzstan</option>
+                                <option value="Laos">Laos</option>
+                                <option value="Latvia">Latvia</option>
+                                <option value="Lebanon">Lebanon</option>
+                                <option value="Lesotho">Lesotho</option>
+                                <option value="Liberia">Liberia</option>
+                                <option value="Libya">Libya</option>
+                                <option value="Liechtenstein">Liechtenstein</option>
+                                <option value="Lithuania">Lithuania</option>
+                                <option value="Luxembourg">Luxembourg</option>
+                                <option value="Madagascar">Madagascar</option>
+                                <option value="Malawi">Malawi</option>
+                                <option value="Malaysia">Malaysia</option>
+                                <option value="Maldives">Maldives</option>
+                                <option value="Mali">Mali</option>
+                                <option value="Malta">Malta</option>
+                                <option value="Marshall Islands">Marshall Islands</option>
+                                <option value="Mauritania">Mauritania</option>
+                                <option value="Mauritius">Mauritius</option>
+                                <option value="Mexico">Mexico</option>
+                                <option value="Micronesia">Micronesia</option>
+                                <option value="Moldova">Moldova</option>
+                                <option value="Monaco">Monaco</option>
+                                <option value="Mongolia">Mongolia</option>
+                                <option value="Montenegro">Montenegro</option>
+                                <option value="Morocco">Morocco</option>
+                                <option value="Mozambique">Mozambique</option>
+                                <option value="Myanmar">Myanmar</option>
+                                <option value="Namibia">Namibia</option>
+                                <option value="Nauru">Nauru</option>
+                                <option value="Nepal">Nepal</option>
+                                <option value="Netherlands">Netherlands</option>
+                                <option value="New Zealand">New Zealand</option>
+                                <option value="Nicaragua">Nicaragua</option>
+                                <option value="Niger">Niger</option>
+                                <option value="Nigeria">Nigeria</option>
+                                <option value="North Korea">North Korea</option>
+                                <option value="North Macedonia">North Macedonia</option>
+                                <option value="Norway">Norway</option>
+                                <option value="Oman">Oman</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="Palau">Palau</option>
+                                <option value="Panama">Panama</option>
+                                <option value="Papua New Guinea">Papua New Guinea</option>
+                                <option value="Paraguay">Paraguay</option>
+                                <option value="Peru">Peru</option>
+                                <option value="Philippines">Philippines</option>
+                                <option value="Poland">Poland</option>
+                                <option value="Portugal">Portugal</option>
+                                <option value="Qatar">Qatar</option>
+                                <option value="Romania">Romania</option>
+                                <option value="Russia">Russia</option>
+                                <option value="Rwanda">Rwanda</option>
+                                <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                                <option value="Saint Lucia">Saint Lucia</option>
+                                <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
+                                <option value="Samoa">Samoa</option>
+                                <option value="San Marino">San Marino</option>
+                                <option value="Sao Tome and Principe">Sao Tome and Principe</option>
+                                                                   <option value="Saudi Arabia">Saudi Arabia</option>
+                                   <option value="Scotland">Scotland</option>
+                                   <option value="Senegal">Senegal</option>
+                                   <option value="Serbia">Serbia</option>
+                                <option value="Seychelles">Seychelles</option>
+                                <option value="Sierra Leone">Sierra Leone</option>
+                                <option value="Singapore">Singapore</option>
+                                <option value="Slovakia">Slovakia</option>
+                                <option value="Slovenia">Slovenia</option>
+                                <option value="Solomon Islands">Solomon Islands</option>
+                                <option value="Somalia">Somalia</option>
+                                <option value="South Africa">South Africa</option>
+                                <option value="South Korea">South Korea</option>
+                                <option value="South Sudan">South Sudan</option>
+                                <option value="Spain">Spain</option>
+                                <option value="Sri Lanka">Sri Lanka</option>
+                                <option value="Sudan">Sudan</option>
+                                <option value="Suriname">Suriname</option>
+                                <option value="Sweden">Sweden</option>
+                                <option value="Switzerland">Switzerland</option>
+                                <option value="Syria">Syria</option>
+                                <option value="Taiwan">Taiwan</option>
+                                <option value="Tajikistan">Tajikistan</option>
+                                <option value="Tanzania">Tanzania</option>
+                                <option value="Thailand">Thailand</option>
+                                <option value="Togo">Togo</option>
+                                <option value="Tonga">Tonga</option>
+                                <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+                                <option value="Tunisia">Tunisia</option>
+                                <option value="Turkey">Turkey</option>
+                                <option value="Turkmenistan">Turkmenistan</option>
+                                <option value="Tuvalu">Tuvalu</option>
+                                <option value="Uganda">Uganda</option>
+                                <option value="Ukraine">Ukraine</option>
+                                <option value="United Arab Emirates">United Arab Emirates</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="United States">United States</option>
+                                <option value="Uruguay">Uruguay</option>
+                                <option value="Uzbekistan">Uzbekistan</option>
+                                <option value="Vanuatu">Vanuatu</option>
+                                <option value="Vatican City">Vatican City</option>
+                                <option value="Venezuela">Venezuela</option>
+                                <option value="Vietnam">Vietnam</option>
+                                <option value="Yemen">Yemen</option>
+                                <option value="Zambia">Zambia</option>
+                                <option value="Zimbabwe">Zimbabwe</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighterRanking" class="form-label">Ranking</label>
+                            <select class="form-select" id="fighterRanking">
+                                <option value="">Sem Ranking</option>
+                                <option value="C">C - Campeão</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fight Modal -->
+    <div class="modal fade" id="fightModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Luta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="fightForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="fightId">
+                        <div class="mb-3">
+                            <label for="fightWeightClass" class="form-label">Categoria</label>
+                            <select class="form-select" id="fightWeightClass" required>
+                                <option value="">Selecione...</option>
+                                <option value="Bantamweight">Bantamweight</option>
+                                <option value="Featherweight">Featherweight</option>
+                                <option value="Flyweight">Flyweight</option>
+                                <option value="Heavyweight">Heavyweight</option>
+                                <option value="Light Heavyweight">Light Heavyweight</option>
+                                <option value="Lightweight">Lightweight</option>
+                                <option value="Middleweight">Middleweight</option>
+                                <option value="Welterweight">Welterweight</option>
+                                <option value="Women's Bantamweight">Women's Bantamweight</option>
+                                <option value="Women's Flyweight">Women's Flyweight</option>
+                                <option value="Women's Strawweight">Women's Strawweight</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighter1" class="form-label">Lutador 1</label>
+                            <select class="form-select" id="fighter1" required>
+                                <option value="">Selecione a categoria primeiro...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fighter2" class="form-label">Lutador 2</label>
+                            <select class="form-select" id="fighter2" required>
+                                <option value="">Selecione a categoria primeiro...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fightType" class="form-label">Tipo de Luta</label>
+                            <select class="form-select" id="fightType" required>
+                                <option value="">Selecione...</option>
+                                <option value="main">Card Principal</option>
+                                <option value="prelim">Preliminar</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fightRounds" class="form-label">Rounds</label>
+                            <select class="form-select" id="fightRounds" required>
+                                <option value="3">3 Rounds</option>
+                                <option value="5">5 Rounds (Campeonato)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
 </body>
 </html> 

@@ -217,26 +217,74 @@ app.get('/api/fights', async (req, res) => {
 
 app.post('/api/fights', async (req, res) => {
   try {
-    const { eventId, fighter1Id, fighter2Id, weightClass } = req.body;
-    const newFight = {
-      eventId: new ObjectId(eventId),
-      fighter1Id: new ObjectId(fighter1Id),
-      fighter2Id: new ObjectId(fighter2Id),
-      weightClass,
-      round: 1,
-      timeRemaining: 300,
-      status: 'scheduled',
-      created_at: new Date()
-    };
+    console.log('=== CRIANDO LUTA ===');
+    console.log('Body recebido:', req.body);
     
-    if (db) {
-      const result = await db.collection('fights').insertOne(newFight);
-      newFight._id = result.insertedId;
+    const { eventId, fighter1Id, fighter2Id, weightClass } = req.body;
+    
+    // Validar campos obrigatórios
+    if (!eventId || !fighter1Id || !fighter2Id || !weightClass) {
+      console.log('ERRO: Campos obrigatórios faltando');
+      console.log('eventId:', eventId);
+      console.log('fighter1Id:', fighter1Id);
+      console.log('fighter2Id:', fighter2Id);
+      console.log('weightClass:', weightClass);
+      return res.status(400).json({ 
+        error: 'Campos obrigatórios faltando',
+        required: ['eventId', 'fighter1Id', 'fighter2Id', 'weightClass'],
+        received: { eventId, fighter1Id, fighter2Id, weightClass }
+      });
     }
     
-    res.json(newFight);
+    // Validar se os IDs são válidos
+    try {
+      const eventObjectId = new ObjectId(eventId);
+      const fighter1ObjectId = new ObjectId(fighter1Id);
+      const fighter2ObjectId = new ObjectId(fighter2Id);
+      
+      console.log('ObjectIds criados com sucesso');
+      
+      const newFight = {
+        eventId: eventObjectId,
+        fighter1Id: fighter1ObjectId,
+        fighter2Id: fighter2ObjectId,
+        weightClass,
+        round: 1,
+        timeRemaining: 300,
+        status: 'scheduled',
+        created_at: new Date()
+      };
+      
+      console.log('Fight object criado:', newFight);
+      
+      if (db) {
+        const result = await db.collection('fights').insertOne(newFight);
+        newFight._id = result.insertedId;
+        console.log('Luta salva no banco com ID:', result.insertedId);
+      } else {
+        console.log('ERRO: Banco de dados não conectado');
+        return res.status(500).json({ error: 'Database not connected' });
+      }
+      
+      console.log('=== LUTA CRIADA COM SUCESSO ===');
+      res.json(newFight);
+      
+    } catch (objectIdError) {
+      console.log('ERRO: ObjectId inválido:', objectIdError.message);
+      return res.status(400).json({ 
+        error: 'IDs inválidos',
+        details: objectIdError.message,
+        received: { eventId, fighter1Id, fighter2Id }
+      });
+    }
+    
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log('ERRO GERAL na criação de luta:', error.message);
+    console.log('Stack:', error.stack);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

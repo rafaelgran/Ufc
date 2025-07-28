@@ -2,19 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "server-mongodb.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/server-mongodb.js"
+      "dest": "/server.js"
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "VERCEL": "1",
-    "ALLOWED_ORIGINS": "https://ufc-gray.vercel.app,capacitor://localhost,ionic://localhost"
+    "USE_SQLITE": "true",
+    "VERCEL": "1"
   }
 } 

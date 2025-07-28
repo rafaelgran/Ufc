@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Âncoras das Abas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .tab-content { margin-top: 20px; }
+        .tab-pane { padding: 20px; border: 1px solid #ddd; border-top: none; }
+    </style>
+</head>
+<body>
+    <h1>Teste de Âncoras das Abas</h1>
+    
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="events-tab" type="button" role="tab" aria-controls="events" aria-selected="true">
+                Eventos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="fighters-tab" type="button" role="tab" aria-controls="fighters" aria-selected="false">
+                Lutadores
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="fights-tab" type="button" role="tab" aria-controls="fights" aria-selected="false">
+                Lutas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="live-tab" type="button" role="tab" aria-controls="live" aria-selected="false">
+                Controle ao Vivo
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <div class="tab-pane fade show active" id="events" role="tabpanel">
+            <h3>Eventos</h3>
+            <p>Esta é a aba de Eventos. A URL deve mostrar #events</p>
+        </div>
+        
+        <div class="tab-pane fade" id="fighters" role="tabpanel">
+            <h3>Lutadores</h3>
+            <p>Esta é a aba de Lutadores. A URL deve mostrar #fighters</p>
+        </div>
+        
+        <div class="tab-pane fade" id="fights" role="tabpanel">
+            <h3>Lutas</h3>
+            <p>Esta é a aba de Lutas. A URL deve mostrar #fights</p>
+        </div>
+        
+        <div class="tab-pane fade" id="live" role="tabpanel">
+            <h3>Controle ao Vivo</h3>
+            <p>Esta é a aba de Controle ao Vivo. A URL deve mostrar #live</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h4>Teste de Navegação:</h4>
+        <p>URL atual: <span id="current-url"></span></p>
+        <p>Aba ativa: <span id="active-tab"></span></p>
+        <button onclick="testTab('events')" class="btn btn-primary">Ir para Eventos</button>
+        <button onclick="testTab('fighters')" class="btn btn-primary">Ir para Lutadores</button>
+        <button onclick="testTab('fights')" class="btn btn-primary">Ir para Lutas</button>
+        <button onclick="testTab('live')" class="btn btn-primary">Ir para Controle ao Vivo</button>
+    </div>
+
+    <script>
+        // Tab management
+        const TAB_ANCHORS = {
+            'events': '#events',
+            'fighters': '#fighters', 
+            'fights': '#fights',
+            'live': '#live'
+        };
+
+        // Initialize tab management
+        function initializeTabManagement() {
+            // Check if there's a hash in the URL
+            const hash = window.location.hash.substring(1);
+            
+            if (hash && TAB_ANCHORS[hash]) {
+                // Activate the tab from the URL hash
+                activateTab(hash);
+            } else {
+                // Default to events tab
+                activateTab('events');
+            }
+            
+            // Listen for hash changes
+            window.addEventListener('hashchange', function() {
+                const newHash = window.location.hash.substring(1);
+                if (newHash && TAB_ANCHORS[newHash]) {
+                    activateTab(newHash);
+                }
+            });
+            
+            // Add click listeners to tab buttons
+            Object.keys(TAB_ANCHORS).forEach(tabId => {
+                const tabButton = document.getElementById(`${tabId}-tab`);
+                if (tabButton) {
+                    tabButton.addEventListener('click', function() {
+                        navigateToTab(tabId);
+                    });
+                }
+            });
+        }
+
+        function activateTab(tabId) {
+            console.log('Activating tab:', tabId);
+            
+            // Remove active class from all tabs
+            Object.keys(TAB_ANCHORS).forEach(id => {
+                const tabButton = document.getElementById(`${id}-tab`);
+                const tabPane = document.getElementById(id);
+                
+                if (tabButton) {
+                    tabButton.classList.remove('active');
+                    tabButton.setAttribute('aria-selected', 'false');
+                }
+                
+                if (tabPane) {
+                    tabPane.classList.remove('show', 'active');
+                }
+            });
+            
+            // Activate the selected tab
+            const activeTabButton = document.getElementById(`${tabId}-tab`);
+            const activeTabPane = document.getElementById(tabId);
+            
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+                activeTabButton.setAttribute('aria-selected', 'true');
+            }
+            
+            if (activeTabPane) {
+                activeTabPane.classList.add('show', 'active');
+            }
+            
+            // Update display
+            updateDisplay();
+        }
+
+        function navigateToTab(tabId) {
+            console.log('Navigating to tab:', tabId);
+            // Update URL hash
+            window.location.hash = tabId;
+        }
+
+        function testTab(tabId) {
+            navigateToTab(tabId);
+        }
+
+        function updateDisplay() {
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('active-tab').textContent = window.location.hash.substring(1) || 'events';
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabManagement();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html> 

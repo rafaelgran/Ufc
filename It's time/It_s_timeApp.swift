@@ -8,11 +8,15 @@
 import SwiftUI
 
 @main
-struct Its_timeApp: App {
+struct It_s_timeApp: App {
+    init() {
+        // Register custom fonts
+        CustomFonts.registerFonts()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
         }
     }
 }

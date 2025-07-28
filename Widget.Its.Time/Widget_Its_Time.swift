@@ -181,58 +181,61 @@ struct UFCWidgetEntryView: View {
     
     var body: some View {
         ZStack {
-            // Dynamic gradient background based on championship status
-            ZStack {
-                // Base black background
-                Color.black
-                
-                if entry.isChampionship {
-                    // Golden gradient for championship fights - full coverage
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.3), // Golden glow
-                            Color.clear
-                        ]),
-                        center: .topLeading,
-                        startRadius: 0,
-                        endRadius: 200
-                    )
+            // Dynamic gradient background - FULL WIDGET AREA
+            GeometryReader { geometry in
+                ZStack {
+                    // Base black background
+                    Color.black
                     
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.25), // Golden glow
-                            Color.clear
-                        ]),
-                        center: .topTrailing,
-                        startRadius: 0,
-                        endRadius: 200
-                    )
-                } else {
-                    // Reddish-purple gradient for regular fights - full coverage
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.3), // Purple glow
-                            Color.clear
-                        ]),
-                        center: .topLeading,
-                        startRadius: 0,
-                        endRadius: 200
-                    )
-                    
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.25), // Purple glow
-                            Color.clear
-                        ]),
-                        center: .topTrailing,
-                        startRadius: 0,
-                        endRadius: 200
-                    )
+                    if entry.isChampionship {
+                        // Golden gradient for championship fights - full coverage
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.3), // Golden glow
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 0,
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                        )
+                        
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.25), // Golden glow
+                                Color.clear
+                            ]),
+                            center: .topTrailing,
+                            startRadius: 0,
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                        )
+                    } else {
+                        // Reddish-purple gradient for regular fights - full coverage
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.3), // Purple glow
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 0,
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                        )
+                        
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color(red: 0.8, green: 0.2, blue: 0.4).opacity(0.25), // Purple glow
+                                Color.clear
+                            ]),
+                            center: .topTrailing,
+                            startRadius: 0,
+                            endRadius: max(geometry.size.width, geometry.size.height) * 1.5
+                        )
+                    }
                 }
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .ignoresSafeArea()
             
-            // Widget content
+            // Widget content - OVERLAY on top of gradient
             VStack(spacing: 0) {
                 if family == .systemSmall {
                     smallWidgetLayout

@@ -291,8 +291,7 @@ struct UFCWidgetEntryView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding(.leading, -20)
-        .padding(.vertical, 16)
+        .padding(16) // Standard padding for content
     }
     
     private var mediumWidgetLayout: some View {
@@ -301,7 +300,7 @@ struct UFCWidgetEntryView: View {
             Spacer()
             countdown
         }
-        .padding(16)
+        .padding(16) // Standard padding for content
     }
     
     private var eventInfo: some View {
@@ -330,7 +329,6 @@ struct UFCWidgetEntryView: View {
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
         }
-        .padding(.leading, -10)
         .padding(.vertical, 16)
     }
 

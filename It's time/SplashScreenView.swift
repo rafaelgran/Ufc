@@ -40,7 +40,7 @@ struct SplashScreenView: View {
                             Text("FIGHT")
                                 .font(.rajdhani(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 1.0, green: 0.8, blue: 0.0))
-                                .uppercase()
+                                .textCase(.uppercase)
                             
                             Rectangle()
                                 .fill(Color.white)
@@ -51,13 +51,13 @@ struct SplashScreenView: View {
                         Text("TIME")
                             .font(.rajdhani(size: 48, weight: .bold))
                             .foregroundColor(.white)
-                            .uppercase()
+                            .textCase(.uppercase)
                         
                         // CLUB
                         Text("CLUB")
                             .font(.rajdhani(size: 20, weight: .bold))
                             .foregroundColor(.white)
-                            .uppercase()
+                            .textCase(.uppercase)
                     }
                 }
                 .scaleEffect(isAnimating ? 1.0 : 0.8)

@@ -25,46 +25,46 @@ struct EventDetailView: View {
                         // Golden gradient for events with championship fights
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.2), // Golden glow
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.15), // Golden glow
                                 Color.clear
                             ]),
                             center: .topLeading,
                             startRadius: 50,
-                            endRadius: 200
+                            endRadius: 400
                         )
                         .ignoresSafeArea()
                         
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.15), // Golden glow
+                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.1), // Golden glow
                                 Color.clear
                             ]),
                             center: .topTrailing,
                             startRadius: 50,
-                            endRadius: 200
+                            endRadius: 400
                         )
                         .ignoresSafeArea()
                     } else {
                         // Red gradient for events without championship fights
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.2), // Red glow (#F13C54)
+                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.15), // Red glow (#F13C54)
                                 Color.clear
                             ]),
                             center: .topLeading,
                             startRadius: 50,
-                            endRadius: 200
+                            endRadius: 400
                         )
                         .ignoresSafeArea()
                         
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.15), // Red glow (#F13C54)
+                                Color(red: 0.945, green: 0.235, blue: 0.329).opacity(0.1), // Red glow (#F13C54)
                                 Color.clear
                             ]),
                             center: .topTrailing,
                             startRadius: 50,
-                            endRadius: 200
+                            endRadius: 400
                         )
                         .ignoresSafeArea()
                     }

@@ -16,7 +16,7 @@ struct It_s_timeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashScreenView()
         }
     }
 }

@@ -254,7 +254,7 @@ struct UFCWidgetEntryView: View {
     }
     
     private var smallWidgetLayout: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
             // Event info
             VStack(alignment: .leading, spacing: 0) {
                 Text(entry.eventName)
@@ -288,7 +288,7 @@ struct UFCWidgetEntryView: View {
             Spacer()
             
             // Countdown (only days for small widget)
-            HStack(alignment: .center, spacing: 4) {
+            HStack(alignment: .center, spacing: 8) {
                 Text("\(entry.daysRemaining)")
                     .font(.rajdhani(size: 28, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
@@ -299,6 +299,8 @@ struct UFCWidgetEntryView: View {
         }
         .padding(.leading, -20)
         .padding(.vertical, 16)
+        .padding(.top, 8)
+
     }
     
     private var mediumWidgetLayout: some View {
@@ -339,7 +341,7 @@ struct UFCWidgetEntryView: View {
                 .foregroundColor(.gray)
         }
         .padding(.leading, -10)
-        .padding(.vertical, 16)
+        .padding(.vertical, 20)
     }
 
     // Função utilitária para exibir apenas o(s) sobrenome(s) com primeira letra maiúscula

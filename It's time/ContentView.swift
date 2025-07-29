@@ -30,24 +30,24 @@ struct ContentView: View {
                     // Top-left golden glow
                     RadialGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 0.9, green: 0.7, blue: 0.3).opacity(0.25), // Golden glow - increased strength
+                            Color(red: 0.9, green: 0.7, blue: 0.3).opacity(0.15), // Golden glow - increased strength
                             Color.clear
                         ]),
                         center: .topLeading,
                         startRadius: 50,
-                        endRadius: 200
+                        endRadius: 400
                     )
                     .ignoresSafeArea()
                     
                     // Top-right reddish-purple glow
                     RadialGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 0.7, green: 0.3, blue: 0.5).opacity(0.2), // Reddish-purple glow - increased strength
+                            Color(red: 0.7, green: 0.3, blue: 0.5).opacity(0.15), // Reddish-purple glow - increased strength
                             Color.clear
                         ]),
                         center: .topTrailing,
                         startRadius: 50,
-                        endRadius: 200
+                        endRadius: 400
                     )
                     .ignoresSafeArea()
                 }
@@ -110,25 +110,25 @@ struct ContentView: View {
                             // Events List
                             EventsListView(filteredEvents: filteredEvents)
                         }
-                        .background(
-                            // Large octagon background decoration - fixed position
-                            HStack {
-                                Spacer()
-                                Image(systemName: "octagon.fill")
-                                    .foregroundColor(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111111
-                                    .font(.system(size: UIScreen.main.bounds.width * 1.35)) // 20% maior que a largura da tela
-                                    .overlay(
-                                        // Rectangle that starts from the middle of the octagon and goes to the bottom
-                                        Rectangle()
-                                            .fill(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111111
-                                            .frame(width: UIScreen.main.bounds.width * 1.2, height: backgroundRectangleHeight)
-                                            .offset(y: backgroundRectangleOffset)
-                                    )
-                                Spacer()
-                            }
-                            .offset(y: backgroundElementInitialOffset + octagonOffsetAdjustment)
-                            .allowsHitTesting(false) // Não interfere com interações
-                        )
+                        // .background(
+                        //     // Large octagon background decoration - fixed position
+                        //     HStack {
+                        //         Spacer()
+                        //         Image(systemName: "octagon.fill")
+                        //             .foregroundColor(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111111
+                        //             .font(.system(size: UIScreen.main.bounds.width * 1.35)) // 20% maior que a largura da tela
+                        //             .overlay(
+                        //                 // Rectangle that starts from the middle of the octagon and goes to the bottom
+                        //                 Rectangle()
+                        //                     .fill(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111111
+                        //                     .frame(width: UIScreen.main.bounds.width * 1.2, height: backgroundRectangleHeight)
+                        //                     .offset(y: backgroundRectangleOffset)
+                        //             )
+                        //         Spacer()
+                        //     }
+                        //     .offset(y: backgroundElementInitialOffset + octagonOffsetAdjustment)
+                        //     .allowsHitTesting(false) // Não interfere com interações
+                        // )
                         .background(
                             GeometryReader { geometry in
                                 Color.clear
@@ -483,7 +483,7 @@ struct FeaturedEventView: View {
 
         }
         .padding(.horizontal, 10)
-        .padding(.top, 50)
+        .padding(.top, 24)
     }
     
     // Computed properties to get fighter names

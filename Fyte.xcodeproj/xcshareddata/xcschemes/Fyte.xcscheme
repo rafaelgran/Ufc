@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-               BuildableName = "It&apos;s time.app"
-               BlueprintName = "It&apos;s time"
-               ReferencedContainer = "container:It&apos;s time.xcodeproj">
+               BuildableName = "Fyte.app"
+               BlueprintName = "Fyte"
+               ReferencedContainer = "container:Fyte.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,30 +29,6 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "68FFDDE62DB9BCD300D5AA79"
-               BuildableName = "It&apos;s timeTests.xctest"
-               BlueprintName = "It&apos;s timeTests"
-               ReferencedContainer = "container:It&apos;s time.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "68FFDDF02DB9BCD300D5AA79"
-               BuildableName = "It&apos;s timeUITests.xctest"
-               BlueprintName = "It&apos;s timeUITests"
-               ReferencedContainer = "container:It&apos;s time.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -69,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-            BuildableName = "It&apos;s time.app"
-            BlueprintName = "It&apos;s time"
-            ReferencedContainer = "container:It&apos;s time.xcodeproj">
+            BuildableName = "Fyte.app"
+            BlueprintName = "Fyte"
+            ReferencedContainer = "container:Fyte.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -86,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-            BuildableName = "It&apos;s time.app"
-            BlueprintName = "It&apos;s time"
-            ReferencedContainer = "container:It&apos;s time.xcodeproj">
+            BuildableName = "Fyte.app"
+            BlueprintName = "Fyte"
+            ReferencedContainer = "container:Fyte.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

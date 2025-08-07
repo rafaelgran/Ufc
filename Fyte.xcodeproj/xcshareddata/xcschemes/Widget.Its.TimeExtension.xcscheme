@@ -19,7 +19,7 @@
                BlueprintIdentifier = "68196D8E2E32EAF5009556C4"
                BuildableName = "Widget.Its.TimeExtension.appex"
                BlueprintName = "Widget.Its.TimeExtension"
-               ReferencedContainer = "container:It&apos;s time.xcodeproj">
+               ReferencedContainer = "container:Fyte.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-               BuildableName = "It&apos;s time.app"
-               BlueprintName = "It&apos;s time"
-               ReferencedContainer = "container:It&apos;s time.xcodeproj">
+               BuildableName = "Fyte.app"
+               BlueprintName = "Fyte"
+               ReferencedContainer = "container:Fyte.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -65,16 +65,16 @@
             BlueprintIdentifier = "68196D8E2E32EAF5009556C4"
             BuildableName = "Widget.Its.TimeExtension.appex"
             BlueprintName = "Widget.Its.TimeExtension"
-            ReferencedContainer = "container:It&apos;s time.xcodeproj">
+            ReferencedContainer = "container:Fyte.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-            BuildableName = "It&apos;s time.app"
-            BlueprintName = "It&apos;s time"
-            ReferencedContainer = "container:It&apos;s time.xcodeproj">
+            BuildableName = "Fyte.app"
+            BlueprintName = "Fyte"
+            ReferencedContainer = "container:Fyte.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <EnvironmentVariables>
@@ -107,9 +107,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "68FFDDD62DB9BCD000D5AA79"
-            BuildableName = "It&apos;s time.app"
-            BlueprintName = "It&apos;s time"
-            ReferencedContainer = "container:It&apos;s time.xcodeproj">
+            BuildableName = "Fyte.app"
+            BlueprintName = "Fyte"
+            ReferencedContainer = "container:Fyte.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

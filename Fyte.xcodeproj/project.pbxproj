@@ -1,0 +1,799 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		68196D922E32EAF5009556C4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68196D912E32EAF5009556C4 /* WidgetKit.framework */; };
+		68196D942E32EAF5009556C4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68196D932E32EAF5009556C4 /* SwiftUI.framework */; };
+		68196DA52E32EAF7009556C4 /* Widget.Its.TimeExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 68196D8F2E32EAF5009556C4 /* Widget.Its.TimeExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		683CEE102E42D32C0008DF12 /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 683CEE0F2E42D32C0008DF12 /* SVGKit */; };
+		683CEE122E42D32C0008DF12 /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 683CEE112E42D32C0008DF12 /* SVGKitSwift */; };
+		683CEEE92E454F330008DF12 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		683CEEEA2E454F330008DF12 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		683CEEEB2E454F330008DF12 /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 683CEE0F2E42D32C0008DF12 /* SVGKit */; };
+		683CEEEC2E454F330008DF12 /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 683CEE112E42D32C0008DF12 /* SVGKitSwift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		68196DA32E32EAF7009556C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 68FFDDCF2DB9BCD000D5AA79 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 68196D8E2E32EAF5009556C4;
+			remoteInfo = Widget.Its.TimeExtension;
+		};
+		68FFDDE82DB9BCD300D5AA79 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 68FFDDCF2DB9BCD000D5AA79 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 68FFDDD62DB9BCD000D5AA79;
+			remoteInfo = Fyte;
+		};
+		68FFDDF22DB9BCD300D5AA79 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 68FFDDCF2DB9BCD000D5AA79 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 68FFDDD62DB9BCD000D5AA79;
+			remoteInfo = Fyte;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		68196DAA2E32EAF7009556C4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				68196DA52E32EAF7009556C4 /* Widget.Its.TimeExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		68196D8F2E32EAF5009556C4 /* Widget.Its.TimeExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Widget.Its.TimeExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		68196D912E32EAF5009556C4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		68196D932E32EAF5009556C4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		68196DAB2E32EBFE009556C4 /* Widget.Its.TimeExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Widget.Its.TimeExtension.entitlements; sourceTree = "<group>"; };
+		68FFDDD72DB9BCD000D5AA79 /* Fyte.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fyte.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		68FFDDE72DB9BCD300D5AA79 /* FyteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FyteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		68FFDDF12DB9BCD300D5AA79 /* FyteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FyteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		68196DA62E32EAF7009556C4 /* Exceptions for "Widget.Its.Time" folder in "Widget.Its.TimeExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 68196D8E2E32EAF5009556C4 /* Widget.Its.TimeExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		68196D952E32EAF5009556C4 /* Widget.Its.Time */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				68196DA62E32EAF7009556C4 /* Exceptions for "Widget.Its.Time" folder in "Widget.Its.TimeExtension" target */,
+			);
+			path = Widget.Its.Time;
+			sourceTree = "<group>";
+		};
+		68FFDDD92DB9BCD000D5AA79 /* Fyte */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Fyte;
+			sourceTree = "<group>";
+		};
+		68FFDDEA2DB9BCD300D5AA79 /* FyteTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FyteTests;
+			sourceTree = "<group>";
+		};
+		68FFDDF42DB9BCD300D5AA79 /* FyteUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FyteUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		68196D8C2E32EAF5009556C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				68196D942E32EAF5009556C4 /* SwiftUI.framework in Frameworks */,
+				68196D922E32EAF5009556C4 /* WidgetKit.framework in Frameworks */,
+				683CEE122E42D32C0008DF12 /* SVGKitSwift in Frameworks */,
+				683CEE102E42D32C0008DF12 /* SVGKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDD42DB9BCD000D5AA79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				683CEEEC2E454F330008DF12 /* SVGKitSwift in Frameworks */,
+				683CEEEB2E454F330008DF12 /* SVGKit in Frameworks */,
+				683CEEE92E454F330008DF12 /* (null) in Frameworks */,
+				683CEEEA2E454F330008DF12 /* (null) in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDE42DB9BCD300D5AA79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDEE2DB9BCD300D5AA79 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		68196D902E32EAF5009556C4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				68196D912E32EAF5009556C4 /* WidgetKit.framework */,
+				68196D932E32EAF5009556C4 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		68FFDDCE2DB9BCD000D5AA79 = {
+			isa = PBXGroup;
+			children = (
+				68196DAB2E32EBFE009556C4 /* Widget.Its.TimeExtension.entitlements */,
+				68FFDDD92DB9BCD000D5AA79 /* Fyte */,
+				68FFDDEA2DB9BCD300D5AA79 /* FyteTests */,
+				68FFDDF42DB9BCD300D5AA79 /* FyteUITests */,
+				68196D952E32EAF5009556C4 /* Widget.Its.Time */,
+				68196D902E32EAF5009556C4 /* Frameworks */,
+				68FFDDD82DB9BCD000D5AA79 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		68FFDDD82DB9BCD000D5AA79 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				68FFDDD72DB9BCD000D5AA79 /* Fyte.app */,
+				68FFDDE72DB9BCD300D5AA79 /* FyteTests.xctest */,
+				68FFDDF12DB9BCD300D5AA79 /* FyteUITests.xctest */,
+				68196D8F2E32EAF5009556C4 /* Widget.Its.TimeExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		68196D8E2E32EAF5009556C4 /* Widget.Its.TimeExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68196DA72E32EAF7009556C4 /* Build configuration list for PBXNativeTarget "Widget.Its.TimeExtension" */;
+			buildPhases = (
+				68196D8B2E32EAF5009556C4 /* Sources */,
+				68196D8C2E32EAF5009556C4 /* Frameworks */,
+				68196D8D2E32EAF5009556C4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				68196D952E32EAF5009556C4 /* Widget.Its.Time */,
+			);
+			name = Widget.Its.TimeExtension;
+			packageProductDependencies = (
+				683CEE0F2E42D32C0008DF12 /* SVGKit */,
+				683CEE112E42D32C0008DF12 /* SVGKitSwift */,
+			);
+			productName = Widget.Its.TimeExtension;
+			productReference = 68196D8F2E32EAF5009556C4 /* Widget.Its.TimeExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		68FFDDD62DB9BCD000D5AA79 /* Fyte */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68FFDDFB2DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "Fyte" */;
+			buildPhases = (
+				68FFDDD32DB9BCD000D5AA79 /* Sources */,
+				68FFDDD42DB9BCD000D5AA79 /* Frameworks */,
+				68FFDDD52DB9BCD000D5AA79 /* Resources */,
+				68196DAA2E32EAF7009556C4 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				68196DA42E32EAF7009556C4 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				68FFDDD92DB9BCD000D5AA79 /* Fyte */,
+			);
+			name = Fyte;
+			packageProductDependencies = (
+				683CEE0F2E42D32C0008DF12 /* SVGKit */,
+				683CEE112E42D32C0008DF12 /* SVGKitSwift */,
+			);
+			productName = Fyte;
+			productReference = 68FFDDD72DB9BCD000D5AA79 /* Fyte.app */;
+			productType = "com.apple.product-type.application";
+		};
+		68FFDDE62DB9BCD300D5AA79 /* FyteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68FFDDFE2DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "FyteTests" */;
+			buildPhases = (
+				68FFDDE32DB9BCD300D5AA79 /* Sources */,
+				68FFDDE42DB9BCD300D5AA79 /* Frameworks */,
+				68FFDDE52DB9BCD300D5AA79 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				68FFDDE92DB9BCD300D5AA79 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				68FFDDEA2DB9BCD300D5AA79 /* FyteTests */,
+			);
+			name = FyteTests;
+			packageProductDependencies = (
+			);
+			productName = FyteTests;
+			productReference = 68FFDDE72DB9BCD300D5AA79 /* FyteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		68FFDDF02DB9BCD300D5AA79 /* FyteUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68FFDE012DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "FyteUITests" */;
+			buildPhases = (
+				68FFDDED2DB9BCD300D5AA79 /* Sources */,
+				68FFDDEE2DB9BCD300D5AA79 /* Frameworks */,
+				68FFDDEF2DB9BCD300D5AA79 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				68FFDDF32DB9BCD300D5AA79 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				68FFDDF42DB9BCD300D5AA79 /* FyteUITests */,
+			);
+			name = FyteUITests;
+			packageProductDependencies = (
+			);
+			productName = FyteUITests;
+			productReference = 68FFDDF12DB9BCD300D5AA79 /* FyteUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		68FFDDCF2DB9BCD000D5AA79 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					68196D8E2E32EAF5009556C4 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					68FFDDD62DB9BCD000D5AA79 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					68FFDDE62DB9BCD300D5AA79 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 68FFDDD62DB9BCD000D5AA79;
+					};
+					68FFDDF02DB9BCD300D5AA79 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 68FFDDD62DB9BCD000D5AA79;
+					};
+				};
+			};
+			buildConfigurationList = 68FFDDD22DB9BCD000D5AA79 /* Build configuration list for PBXProject "Fyte" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 68FFDDCE2DB9BCD000D5AA79;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				683CEE0E2E42D32C0008DF12 /* XCRemoteSwiftPackageReference "SVGKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 68FFDDD82DB9BCD000D5AA79 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				68FFDDD62DB9BCD000D5AA79 /* Fyte */,
+				68FFDDE62DB9BCD300D5AA79 /* FyteTests */,
+				68FFDDF02DB9BCD300D5AA79 /* FyteUITests */,
+				68196D8E2E32EAF5009556C4 /* Widget.Its.TimeExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		68196D8D2E32EAF5009556C4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDD52DB9BCD000D5AA79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDE52DB9BCD300D5AA79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDEF2DB9BCD300D5AA79 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		68196D8B2E32EAF5009556C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDD32DB9BCD000D5AA79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDE32DB9BCD300D5AA79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		68FFDDED2DB9BCD300D5AA79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		68196DA42E32EAF7009556C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 68196D8E2E32EAF5009556C4 /* Widget.Its.TimeExtension */;
+			targetProxy = 68196DA32E32EAF7009556C4 /* PBXContainerItemProxy */;
+		};
+		68FFDDE92DB9BCD300D5AA79 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 68FFDDD62DB9BCD000D5AA79 /* Fyte */;
+			targetProxy = 68FFDDE82DB9BCD300D5AA79 /* PBXContainerItemProxy */;
+		};
+		68FFDDF32DB9BCD300D5AA79 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 68FFDDD62DB9BCD000D5AA79 /* Fyte */;
+			targetProxy = 68FFDDF22DB9BCD300D5AA79 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		68196DA82E32EAF7009556C4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Widget.Its.TimeExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A87389SDGH;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widget.Its.Time/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Widget.Its.Time;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.granemanndigital.Fyte.Widget-Its-Time";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		68196DA92E32EAF7009556C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Widget.Its.TimeExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = A87389SDGH;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widget.Its.Time/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Widget.Its.Time;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.granemanndigital.Fyte.Widget-Its-Time";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		68FFDDF92DB9BCD300D5AA79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		68FFDDFA2DB9BCD300D5AA79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		68FFDDFC2DB9BCD300D5AA79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Fyte/Fyte.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Fyte/Preview Content\"";
+				DEVELOPMENT_TEAM = A87389SDGH;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.granemanndigital.Fyte;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		68FFDDFD2DB9BCD300D5AA79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Fyte/Fyte.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Fyte/Preview Content\"";
+				DEVELOPMENT_TEAM = A87389SDGH;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.granemanndigital.Fyte;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		68FFDDFF2DB9BCD300D5AA79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9324WAPQRT;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rafaelgranemann.FyteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fyte.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fyte";
+			};
+			name = Debug;
+		};
+		68FFDE002DB9BCD300D5AA79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9324WAPQRT;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rafaelgranemann.FyteTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fyte.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fyte";
+			};
+			name = Release;
+		};
+		68FFDE022DB9BCD300D5AA79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9324WAPQRT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rafaelgranemann.FyteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Fyte;
+			};
+			name = Debug;
+		};
+		68FFDE032DB9BCD300D5AA79 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9324WAPQRT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rafaelgranemann.FyteUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Fyte;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		68196DA72E32EAF7009556C4 /* Build configuration list for PBXNativeTarget "Widget.Its.TimeExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68196DA82E32EAF7009556C4 /* Debug */,
+				68196DA92E32EAF7009556C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		68FFDDD22DB9BCD000D5AA79 /* Build configuration list for PBXProject "Fyte" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68FFDDF92DB9BCD300D5AA79 /* Debug */,
+				68FFDDFA2DB9BCD300D5AA79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		68FFDDFB2DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "Fyte" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68FFDDFC2DB9BCD300D5AA79 /* Debug */,
+				68FFDDFD2DB9BCD300D5AA79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		68FFDDFE2DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "FyteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68FFDDFF2DB9BCD300D5AA79 /* Debug */,
+				68FFDE002DB9BCD300D5AA79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		68FFDE012DB9BCD300D5AA79 /* Build configuration list for PBXNativeTarget "FyteUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				68FFDE022DB9BCD300D5AA79 /* Debug */,
+				68FFDE032DB9BCD300D5AA79 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		683CEE0E2E42D32C0008DF12 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		683CEE0F2E42D32C0008DF12 /* SVGKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 683CEE0E2E42D32C0008DF12 /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKit;
+		};
+		683CEE112E42D32C0008DF12 /* SVGKitSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 683CEE0E2E42D32C0008DF12 /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKitSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 68FFDDCF2DB9BCD000D5AA79 /* Project object */;
+}

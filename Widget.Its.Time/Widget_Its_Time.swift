@@ -12,17 +12,28 @@ import CoreText
 // MARK: - Font Registration for Widget
 struct WidgetFonts {
     static func registerFonts() {
+        print("🔧 Widget: Iniciando registro de fontes...")
         registerFont(named: "Rajdhani-Regular")
         registerFont(named: "Rajdhani-Bold")
         registerFont(named: "Rajdhani-Medium")
+        print("🔧 Widget: Registro de fontes concluído")
     }
     
     private static func registerFont(named fontName: String) {
         guard let fontURL = Bundle.main.url(forResource: fontName, withExtension: "ttf") else {
             print("⚠️ Widget: Font file not found: \(fontName).ttf")
+            // Listar todos os recursos do bundle para debug
+            let bundle = Bundle.main
+            print("📦 Widget: Bundle resources:")
+            if let resources = bundle.urls(forResourcesWithExtension: nil, subdirectory: nil) {
+                for resource in resources {
+                    print("   - \(resource.lastPathComponent)")
+                }
+            }
             return
         }
         
+        print("🔧 Widget: Tentando registrar fonte: \(fontName) de \(fontURL)")
         var error: Unmanaged<CFError>?
         if CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error) {
             print("✅ Widget: Successfully registered font: \(fontName)")
@@ -36,18 +47,7 @@ struct WidgetFonts {
     }
 }
 
-extension Font {
-    static func rajdhani(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        switch weight {
-        case .bold:
-            return .custom("Rajdhani-Bold", size: size)
-        case .medium:
-            return .custom("Rajdhani-Medium", size: size)
-        default:
-            return .custom("Rajdhani-Regular", size: size)
-        }
-    }
-}
+
 
 // MARK: - Widget Data Model
 struct WidgetEventData {
@@ -113,7 +113,9 @@ struct UFCWidgetProvider: TimelineProvider {
     }
     
     private func getNextEventData() -> UFCWidgetEntry {
-        let userDefaults = UserDefaults(suiteName: "group.com.ufcapp.widget")
+        let userDefaults = UserDefaults(suiteName: "group.com.granemanndigital.dev")
+        
+        print("🔍 Widget: Tentando carregar dados do UserDefaults...")
         
         // Get saved event data
         if let eventData = userDefaults?.dictionary(forKey: "nextEvent"),
@@ -130,6 +132,7 @@ struct UFCWidgetProvider: TimelineProvider {
             let location = eventData["location"] as? String ?? ""
             let weightClass = eventData["weightClass"] as? String ?? ""
             let isChampionship = eventData["isChampionship"] as? Bool ?? false
+            print("✅ Widget: Dados carregados com sucesso - Evento: \(eventName), Lutadores: \(fighter1Name) vs \(fighter2Name)")
             return UFCWidgetEntry(
                 date: Date(),
                 eventName: eventName,
@@ -144,6 +147,8 @@ struct UFCWidgetProvider: TimelineProvider {
                 isChampionship: isChampionship
             )
         }
+        
+        print("⚠️ Widget: Nenhum dado encontrado, usando fallback")
         // Fallback
         let days: TimeInterval = 86400 * 17
         let hours: TimeInterval = 3600 * 14
@@ -201,7 +206,7 @@ struct UFCWidgetEntryView: View {
                         // Golden gradient for championship fights - left side only
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.06), // Golden glow
+                                Color(red: 0.984, green: 1.0, blue: 0.020).opacity(0.06), // #FBFF05 glow
                                 Color.clear
                             ]),
                             center: .topLeading,
@@ -229,7 +234,7 @@ struct UFCWidgetEntryView: View {
                         // Golden gradient for championship fights - same as dark mode
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.8, blue: 0.0).opacity(0.1), // Same golden glow as dark mode
+                                Color(red: 0.984, green: 1.0, blue: 0.020).opacity(0.1), // #FBFF05 glow as dark mode
                                 Color.clear
                             ]),
                             center: .topLeading,
@@ -258,24 +263,24 @@ struct UFCWidgetEntryView: View {
             // Event info
             VStack(alignment: .leading, spacing: 0) {
                 Text(entry.eventName)
-                    .font(.rajdhani(size: 16, weight: .bold))
+                    .font(.widgetRajdhani(size: 16, weight: .bold))
                     .foregroundColor(entry.isChampionship ? 
-                        (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // Much darker golden for light mode
-                        Color(red: 0.945, green: 0.235, blue: 0.329)) // #F13C54 for bout
+                        (colorScheme == .dark ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // #FBFF05 for dark mode
+                        Color(red: 1.0, green: 0.020, blue: 0.314)) // #FF0550 for bout
                     .lineLimit(1)
                 
                 VStack(alignment: .leading, spacing: -2) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(formatFighterName(entry.fighter1Name))
-                            .font(.rajdhani(size: 24, weight: .bold))
+                            .font(.widgetRajdhani(size: 24, weight: .bold))
                             .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                             .lineLimit(1)
                         Text("vs")
-                            .font(.rajdhani(size: 24, weight: .bold))
+                            .font(.widgetRajdhani(size: 24, weight: .bold))
                             .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                     }
                     Text(formatFighterName(entry.fighter2Name))
-                        .font(.rajdhani(size: 24, weight: .bold))
+                        .font(.widgetRajdhani(size: 24, weight: .bold))
                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                         .lineLimit(1)
                 }
@@ -290,7 +295,7 @@ struct UFCWidgetEntryView: View {
             // Countdown (only days for small widget)
             HStack(alignment: .center, spacing: 8) {
                 Text("\(entry.daysRemaining)")
-                    .font(.rajdhani(size: 28, weight: .bold))
+                    .font(.widgetRajdhani(size: 28, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Days")
                     .font(.system(size: 12, weight: .medium))
@@ -315,23 +320,23 @@ struct UFCWidgetEntryView: View {
     private var eventInfo: some View {
         VStack(alignment: .leading, spacing: -2) {
             Text(entry.eventName)
-                .font(.rajdhani(size: 18, weight: .bold))
+                .font(.widgetRajdhani(size: 18, weight: .bold))
                 .foregroundColor(entry.isChampionship ? 
-                    (colorScheme == .dark ? Color(red: 1.0, green: 0.8, blue: 0.0) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // Much darker golden for light mode
-                    Color(red: 0.945, green: 0.235, blue: 0.329)) // #F13C54 for bout
+                                            (colorScheme == .dark ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color(red: 0.4, green: 0.25, blue: 0.0)) : // #FBFF05 for dark mode
+                                            Color(red: 1.0, green: 0.020, blue: 0.314)) // #FF0550 for bout
                 .lineLimit(1)
             VStack(alignment: .leading, spacing: -6) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(formatFighterName(entry.fighter1Name))
-                        .font(.rajdhani(size: 32, weight: .bold))
+                        .font(.widgetRajdhani(size: 32, weight: .bold))
                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                         .lineLimit(1)
                     Text("vs")
-                        .font(.rajdhani(size: 32, weight: .bold))
+                        .font(.widgetRajdhani(size: 32, weight: .bold))
                         .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 }
                 Text(formatFighterName(entry.fighter2Name))
-                    .font(.rajdhani(size: 32, weight: .bold))
+                    .font(.widgetRajdhani(size: 32, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                     .lineLimit(1)
             }
@@ -358,24 +363,24 @@ struct UFCWidgetEntryView: View {
     private var countdown: some View {
         VStack(alignment: .leading, spacing: -2) {
             HStack(alignment: .center, spacing: 8) {
-                Text("\(entry.daysRemaining)")
-                    .font(.rajdhani(size: 32, weight: .bold))
+                Text(String(format: "%02d", entry.daysRemaining))
+                    .font(.widgetRajdhani(size: 32, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Days")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
             }
             HStack(alignment: .center, spacing: 8) {
-                Text("\(entry.hoursRemaining)")
-                    .font(.rajdhani(size: 32, weight: .bold))
+                Text(String(format: "%02d", entry.hoursRemaining))
+                    .font(.widgetRajdhani(size: 32, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Hrs")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
             }
             HStack(alignment: .center, spacing: 8) {
-                Text("\(entry.minutesRemaining)")
-                    .font(.rajdhani(size: 32, weight: .bold))
+                Text(String(format: "%02d", entry.minutesRemaining))
+                    .font(.widgetRajdhani(size: 32, weight: .bold))
                     .foregroundColor(colorScheme == .dark ? .white : Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222 in light mode
                 Text("Mins")
                     .font(.system(size: 14, weight: .medium))
@@ -404,12 +409,14 @@ struct UFCWidget: Widget {
 struct UFCWidgetBundle: WidgetBundle {
     init() {
         // Register custom fonts for widget
+        print("🚀 Widget: Inicializando bundle do widget...")
         WidgetFonts.registerFonts()
+        print("🚀 Widget: Bundle do widget inicializado")
     }
     
     var body: some Widget {
         UFCWidget()
-        Widget_Its_TimeControl()
+        UFCEventLiveActivity()
     }
 }
 

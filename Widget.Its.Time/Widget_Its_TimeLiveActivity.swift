@@ -69,6 +69,9 @@ struct UFCEventLiveActivityAttributes: ActivityAttributes {
         var mainEventFighter2FlagSvg: String?
         var liveFightFighter1FlagSvg: String?
         var liveFightFighter2FlagSvg: String?
+        // Campos para animação do retângulo
+        var roundStartTime: String?
+        var totalRounds: Int?
     }
     
     var eventName: String
@@ -111,10 +114,10 @@ struct UFCEventLiveActivity: Widget {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
-                .padding(.bottom, 8)
+                .padding(.bottom, 6)
                 
                 // Main content box
-                VStack(spacing: 0) {
+                VStack(spacing: -4) {
                     // Main event info in gray box
                     VStack(spacing: 8) {
                         // Verificar se há luta ao vivo
@@ -132,9 +135,9 @@ struct UFCEventLiveActivity: Widget {
                                 }
                                 
                                 // Luta ao vivo
-                                HStack(spacing: 8) {
+                                HStack(spacing: 10) {
                                     // Fighter 1
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: 8) {
                                         if let ranking = context.state.liveFightFighter1Ranking {
                                             Text(ranking)
                                                 .font(.widgetRajdhani(size: 14, weight: .bold))
@@ -162,7 +165,7 @@ struct UFCEventLiveActivity: Widget {
                                         .foregroundColor(.gray)
                                     
                                     // Fighter 2
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: 8) {
                                         // Usar apenas SVG
                                         if let flagSvg = context.state.liveFightFighter2FlagSvg, !flagSvg.isEmpty {
                                             FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter2Country)
@@ -185,6 +188,70 @@ struct UFCEventLiveActivity: Widget {
                                         }
                                     }
                                 }
+                                
+                                // Barra de progresso da luta ao vivo
+                                GeometryReader { geometry in
+                                    ZStack(alignment: .leading) {
+                                        // Background
+                                        Rectangle()
+                                            .fill(Color(red: 0.133, green: 0.133, blue: 0.133))
+                                            .frame(height: 5)
+                                            .frame(maxWidth: .infinity)
+                                            .cornerRadius(10)
+                                        
+                                        // Progress (17:20 = 1040 segundos)
+                                        Rectangle()
+                                            .fill(
+                                                // Lógica do haschampion: amarelo se tem campeão, vermelho se não tem
+                                                context.state.mainEventFighter1Ranking == "C" || context.state.mainEventFighter2Ranking == "C" || 
+                                                context.state.liveFightFighter1Ranking == "C" || context.state.liveFightFighter2Ranking == "C" ?
+                                                Color(red: 0.984, green: 1.0, blue: 0.020) : // Amarelo se tem campeão
+                                                Color(red: 1.0, green: 0.020, blue: 0.314)   // Vermelho se não tem campeão
+                                            )
+                                            .frame(width: geometry.size.width * calculateProgress(context: context), height: 5)
+                                            .onAppear {
+                                                print("🔍 Debug: Barra de progresso renderizada - width: \(geometry.size.width * calculateProgress(context: context))")
+                                            }
+                                            .cornerRadius(10)
+                                    }
+                                }
+                                .frame(height: 4)
+                                .padding(.top, 8)
+                                
+                                // Retângulos baseados no número de rounds
+                                let totalRounds = context.state.totalRounds ?? 3
+                                let _ = print("🔍 Debug: totalRounds = \(totalRounds), liveFightFighter1LastName = '\(context.state.liveFightFighter1LastName)', liveFightFighter2LastName = '\(context.state.liveFightFighter2LastName)', eventStatus = '\(context.state.eventStatus)'")
+                                
+                                HStack {
+                                    Spacer()
+                                    Rectangle()
+                                        .fill(Color(red: 0.067, green: 0.067, blue: 0.067))
+                                        .frame(width: 8, height: 8)
+                                        .cornerRadius(2)
+                                    Spacer()
+                                    Rectangle()
+                                        .fill(Color(red: 0.067, green: 0.067, blue: 0.067))
+                                        .frame(width: 8, height: 8)
+                                        .cornerRadius(2)
+                                    Spacer()
+                                    
+                                    // Retângulos adicionais para 5 rounds
+                                    if totalRounds == 5 {
+                                        Rectangle()
+                                            .fill(Color(red: 0.067, green: 0.067, blue: 0.067))
+                                            .frame(width: 8, height: 8)
+                                            .cornerRadius(2)
+                                        Spacer()
+                                        Rectangle()
+                                            .fill(Color(red: 0.067, green: 0.067, blue: 0.067))
+                                            .frame(width: 8, height: 8)
+                                            .cornerRadius(2)
+                                        Spacer()
+                                    }
+                                    
+
+                                }
+                                .padding(.top, -12)
                             }
                             .lineLimit(1)
                             .onAppear {
@@ -196,6 +263,8 @@ struct UFCEventLiveActivity: Widget {
                                 print("🔍 Debug: - liveFightFighter1FlagSvg: '\(context.state.liveFightFighter1FlagSvg?.prefix(50) ?? "nil")...'")
                                 print("🔍 Debug: - liveFightFighter2FlagSvg: '\(context.state.liveFightFighter2FlagSvg?.prefix(50) ?? "nil")...'")
                             }
+                            
+
                         } else {
                             // ===== SEÇÃO 1: LUTA PRINCIPAL (quando não há luta ao vivo) =====
                             VStack(spacing: 6) {
@@ -225,15 +294,19 @@ struct UFCEventLiveActivity: Widget {
                                 print("🔍 Debug: - liveFightFighter1Country: '\(context.state.liveFightFighter1Country ?? "nil")'")
                                 print("🔍 Debug: - liveFightFighter2Country: '\(context.state.liveFightFighter2Country ?? "nil")'")
                             }
+                            
+
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity) // Ocupar todo o espaço disponível
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .frame(height: 80) // Tamanho fixo para o box
+                    .frame(height: 90) // Tamanho fixo para o box
                     .background(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111
                     .cornerRadius(12)
                     .padding(.horizontal, 16)
+                    
+
                     .onAppear {
                         print("🔍 Debug: Widget Status Check:")
                         print("🔍 Debug: - eventStatus: '\(context.state.eventStatus)'")
@@ -244,6 +317,8 @@ struct UFCEventLiveActivity: Widget {
                         print("🔍 Debug: - fighter1Ranking: '\(context.state.fighter1Ranking ?? "nil")'")
                         print("🔍 Debug: - fighter2Ranking: '\(context.state.fighter2Ranking ?? "nil")'")
                     }
+                    
+
                     
                     // Next fight info
                     HStack {
@@ -265,15 +340,21 @@ struct UFCEventLiveActivity: Widget {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 8)
                 }
             }
             .background(Color.black)
             .activityBackgroundTint(Color.black)
             .activitySystemActionForegroundColor(Color.white)
-            .padding(.top, 30)
-
-
+            .padding(.top, 2)
+            .padding(.bottom, 8)
+            .onAppear {
+                let hasLiveFight = !context.state.liveFightFighter1LastName.isEmpty && !context.state.liveFightFighter2LastName.isEmpty
+                print("🔍 Debug: hasLiveFight = \(hasLiveFight)")
+                print("🔍 Debug: liveFightFighter1LastName = '\(context.state.liveFightFighter1LastName)'")
+                print("🔍 Debug: liveFightFighter2LastName = '\(context.state.liveFightFighter2LastName)'")
+                print("🔍 Debug: eventStatus = '\(context.state.eventStatus)'")
+            }
         } dynamicIsland: { context in
             DynamicIsland {
                 // Expanded UI
@@ -339,6 +420,81 @@ struct UFCEventLiveActivity: Widget {
     }
 }
 
+// MARK: - Progress Calculation
+    func calculateProgress(context: ActivityViewContext<UFCEventLiveActivityAttributes>) -> CGFloat {
+        print("🔍 Debug: calculateProgress - FUNÇÃO CHAMADA")
+        // Determinar duração baseada no número de rounds
+        let totalRounds = context.state.totalRounds ?? 3 // Padrão é 3 rounds
+        let totalDuration: TimeInterval = totalRounds == 5 ? 1820 : 1040 // 30:20 para 5 rounds, 17:20 para 3 rounds
+        print("🔍 Debug: calculateProgress - totalRounds = \(totalRounds), totalDuration = \(totalDuration) segundos (\(totalDuration/60) minutos)")
+        
+        // Verificar se o evento está ao vivo
+        let isEventLive = context.state.eventStatus == "live"
+        let hasLiveFight = !context.state.liveFightFighter1LastName.isEmpty && !context.state.liveFightFighter2LastName.isEmpty
+        
+        print("🔍 Debug: calculateProgress - isEventLive = \(isEventLive), hasLiveFight = \(hasLiveFight), eventStatus = '\(context.state.eventStatus)', liveFightFighter1LastName = '\(context.state.liveFightFighter1LastName)', liveFightFighter2LastName = '\(context.state.liveFightFighter2LastName)'")
+        
+        // Se não está ao vivo, retornar 1% (barra vazia)
+        if !isEventLive || !hasLiveFight {
+            print("🔍 Debug: calculateProgress - Evento não está ao vivo, retornando 1%")
+            return 0.01
+        }
+        
+        // Se está ao vivo, calcular progresso baseado no roundStartTime
+        let currentTime = Date()
+        
+        // Verificar se temos o roundStartTime
+        guard let roundStartTimeString = context.state.roundStartTime,
+              !roundStartTimeString.isEmpty else {
+            print("🔍 Debug: calculateProgress - roundStartTime não disponível, usando tempo absoluto")
+            // Fallback: usar tempo absoluto se roundStartTime não estiver disponível
+            let calendar = Calendar.current
+            let totalSeconds = calendar.component(.second, from: currentTime) + 
+                              calendar.component(.minute, from: currentTime) * 60 +
+                              calendar.component(.hour, from: currentTime) * 3600
+            
+            let progress = CGFloat(totalSeconds % Int(totalDuration)) / CGFloat(totalDuration)
+            let finalProgress = min(max(progress, 0.01), 1.0)
+            print("🔍 Debug: calculateProgress - Fallback, progresso: \(finalProgress * 100)%")
+            return finalProgress
+        }
+        
+        // Converter roundStartTime para Date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.timeZone = TimeZone.current
+        
+        guard let roundStartTime = dateFormatter.date(from: roundStartTimeString) else {
+            print("🔍 Debug: calculateProgress - Erro ao converter roundStartTime: \(roundStartTimeString)")
+            return 0.01
+        }
+        
+        // Calcular tempo decorrido desde o início da luta
+        let timeElapsed = currentTime.timeIntervalSince(roundStartTime)
+        print("🔍 Debug: calculateProgress - roundStartTime: \(roundStartTimeString)")
+        print("🔍 Debug: calculateProgress - currentTime: \(dateFormatter.string(from: currentTime))")
+        print("🔍 Debug: calculateProgress - timeElapsed: \(timeElapsed) segundos")
+        
+        // Se o tempo decorrido é negativo (luta ainda não começou), retornar 1%
+        if timeElapsed < 0 {
+            print("🔍 Debug: calculateProgress - Luta ainda não começou, retornando 1%")
+            return 0.01
+        }
+        
+        // Calcular progresso baseado no tempo decorrido
+        let progress = CGFloat(timeElapsed) / CGFloat(totalDuration)
+        
+        // Garantir que sempre comece em 1% (0.01) e pare em 100% (1.0)
+        let finalProgress = min(max(progress, 0.01), 1.0)
+        
+        print("🔍 Debug: calculateProgress - Evento ao vivo, progresso: \(finalProgress * 100)%")
+        return finalProgress
+    }
+
+
+
+
+
 extension UFCEventLiveActivityAttributes {
     fileprivate static var preview: UFCEventLiveActivityAttributes {
         UFCEventLiveActivityAttributes(
@@ -387,7 +543,9 @@ extension UFCEventLiveActivityAttributes.ContentState {
             mainEventFighter1FlagSvg: nil,
             mainEventFighter2FlagSvg: nil,
             liveFightFighter1FlagSvg: nil,
-            liveFightFighter2FlagSvg: nil
+            liveFightFighter2FlagSvg: nil,
+            roundStartTime: nil,
+            totalRounds: 5
         )
     }
     
@@ -426,7 +584,9 @@ extension UFCEventLiveActivityAttributes.ContentState {
             mainEventFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#009b3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#fedf00\" d=\"M320 240L240 120l80-60 80 60z\"/><circle fill=\"#002776\" cx=\"320\" cy=\"240\" r=\"40\"/><path fill=\"#fff\" d=\"M320 220c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 32c-6.6 0-12-5.4-12-12s5.4-12 12-12 12 5.4 12 12-5.4 12-12 12z\"/></svg>",
             mainEventFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#bd3d44\" d=\"M0 0h640v480H0\"/><path stroke=\"#fff\" stroke-width=\"37\" d=\"M0 55.3h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640\"/><rect fill=\"#192f5d\" width=\"247\" height=\"259\"/><g fill=\"#fff\"><g id=\"d\"><g id=\"c\"><g id=\"e\"><g id=\"b\"><path id=\"a\" d=\"M24.8 25l3.2 9.8h10.3l-8.4 6.1 3.2 9.8-8.3-6-8.3 6 3.2-9.8-8.4-6.1h10.3z\"/><use href=\"#a\" y=\"19.5\"/><use href=\"#a\" y=\"39\"/></g><use href=\"#b\" y=\"78\"/></g><use href=\"#c\" y=\"156\"/></g><use href=\"#d\" y=\"312\"/></g></svg>",
             liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
-            liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>"
+            liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
+            roundStartTime: nil,
+            totalRounds: 5
         )
     }
 }

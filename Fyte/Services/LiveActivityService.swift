@@ -51,6 +51,9 @@ struct UFCEventLiveActivityAttributes: ActivityAttributes {
         var mainEventFighter2FlagSvg: String?
         var liveFightFighter1FlagSvg: String?
         var liveFightFighter2FlagSvg: String?
+        // ===== ROUNDS =====
+        var roundStartTime: String?
+        var totalRounds: Int?
     }
     
     var eventName: String
@@ -152,8 +155,13 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: mainEventFight?.fighter1.flagSvg,
             mainEventFighter2FlagSvg: mainEventFight?.fighter2.flagSvg,
             liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
-            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil
+            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil,
+            // ===== ROUNDS =====
+            roundStartTime: nil,
+            totalRounds: hasLiveFight ? displayFight?.rounds : mainEventFight?.rounds
         )
+        
+        print("🔍 Debug: initialState totalRounds = \(hasLiveFight ? String(describing: displayFight?.rounds) : String(describing: mainEventFight?.rounds)), hasLiveFight = \(hasLiveFight), displayFight?.status = \(displayFight?.status ?? "nil")")
         
         do {
             let activity = try Activity.request(
@@ -222,7 +230,10 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: nil,
             mainEventFighter2FlagSvg: nil,
             liveFightFighter1FlagSvg: nil,
-            liveFightFighter2FlagSvg: nil
+            liveFightFighter2FlagSvg: nil,
+            // ===== ROUNDS =====
+            roundStartTime: nil,
+            totalRounds: nil
         )
         
         await activity.endCompat(finalState, dismissalPolicy: .immediate)
@@ -362,9 +373,41 @@ class LiveActivityService: ObservableObject {
             nextFighter2LastName = extractLastName(from: nextFight?.fighter2.name ?? "")
         }
         
+        // Obter luta principal para manter o totalRounds consistente
+        var mainEventFight: UFCFight? = nil
+        if let event = event {
+            mainEventFight = getHighlightFight(for: event)
+        }
+        
         // Verificar se realmente há uma luta ao vivo
         let hasLiveFight = displayFight?.status == "live"
         let eventStatus = hasLiveFight ? "live" : "starting"
+        
+        // Determinar o roundStartTime
+        var roundStartTime: String? = currentState.roundStartTime
+        
+        // Se há uma luta ao vivo e ela é diferente da anterior, definir novo roundStartTime
+        if hasLiveFight {
+            let currentLiveFighters = "\(currentFighter1LastName) vs \(currentFighter2LastName)"
+            let previousLiveFighters = "\(currentState.liveFightFighter1LastName) vs \(currentState.liveFightFighter2LastName)"
+            
+            // Se os lutadores ao vivo mudaram, definir novo roundStartTime
+            if currentLiveFighters != previousLiveFighters || currentState.liveFightFighter1LastName.isEmpty {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                dateFormatter.timeZone = TimeZone.current
+                roundStartTime = dateFormatter.string(from: Date())
+                print("🔍 Debug: updateToLiveStatus - Nova luta ao vivo detectada, definindo roundStartTime: \(roundStartTime ?? "nil")")
+                print("🔍 Debug: updateToLiveStatus - Lutadores anteriores: '\(previousLiveFighters)'")
+                print("🔍 Debug: updateToLiveStatus - Lutadores atuais: '\(currentLiveFighters)'")
+            } else {
+                print("🔍 Debug: updateToLiveStatus - Mesma luta ao vivo, mantendo roundStartTime: \(roundStartTime ?? "nil")")
+            }
+        } else {
+            // Se não há luta ao vivo, limpar roundStartTime
+            roundStartTime = nil
+            print("🔍 Debug: updateToLiveStatus - Nenhuma luta ao vivo, limpando roundStartTime")
+        }
         
         let liveState = UFCEventLiveActivityAttributes.ContentState(
             timeRemaining: hasLiveFight ? "LIVE" : currentState.timeRemaining,
@@ -403,14 +446,20 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
-            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil
+            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil,
+            // ===== ROUNDS =====
+            roundStartTime: roundStartTime,
+            totalRounds: hasLiveFight ? displayFight?.rounds : mainEventFight?.rounds
         )
+        
+        print("🔍 Debug: updateLiveActivity totalRounds = \(hasLiveFight ? String(describing: displayFight?.rounds) : String(describing: mainEventFight?.rounds)), hasLiveFight = \(hasLiveFight), displayFight?.status = \(displayFight?.status ?? "nil")")
         
         await activity.updateCompat(liveState)
     }
     
-    // Atualizar luta atual
-    func updateCurrentFight(_ fight: String) async {
+            // Atualizar luta atual
+        func updateCurrentFight(_ fight: String) async {
+            print("🔍 Debug: updateCurrentFight called with fight: \(fight)")
         guard let activity = currentActivity else { return }
         
         let currentState = activity.content.state
@@ -449,14 +498,18 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
+            // ===== ROUNDS =====
+            roundStartTime: currentState.roundStartTime,
+            totalRounds: currentState.totalRounds
         )
         
         await activity.updateCompat(updatedState)
     }
     
-    // Atualizar número de lutas finalizadas e próxima luta
-    func updateFinishedFights(_ finishedFights: Int, event: UFCEvent) async {
+            // Atualizar número de lutas finalizadas e próxima luta
+        func updateFinishedFights(_ finishedFights: Int, event: UFCEvent) async {
+            print("🔍 Debug: updateFinishedFights called with finishedFights: \(finishedFights)")
         guard let activity = currentActivity else { return }
         
         let currentState = activity.content.state
@@ -504,7 +557,10 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
+            // ===== ROUNDS =====
+            roundStartTime: currentState.roundStartTime,
+            totalRounds: currentState.totalRounds
         )
         
         await activity.updateCompat(updatedState)
@@ -540,16 +596,19 @@ class LiveActivityService: ObservableObject {
         }
     }
     
-    // Atualizar countdown
-    private func updateCountdown(for event: UFCEvent) async {
+            // Atualizar countdown
+        private func updateCountdown(for event: UFCEvent) async {
+            print("🔍 Debug: updateCountdown called")
         guard let activity = currentActivity else { return }
         
         let timeRemaining = formatTimeRemaining(for: event)
         let currentState = activity.content.state
         
-        // Se apenas o tempo mudou e o evento já começou, fazer update mínimo
-        if timeRemaining != currentState.timeRemaining && 
-           (timeRemaining == "00:00:00" || timeRemaining == "EVENTO INICIADO" || currentState.eventStatus == "live") {
+        print("🔍 Debug: updateCountdown - timeRemaining = '\(timeRemaining)', currentState.timeRemaining = '\(currentState.timeRemaining)', currentState.eventStatus = '\(currentState.eventStatus)'")
+        
+        // Se o evento já começou (status "live"), fazer update mínimo
+        if currentState.eventStatus == "live" {
+            print("🔍 Debug: updateCountdown - fazendo update mínimo (primeira parte)")
             
             // Criar estado mínimo apenas com o tempo atualizado
             let updatedState = UFCEventLiveActivityAttributes.ContentState(
@@ -587,9 +646,13 @@ class LiveActivityService: ObservableObject {
                 mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
                 mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
                 liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-                liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
+                liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
+                // ===== ROUNDS =====
+                roundStartTime: currentState.roundStartTime,
+                totalRounds: currentState.totalRounds
             )
             
+            print("🔍 Debug: updateCountdown - Atualizando Live Activity com update mínimo")
             await activity.updateCompat(updatedState)
             return
         }
@@ -597,6 +660,11 @@ class LiveActivityService: ObservableObject {
         // Se o evento ainda não começou, atualizar countdown e lutas
         let finishedFights = calculateFinishedFights(for: event)
         let nextFight = getNextFight(for: event, finishedFights: finishedFights)
+        
+        // Obter luta principal para manter o totalRounds consistente
+        let mainEventFight = getHighlightFight(for: event)
+        print("🔍 Debug: updateCountdown mainEventFight?.rounds = \(String(describing: mainEventFight?.rounds))")
+        print("🔍 Debug: updateCountdown - fazendo update completo (segunda parte)")
         
         let updatedState = UFCEventLiveActivityAttributes.ContentState(
             timeRemaining: timeRemaining,
@@ -633,7 +701,10 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
+            // ===== ROUNDS =====
+            roundStartTime: currentState.roundStartTime,
+            totalRounds: mainEventFight?.rounds
         )
         
         await activity.updateCompat(updatedState)
@@ -754,6 +825,35 @@ class LiveActivityService: ObservableObject {
         // Determinar status do evento
         let eventStatus = timeRemaining == "00:00:00" || timeRemaining == "EVENTO INICIADO" ? "live" : "starting"
         
+        // Verificar se há luta ao vivo
+        let hasLiveFight = displayFight?.status == "live"
+        
+        // Determinar o roundStartTime
+        var roundStartTime: String? = currentState.roundStartTime
+        
+        // Se há uma luta ao vivo e ela é diferente da anterior, definir novo roundStartTime
+        if hasLiveFight {
+            let currentLiveFighters = "\(extractLastName(from: displayFight?.fighter1.name ?? "")) vs \(extractLastName(from: displayFight?.fighter2.name ?? ""))"
+            let previousLiveFighters = "\(currentState.liveFightFighter1LastName) vs \(currentState.liveFightFighter2LastName)"
+            
+            // Se os lutadores ao vivo mudaram, definir novo roundStartTime
+            if currentLiveFighters != previousLiveFighters || currentState.liveFightFighter1LastName.isEmpty {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                dateFormatter.timeZone = TimeZone.current
+                roundStartTime = dateFormatter.string(from: Date())
+                print("🔍 Debug: forceUpdateLiveActivity - Nova luta ao vivo detectada, definindo roundStartTime: \(roundStartTime ?? "nil")")
+                print("🔍 Debug: forceUpdateLiveActivity - Lutadores anteriores: '\(previousLiveFighters)'")
+                print("🔍 Debug: forceUpdateLiveActivity - Lutadores atuais: '\(currentLiveFighters)'")
+            } else {
+                print("🔍 Debug: forceUpdateLiveActivity - Mesma luta ao vivo, mantendo roundStartTime: \(roundStartTime ?? "nil")")
+            }
+        } else {
+            // Se não há luta ao vivo, limpar roundStartTime
+            roundStartTime = nil
+            print("🔍 Debug: forceUpdateLiveActivity - Nenhuma luta ao vivo, limpando roundStartTime")
+        }
+        
         let updatedState = UFCEventLiveActivityAttributes.ContentState(
             timeRemaining: timeRemaining,
             eventStatus: eventStatus,
@@ -778,21 +878,24 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1Country: currentState.mainEventFighter1Country,
             mainEventFighter2Country: currentState.mainEventFighter2Country,
             mainEventWeightClass: currentState.mainEventWeightClass,
-            liveFightFighter1LastName: currentState.liveFightFighter1LastName,
-            liveFightFighter2LastName: currentState.liveFightFighter2LastName,
-            liveFightFighter1Ranking: currentState.liveFightFighter1Ranking,
-            liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
-            liveFightFighter1Country: currentState.liveFightFighter1Country,
-            liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass,
+            liveFightFighter1LastName: hasLiveFight ? extractLastName(from: displayFight?.fighter1.name ?? "") : "",
+            liveFightFighter2LastName: hasLiveFight ? extractLastName(from: displayFight?.fighter2.name ?? "") : "",
+            liveFightFighter1Ranking: hasLiveFight ? displayFight?.fighter1.ranking : nil,
+            liveFightFighter2Ranking: hasLiveFight ? displayFight?.fighter2.ranking : nil,
+            liveFightFighter1Country: hasLiveFight ? displayFight?.fighter1.country : nil,
+            liveFightFighter2Country: hasLiveFight ? displayFight?.fighter2.country : nil,
+            liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
             // ===== SVGs DAS BANDEIRAS =====
             mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
-            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
+            liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
+            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil,
+            // ===== ROUNDS =====
+            roundStartTime: roundStartTime,
+            totalRounds: hasLiveFight ? displayFight?.rounds : currentState.totalRounds
         )
         
-                await activity.updateCompat(updatedState)
+        await activity.updateCompat(updatedState)
         print("✅ Live Activity force updated with latest data - \(finishedFights)/\(event.fights?.count ?? 0)")
 
         // Chamar updateToLiveStatus para garantir que as variáveis liveFightFighter* sejam populadas corretamente

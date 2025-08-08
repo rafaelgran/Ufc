@@ -117,109 +117,114 @@ struct UFCEventLiveActivity: Widget {
                 VStack(spacing: 0) {
                     // Main event info in gray box
                     VStack(spacing: 8) {
-                        // ===== SEÇÃO 1: LUTA PRINCIPAL (sempre visível) =====
-                        VStack(spacing: 6) {
-                            HStack(spacing: 4) {
-                                Text(context.state.mainEventFighter1LastName)
-                                    .font(.widgetRajdhani(size: 24, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Text("vs")
-                                    .font(.widgetRajdhani(size: 24, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Text(context.state.mainEventFighter2LastName)
-                                    .font(.widgetRajdhani(size: 24, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Text("is live!")
-                                    .font(.widgetRajdhani(size: 24, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .lineLimit(1)
-                        .onAppear {
-                            print("🔍 Debug: Live Activity UI - Main Event section")
-                            print("🔍 Debug: - mainEventFighter1LastName: '\(context.state.mainEventFighter1LastName)'")
-                            print("🔍 Debug: - mainEventFighter2LastName: '\(context.state.mainEventFighter2LastName)'")
-                            print("🔍 Debug: - liveFightFighter1Country: '\(context.state.liveFightFighter1Country ?? "nil")'")
-                            print("🔍 Debug: - liveFightFighter2Country: '\(context.state.liveFightFighter2Country ?? "nil")'")
-                        }
+                        // Verificar se há luta ao vivo
+                        let hasLiveFight = !context.state.liveFightFighter1LastName.isEmpty && !context.state.liveFightFighter2LastName.isEmpty
                         
-                        // ===== SEÇÃO 2: LUTA AO VIVO (sempre visível) =====
-                        VStack(spacing: 6) {
-                            // Título "LIVE"
-                            HStack {
-                                Text("LIVE")
-                                    .font(.widgetRajdhani(size: 12, weight: .bold))
-                                    .foregroundColor(.gray)
-                                Spacer()
-                            }
-                            
-                            // Luta ao vivo
-                            HStack(spacing: 8) {
-                                // Fighter 1
-                                HStack(spacing: 4) {
-                                    if let ranking = context.state.liveFightFighter1Ranking {
-                                        Text(ranking)
-                                            .font(.widgetRajdhani(size: 14, weight: .bold))
-                                            .foregroundColor(ranking == "C" ? .black : .white)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 3)
-                                                    .fill(ranking == "C" ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color.gray.opacity(0.6))
-                                            )
+                        if hasLiveFight {
+                            // ===== SEÇÃO 2: LUTA AO VIVO (quando há luta ao vivo) =====
+                            VStack(spacing: 6) {
+                                // Título "LIVE"
+                                HStack {
+                                    Text("LIVE")
+                                        .font(.widgetRajdhani(size: 12, weight: .bold))
+                                        .foregroundColor(.gray)
+                                    Spacer()
+                                }
+                                
+                                // Luta ao vivo
+                                HStack(spacing: 8) {
+                                    // Fighter 1
+                                    HStack(spacing: 4) {
+                                        if let ranking = context.state.liveFightFighter1Ranking {
+                                            Text(ranking)
+                                                .font(.widgetRajdhani(size: 14, weight: .bold))
+                                                .foregroundColor(ranking == "C" ? .black : .white)
+                                                .padding(.horizontal, 4)
+                                                .padding(.vertical, 1)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 3)
+                                                        .fill(ranking == "C" ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color.gray.opacity(0.6))
+                                                )
+                                        }
+                                        
+                                        Text(context.state.liveFightFighter1LastName)
+                                            .font(.widgetRajdhani(size: 24, weight: .bold))
+                                            .foregroundColor(.white)
+                                        
+                                        // Usar apenas SVG
+                                        if let flagSvg = context.state.liveFightFighter1FlagSvg, !flagSvg.isEmpty {
+                                            FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter1Country)
+                                        }
                                     }
                                     
-                                    Text(context.state.liveFightFighter1LastName)
+                                    Text("vs")
+                                        .font(.widgetRajdhani(size: 20, weight: .regular))
+                                        .foregroundColor(.gray)
+                                    
+                                    // Fighter 2
+                                    HStack(spacing: 4) {
+                                        // Usar apenas SVG
+                                        if let flagSvg = context.state.liveFightFighter2FlagSvg, !flagSvg.isEmpty {
+                                            FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter2Country)
+                                        }
+                                        
+                                        Text(context.state.liveFightFighter2LastName)
+                                            .font(.widgetRajdhani(size: 24, weight: .bold))
+                                            .foregroundColor(.white)
+                                        
+                                        if let ranking = context.state.liveFightFighter2Ranking {
+                                            Text(ranking)
+                                                .font(.widgetRajdhani(size: 14, weight: .bold))
+                                                .foregroundColor(ranking == "C" ? .black : .white)
+                                                .padding(.horizontal, 4)
+                                                .padding(.vertical, 1)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 3)
+                                                        .fill(ranking == "C" ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color.gray.opacity(0.6))
+                                                )
+                                        }
+                                    }
+                                }
+                            }
+                            .lineLimit(1)
+                            .onAppear {
+                                print("🔍 Debug: Live Activity UI - Live Fight section (ACTIVE)")
+                                print("🔍 Debug: - liveFightFighter1LastName: '\(context.state.liveFightFighter1LastName)'")
+                                print("🔍 Debug: - liveFightFighter2LastName: '\(context.state.liveFightFighter2LastName)'")
+                                print("🔍 Debug: - liveFightFighter1Ranking: '\(context.state.liveFightFighter1Ranking ?? "nil")'")
+                                print("🔍 Debug: - liveFightFighter2Ranking: '\(context.state.liveFightFighter2Ranking ?? "nil")'")
+                                print("🔍 Debug: - liveFightFighter1FlagSvg: '\(context.state.liveFightFighter1FlagSvg?.prefix(50) ?? "nil")...'")
+                                print("🔍 Debug: - liveFightFighter2FlagSvg: '\(context.state.liveFightFighter2FlagSvg?.prefix(50) ?? "nil")...'")
+                            }
+                        } else {
+                            // ===== SEÇÃO 1: LUTA PRINCIPAL (quando não há luta ao vivo) =====
+                            VStack(spacing: 6) {
+                                HStack(spacing: 4) {
+                                    Text(context.state.mainEventFighter1LastName)
                                         .font(.widgetRajdhani(size: 24, weight: .bold))
                                         .foregroundColor(.white)
                                     
-                                    // Usar apenas SVG
-                                    if let flagSvg = context.state.liveFightFighter1FlagSvg, !flagSvg.isEmpty {
-                                        FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter1Country)
-                                    }
-                                }
-                                
-                                Text("vs")
-                                    .font(.widgetRajdhani(size: 20, weight: .regular))
-                                    .foregroundColor(.gray)
-                                
-                                // Fighter 2
-                                HStack(spacing: 4) {
-                                    // Usar apenas SVG
-                                    if let flagSvg = context.state.liveFightFighter2FlagSvg, !flagSvg.isEmpty {
-                                        FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter2Country)
-                                    }
-                                    
-                                    Text(context.state.liveFightFighter2LastName)
+                                    Text("vs")
                                         .font(.widgetRajdhani(size: 24, weight: .bold))
                                         .foregroundColor(.white)
                                     
-                                    if let ranking = context.state.liveFightFighter2Ranking {
-                                        Text(ranking)
-                                            .font(.widgetRajdhani(size: 14, weight: .bold))
-                                            .foregroundColor(ranking == "C" ? .black : .white)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 1)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 3)
-                                                    .fill(ranking == "C" ? Color(red: 0.984, green: 1.0, blue: 0.020) : Color.gray.opacity(0.6))
-                                            )
-                                    }
+                                    Text(context.state.mainEventFighter2LastName)
+                                        .font(.widgetRajdhani(size: 24, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    Text("is live!")
+                                        .font(.widgetRajdhani(size: 24, weight: .bold))
+                                        .foregroundColor(.white)
                                 }
                             }
-                        }
-                        .lineLimit(1)
-                        .onAppear {
-                            print("🔍 Debug: Live Activity UI - Live Fight section")
-                            print("🔍 Debug: - liveFightFighter1LastName: '\(context.state.liveFightFighter1LastName)'")
-                            print("🔍 Debug: - liveFightFighter2LastName: '\(context.state.liveFightFighter2LastName)'")
-                            print("🔍 Debug: - liveFightFighter1Ranking: '\(context.state.liveFightFighter1Ranking ?? "nil")'")
-                            print("🔍 Debug: - liveFightFighter2Ranking: '\(context.state.liveFightFighter2Ranking ?? "nil")'")
-                            print("🔍 Debug: - liveFightFighter1FlagSvg: '\(context.state.liveFightFighter1FlagSvg?.prefix(50) ?? "nil")...'")
-                            print("🔍 Debug: - liveFightFighter2FlagSvg: '\(context.state.liveFightFighter2FlagSvg?.prefix(50) ?? "nil")...'")
+                            .lineLimit(1)
+                            .onAppear {
+                                print("🔍 Debug: Live Activity UI - Main Event section (ACTIVE)")
+                                print("🔍 Debug: - mainEventFighter1LastName: '\(context.state.mainEventFighter1LastName)'")
+                                print("🔍 Debug: - mainEventFighter2LastName: '\(context.state.mainEventFighter2LastName)'")
+                                print("🔍 Debug: - liveFightFighter1Country: '\(context.state.liveFightFighter1Country ?? "nil")'")
+                                print("🔍 Debug: - liveFightFighter2Country: '\(context.state.liveFightFighter2Country ?? "nil")'")
+                            }
                         }
                     }
                     .padding(.horizontal, 16)

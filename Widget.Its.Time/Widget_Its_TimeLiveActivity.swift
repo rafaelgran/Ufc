@@ -227,8 +227,10 @@ struct UFCEventLiveActivity: Widget {
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity) // Ocupar todo o espaço disponível
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
+                    .frame(height: 80) // Tamanho fixo para o box
                     .background(Color(red: 0.067, green: 0.067, blue: 0.067)) // #111
                     .cornerRadius(12)
                     .padding(.horizontal, 16)

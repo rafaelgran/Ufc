@@ -46,6 +46,11 @@ struct UFCEventLiveActivityAttributes: ActivityAttributes {
         var liveFightFighter1Country: String?
         var liveFightFighter2Country: String?
         var liveFightWeightClass: String?
+        // ===== SVGs DAS BANDEIRAS =====
+        var mainEventFighter1FlagSvg: String?
+        var mainEventFighter2FlagSvg: String?
+        var liveFightFighter1FlagSvg: String?
+        var liveFightFighter2FlagSvg: String?
     }
     
     var eventName: String
@@ -142,7 +147,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: hasLiveFight ? displayFight?.fighter2.ranking : nil,
             liveFightFighter1Country: hasLiveFight ? displayFight?.fighter1.country : nil,
             liveFightFighter2Country: hasLiveFight ? displayFight?.fighter2.country : nil,
-            liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil
+            liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: mainEventFight?.fighter1.flagSvg,
+            mainEventFighter2FlagSvg: mainEventFight?.fighter2.flagSvg,
+            liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
+            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil
         )
         
         do {
@@ -208,7 +218,11 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: nil,
             liveFightFighter1Country: nil,
             liveFightFighter2Country: nil,
-            liveFightWeightClass: nil
+            liveFightWeightClass: nil,
+            mainEventFighter1FlagSvg: nil,
+            mainEventFighter2FlagSvg: nil,
+            liveFightFighter1FlagSvg: nil,
+            liveFightFighter2FlagSvg: nil
         )
         
         await activity.endCompat(finalState, dismissalPolicy: .immediate)
@@ -384,7 +398,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: hasLiveFight ? displayFight?.fighter2.ranking : nil,
             liveFightFighter1Country: hasLiveFight ? displayFight?.fighter1.country : nil,
             liveFightFighter2Country: hasLiveFight ? displayFight?.fighter2.country : nil,
-            liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil
+            liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
+            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil
         )
         
         await activity.updateCompat(liveState)
@@ -425,7 +444,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
             liveFightFighter1Country: currentState.liveFightFighter1Country,
             liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass
+            liveFightWeightClass: currentState.liveFightWeightClass,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
         )
         
         await activity.updateCompat(updatedState)
@@ -475,7 +499,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
             liveFightFighter1Country: currentState.liveFightFighter1Country,
             liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass
+            liveFightWeightClass: currentState.liveFightWeightClass,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
         )
         
         await activity.updateCompat(updatedState)
@@ -518,12 +547,14 @@ class LiveActivityService: ObservableObject {
         let timeRemaining = formatTimeRemaining(for: event)
         let currentState = activity.content.state
         
-        // Se o evento já começou, apenas atualizar o tempo (não sobrescrever lutas)
-        if timeRemaining == "00:00:00" || timeRemaining == "EVENTO INICIADO" {
-            // Manter as informações de lutas atuais, apenas atualizar o tempo
+        // Se apenas o tempo mudou e o evento já começou, fazer update mínimo
+        if timeRemaining != currentState.timeRemaining && 
+           (timeRemaining == "00:00:00" || timeRemaining == "EVENTO INICIADO" || currentState.eventStatus == "live") {
+            
+            // Criar estado mínimo apenas com o tempo atualizado
             let updatedState = UFCEventLiveActivityAttributes.ContentState(
                 timeRemaining: timeRemaining,
-                eventStatus: "live",
+                eventStatus: currentState.eventStatus,
                 currentFight: currentState.currentFight,
                 finishedFights: currentState.finishedFights,
                 totalFights: currentState.totalFights,
@@ -544,14 +575,19 @@ class LiveActivityService: ObservableObject {
                 mainEventFighter2Ranking: currentState.mainEventFighter2Ranking,
                 mainEventFighter1Country: currentState.mainEventFighter1Country,
                 mainEventFighter2Country: currentState.mainEventFighter2Country,
-            mainEventWeightClass: currentState.mainEventWeightClass,
-            liveFightFighter1LastName: currentState.liveFightFighter1LastName,
-            liveFightFighter2LastName: currentState.liveFightFighter2LastName,
-            liveFightFighter1Ranking: currentState.liveFightFighter1Ranking,
-            liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
-            liveFightFighter1Country: currentState.liveFightFighter1Country,
-            liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass
+                mainEventWeightClass: currentState.mainEventWeightClass,
+                liveFightFighter1LastName: currentState.liveFightFighter1LastName,
+                liveFightFighter2LastName: currentState.liveFightFighter2LastName,
+                liveFightFighter1Ranking: currentState.liveFightFighter1Ranking,
+                liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
+                liveFightFighter1Country: currentState.liveFightFighter1Country,
+                liveFightFighter2Country: currentState.liveFightFighter2Country,
+                liveFightWeightClass: currentState.liveFightWeightClass,
+                // ===== SVGs DAS BANDEIRAS =====
+                mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+                mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+                liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+                liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
             )
             
             await activity.updateCompat(updatedState)
@@ -592,7 +628,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
             liveFightFighter1Country: currentState.liveFightFighter1Country,
             liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass
+            liveFightWeightClass: currentState.liveFightWeightClass,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
         )
         
         await activity.updateCompat(updatedState)
@@ -743,7 +784,12 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
             liveFightFighter1Country: currentState.liveFightFighter1Country,
             liveFightFighter2Country: currentState.liveFightFighter2Country,
-            liveFightWeightClass: currentState.liveFightWeightClass
+            liveFightWeightClass: currentState.liveFightWeightClass,
+            // ===== SVGs DAS BANDEIRAS =====
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg
         )
         
                 await activity.updateCompat(updatedState)

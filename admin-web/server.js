@@ -5,6 +5,8 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const { SupabaseService } = require('./supabase-config');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -14,481 +16,257 @@ const io = socketIo(server, {
   }
 });
 
-// Database setup
-let db;
-const useSQLite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
-const isVercel = process.env.VERCEL === '1';
-
-if (isVercel || !useSQLite) {
-  // Use in-memory database for Vercel or PostgreSQL for production
-  const sqlite3 = require('sqlite3').verbose();
-  db = new sqlite3.Database(':memory:'); // Use in-memory database for Vercel
-  
-  // Initialize SQLite tables
-  db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      date TEXT NOT NULL,
-      location TEXT,
-      venue TEXT,
-      mainEvent TEXT,
-      status TEXT DEFAULT 'upcoming',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-    
-    db.run(`CREATE TABLE IF NOT EXISTS fighters (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      nickname TEXT,
-      record TEXT,
-      weightClass TEXT,
-      ranking INTEGER,
-      wins INTEGER DEFAULT 0,
-      losses INTEGER DEFAULT 0,
-      draws INTEGER DEFAULT 0,
-      ufcStatsUrl TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-    
-    db.run(`CREATE TABLE IF NOT EXISTS fights (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      eventId INTEGER,
-      fighter1Id INTEGER,
-      fighter2Id INTEGER,
-      weightClass TEXT,
-      fightType TEXT DEFAULT 'main',
-      rounds INTEGER DEFAULT 3,
-      timeRemaining INTEGER DEFAULT 300,
-      status TEXT DEFAULT 'scheduled',
-      winnerId INTEGER,
-      fightOrder INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (eventId) REFERENCES events (id),
-      FOREIGN KEY (fighter1Id) REFERENCES fighters (id),
-      FOREIGN KEY (fighter2Id) REFERENCES fighters (id)
-    )`);
-    
-    // Insert sample data for Vercel
-    if (isVercel) {
-      db.run(`INSERT OR IGNORE INTO events (id, name, date, location, venue, mainEvent, status) VALUES 
-        (1, 'UFC 316', '2024-06-15T20:00:00', 'Newark, NJ - United States', 'Prudential Center', 'Merab Dvalishvili vs Sean O''Malley', 'scheduled')`);
-    }
-  });
-} else {
-  // Use SQLite file for local development
-  const sqlite3 = require('sqlite3').verbose();
-  db = new sqlite3.Database('./ufc_events.db');
-  
-  // Initialize SQLite tables
-  db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      date TEXT NOT NULL,
-      location TEXT,
-      venue TEXT,
-      mainEvent TEXT,
-      status TEXT DEFAULT 'upcoming',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-    
-    db.run(`CREATE TABLE IF NOT EXISTS fighters (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      nickname TEXT,
-      record TEXT,
-      weightClass TEXT,
-      ranking INTEGER,
-      wins INTEGER DEFAULT 0,
-      losses INTEGER DEFAULT 0,
-      draws INTEGER DEFAULT 0,
-      ufcStatsUrl TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-    
-    db.run(`CREATE TABLE IF NOT EXISTS fights (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      eventId INTEGER,
-      fighter1Id INTEGER,
-      fighter2Id INTEGER,
-      weightClass TEXT,
-      fightType TEXT DEFAULT 'main',
-      rounds INTEGER DEFAULT 3,
-      timeRemaining INTEGER DEFAULT 300,
-      status TEXT DEFAULT 'scheduled',
-      winnerId INTEGER,
-      fightOrder INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (eventId) REFERENCES events (id),
-      FOREIGN KEY (fighter1Id) REFERENCES fighters (id),
-      FOREIGN KEY (fighter2Id) REFERENCES fighters (id)
-    )`);
-  });
-}
+// Initialize Supabase service
+const supabaseService = new SupabaseService();
 
 // Middleware
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ["http://localhost:3000", "http://localhost:8080", "capacitor://localhost", "ionic://localhost"],
-  credentials: true
-}));
-app.use(express.json());
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Routes
-app.get('/api/events', (req, res) => {
-  const currentDate = new Date().toISOString();
-  db.all('SELECT * FROM events WHERE date > ? ORDER BY date ASC', [currentDate], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
+// Serve the main HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Test route to see all events
-app.get('/api/events/all', (req, res) => {
-  db.all('SELECT * FROM events ORDER BY date ASC', (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
-});
-
-app.post('/api/events', (req, res) => {
-  const { name, date, location, venue, mainEvent } = req.body;
-  
-  db.run(
-    'INSERT INTO events (name, date, location, venue, mainEvent) VALUES (?, ?, ?, ?, ?)',
-    [name, date, location, venue, mainEvent],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({ id: this.lastID, name, date, location, venue, mainEvent });
-    }
-  );
-});
-
-app.put('/api/events/:id', (req, res) => {
-  const { name, date, location, venue, mainEvent, status } = req.body;
-  
-  db.run(
-    'UPDATE events SET name = ?, date = ?, location = ?, venue = ?, mainEvent = ?, status = ? WHERE id = ?',
-    [name, date, location, venue, mainEvent, status, req.params.id],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({ success: true });
-    }
-  );
-});
-
-app.delete('/api/events/:id', (req, res) => {
-  db.run('DELETE FROM events WHERE id = ?', [req.params.id], function(err) {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({ success: true });
-  });
-});
-
-// Fighters
-app.get('/api/fighters', (req, res) => {
-  db.all('SELECT * FROM fighters ORDER BY name', (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
-});
-
-app.get('/api/fighters/weight-class/:weightClass', (req, res) => {
-  const weightClass = req.params.weightClass;
-  
-  db.all('SELECT * FROM fighters WHERE weightClass = ? ORDER BY ranking ASC, name ASC', [weightClass], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
-});
-
-app.get('/api/fighters/ranked', (req, res) => {
-  db.all('SELECT * FROM fighters WHERE ranking IS NOT NULL ORDER BY weightClass ASC, ranking ASC', (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
-});
-
-app.get('/api/fighters/:id', (req, res) => {
-  db.get('SELECT * FROM fighters WHERE id = ?', [req.params.id], (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    if (!row) {
-      res.status(404).json({ error: 'Fighter not found' });
-      return;
-    }
-    res.json(row);
-  });
-});
-
-app.post('/api/fighters', (req, res) => {
-  const { name, nickname, record, weightClass, ranking } = req.body;
-  
-  db.run(
-    'INSERT INTO fighters (name, nickname, record, weightClass, ranking) VALUES (?, ?, ?, ?, ?)',
-    [name, nickname, record, weightClass, ranking],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({ id: this.lastID, name, nickname, record, weightClass, ranking });
-    }
-  );
-});
-
-app.post('/api/fighters/bulk', (req, res) => {
-  const { fighters } = req.body;
-  
-  if (!fighters || !Array.isArray(fighters)) {
-    res.status(400).json({ error: 'Fighters array is required' });
-    return;
+// API Routes for Events
+app.get('/api/events', async (req, res) => {
+  try {
+    const events = await supabaseService.getAllEvents();
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Failed to fetch events' });
   }
-  
-  db.run('DELETE FROM fighters', (err) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    
-    const stmt = db.prepare(`
-      INSERT INTO fighters (name, nickname, record, weightClass, wins, losses, draws, ranking, ufcStatsUrl)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    
-    let inserted = 0;
-    let errors = 0;
-    
-    fighters.forEach((fighter, index) => {
-      stmt.run([
-        fighter.name,
-        fighter.nickname || null,
-        fighter.record || null,
-        fighter.weightClass || null,
-        fighter.wins || 0,
-        fighter.losses || 0,
-        fighter.draws || 0,
-        fighter.ranking || null,
-        fighter.ufcStatsUrl || null
-      ], function(err) {
-        if (err) {
-          console.error(`Error inserting ${fighter.name}:`, err.message);
-          errors++;
-        } else {
-          inserted++;
-        }
-        
-        if (index === fighters.length - 1) {
-          stmt.finalize((err) => {
-            if (err) {
-              res.status(500).json({ error: err.message });
-            } else {
-              res.json({ 
-                success: true, 
-                inserted, 
-                errors,
-                total: fighters.length 
-              });
-            }
-          });
-        }
-      });
-    });
-  });
 });
 
-app.put('/api/fighters/:id', (req, res) => {
-  const { name, nickname, record, weightClass, ranking } = req.body;
-  
-  db.run(
-    'UPDATE fighters SET name = ?, nickname = ?, record = ?, weightClass = ?, ranking = ? WHERE id = ?',
-    [name, nickname, record, weightClass, ranking, req.params.id],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({ success: true });
-    }
-  );
+app.post('/api/events', async (req, res) => {
+  try {
+    const eventData = req.body;
+    const newEvent = await supabaseService.createEvent(eventData);
+    res.status(201).json(newEvent);
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
 });
 
-app.delete('/api/fighters/:id', (req, res) => {
-  db.run('DELETE FROM fighters WHERE id = ?', [req.params.id], function(err) {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
+app.put('/api/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const eventData = req.body;
+    
+    console.log(`🔄 Updating event ${id} with data:`, eventData);
+    
+    const updatedEvent = await supabaseService.updateEvent(parseInt(id), eventData);
+    
+    if (!updatedEvent) {
+      console.error('❌ Update returned null/undefined');
+      return res.status(404).json({ error: 'Event not found or update failed' });
     }
-    res.json({ success: true });
-  });
-});
-
-// Fights
-app.get('/api/fights', (req, res) => {
-  const eventId = req.query.eventId;
-  let query = `
-    SELECT f.*, 
-           f1.name as fighter1Name, f1.nickname as fighter1Nickname,
-           f2.name as fighter2Name, f2.nickname as fighter2Nickname
-    FROM fights f
-    LEFT JOIN fighters f1 ON f.fighter1Id = f1.id
-    LEFT JOIN fighters f2 ON f.fighter2Id = f2.id
-  `;
-  
-  if (eventId) {
-    query += ' WHERE f.eventId = ? ORDER BY f.fightOrder ASC, f.created_at ASC';
-    db.all(query, [eventId], (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json(rows);
-    });
-  } else {
-    query += ' ORDER BY f.eventId ASC, f.fightOrder ASC, f.created_at ASC';
-    db.all(query, (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json(rows);
+    
+    console.log('✅ Event updated successfully:', updatedEvent);
+    res.json(updatedEvent);
+  } catch (error) {
+    console.error('❌ Error updating event:', error);
+    res.status(500).json({ 
+      error: 'Failed to update event',
+      details: error.message 
     });
   }
 });
 
-app.get('/api/fights/:id', (req, res) => {
-  const query = `
-    SELECT f.*, 
-           f1.name as fighter1Name, f1.nickname as fighter1Nickname,
-           f2.name as fighter2Name, f2.nickname as fighter2Nickname
-    FROM fights f
-    LEFT JOIN fighters f1 ON f.fighter1Id = f1.id
-    LEFT JOIN fighters f2 ON f.fighter2Id = f2.id
-    WHERE f.id = ?
-  `;
-  
-  db.get(query, [req.params.id], (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    if (!row) {
-      res.status(404).json({ error: 'Fight not found' });
-      return;
-    }
-    res.json(row);
-  });
+app.delete('/api/events/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await supabaseService.deleteEvent(parseInt(id));
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: 'Failed to delete event' });
+  }
 });
 
-app.post('/api/fights', (req, res) => {
-  const { eventId, fighter1Id, fighter2Id, weightClass, fightType, rounds } = req.body;
-  
-  // First, get the next order number for this event
-  db.get('SELECT MAX(fightOrder) as maxOrder FROM fights WHERE eventId = ?', [eventId], (err, row) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
+// API Routes for Fighters
+app.get('/api/fighters', async (req, res) => {
+  try {
+    const fighters = await supabaseService.getAllFighters();
+    res.json(fighters);
+  } catch (error) {
+    console.error('Error fetching fighters:', error);
+    res.status(500).json({ error: 'Failed to fetch fighters' });
+  }
+});
+
+// Get fights for a specific fighter (MUST come before /api/fighters/:id)
+app.get('/api/fighters/:id/fights', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fighterId = parseInt(id);
     
-    const nextOrder = (row.maxOrder || 0) + 1;
-    
-    // Insert the fight with the order
-    db.run(
-      'INSERT INTO fights (eventId, fighter1Id, fighter2Id, weightClass, fightType, rounds, fightOrder) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [eventId, fighter1Id, fighter2Id, weightClass, fightType || 'main', rounds || 3, nextOrder],
-      function(err) {
-        if (err) {
-          res.status(500).json({ error: err.message });
-          return;
-        }
-        res.json({ id: this.lastID, eventId, fighter1Id, fighter2Id, weightClass, fightType: fightType || 'main', rounds: rounds || 3, fightOrder: nextOrder });
-      }
+    // Get all fights and filter by fighter
+    const fights = await supabaseService.getAllFights();
+    const fighterFights = fights.filter(fight => 
+      fight.fighter1id === fighterId || fight.fighter2id === fighterId
     );
-  });
+    
+    // Sort by event date (most recent first)
+    fighterFights.sort((a, b) => {
+      const dateA = new Date(a.event?.date || 0);
+      const dateB = new Date(b.event?.date || 0);
+      return dateB - dateA;
+    });
+    
+    res.json(fighterFights);
+  } catch (error) {
+    console.error('Error fetching fighter fights:', error);
+    res.status(500).json({ error: 'Failed to fetch fighter fights' });
+  }
 });
 
-app.put('/api/fights/:id', (req, res) => {
-  const { eventId, fighter1Id, fighter2Id, weightClass, fightType, rounds, status, fightOrder } = req.body;
-  
-  db.run(
-    'UPDATE fights SET eventId = ?, fighter1Id = ?, fighter2Id = ?, weightClass = ?, fightType = ?, rounds = ?, status = ?, fightOrder = ? WHERE id = ?',
-    [eventId, fighter1Id, fighter2Id, weightClass, fightType || 'main', rounds || 3, status || 'scheduled', fightOrder || 0, req.params.id],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      res.json({ success: true });
+app.get('/api/fighters/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fighters = await supabaseService.getAllFighters();
+    const fighter = fighters.find(f => f.id === parseInt(id));
+    if (fighter) {
+      res.json(fighter);
+    } else {
+      res.status(404).json({ error: 'Fighter not found' });
     }
-  );
+  } catch (error) {
+    console.error('Error fetching fighter:', error);
+    res.status(500).json({ error: 'Failed to fetch fighter' });
+  }
 });
 
-app.put('/api/fights/:id/status', (req, res) => {
-  const { status, rounds, timeRemaining, winnerId } = req.body;
-  
-  db.run(
-    'UPDATE fights SET status = ?, rounds = ?, timeRemaining = ?, winnerId = ? WHERE id = ?',
-    [status, rounds, timeRemaining, winnerId, req.params.id],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      
-      // Emit socket event for real-time updates
-      io.emit('fightUpdate', {
-        fightId: req.params.id,
-        status,
-        rounds,
-        timeRemaining,
-        winnerId
-      });
-      
-      res.json({ success: true });
+app.post('/api/fighters', async (req, res) => {
+  try {
+    const fighterData = req.body;
+    const newFighter = await supabaseService.createFighter(fighterData);
+    res.status(201).json(newFighter);
+  } catch (error) {
+    console.error('Error creating fighter:', error);
+    res.status(500).json({ error: 'Failed to create fighter' });
+  }
+});
+
+app.put('/api/fighters/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fighterData = req.body;
+    const updatedFighter = await supabaseService.updateFighter(parseInt(id), fighterData);
+    res.json(updatedFighter);
+  } catch (error) {
+    console.error('Error updating fighter:', error);
+    res.status(500).json({ error: 'Failed to update fighter' });
+  }
+});
+
+app.delete('/api/fighters/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await supabaseService.deleteFighter(parseInt(id));
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting fighter:', error);
+    res.status(500).json({ error: 'Failed to delete fighter' });
+  }
+});
+
+// API Routes for Fights
+app.get('/api/fights', async (req, res) => {
+  try {
+    const fights = await supabaseService.getAllFights();
+    res.json(fights);
+  } catch (error) {
+    console.error('Error fetching fights:', error);
+    res.status(500).json({ error: 'Failed to fetch fights' });
+  }
+});
+
+app.get('/api/fights/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fights = await supabaseService.getAllFights();
+    const fight = fights.find(f => f.id === parseInt(id));
+    if (fight) {
+      res.json(fight);
+    } else {
+      res.status(404).json({ error: 'Fight not found' });
     }
-  );
+  } catch (error) {
+    console.error('Error fetching fight:', error);
+    res.status(500).json({ error: 'Failed to fetch fight' });
+  }
 });
 
-app.delete('/api/fights/:id', (req, res) => {
-  db.run('DELETE FROM fights WHERE id = ?', [req.params.id], function(err) {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({ success: true });
-  });
+app.post('/api/fights', async (req, res) => {
+  try {
+    const fightData = req.body;
+    const newFight = await supabaseService.createFight(fightData);
+    res.status(201).json(newFight);
+  } catch (error) {
+    console.error('Error creating fight:', error);
+    res.status(500).json({ error: 'Failed to create fight' });
+  }
 });
 
-// Update fight order for an event
-app.put('/api/events/:id/fight-order', (req, res) => {
+app.put('/api/fights/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fightData = req.body;
+    const updatedFight = await supabaseService.updateFight(parseInt(id), fightData);
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error updating fight:', error);
+    res.status(500).json({ error: 'Failed to update fight' });
+  }
+});
+
+app.delete('/api/fights/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await supabaseService.deleteFight(parseInt(id));
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting fight:', error);
+    res.status(500).json({ error: 'Failed to delete fight' });
+  }
+});
+
+// API Route for updating fight status
+app.put('/api/fights/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const updatedFight = await supabaseService.updateFightStatus(parseInt(id), status);
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error updating fight status:', error);
+    res.status(500).json({ error: 'Failed to update fight status' });
+  }
+});
+
+// API Route for updating fight order
+app.put('/api/fights/:id/order', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { order } = req.body;
+    const updatedFight = await supabaseService.updateFightOrder(parseInt(id), order);
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error updating fight order:', error);
+    res.status(500).json({ error: 'Failed to update fight order' });
+  }
+});
+
+// API Route for updating multiple fight orders (drag and drop)
+app.put('/api/events/:id/fight-order', async (req, res) => {
+  try {
+    const { id } = req.params;
   const { fightOrder } = req.body;
-  const eventId = req.params.id;
   
   if (!fightOrder || !Array.isArray(fightOrder)) {
     res.status(400).json({ error: 'fightOrder must be an array' });
@@ -496,179 +274,233 @@ app.put('/api/events/:id/fight-order', (req, res) => {
   }
   
   // Update the order for each fight
-  const updatePromises = fightOrder.map((fightId, index) => {
-    return new Promise((resolve, reject) => {
-      db.run(
-        'UPDATE fights SET fightOrder = ? WHERE id = ? AND eventId = ?',
-        [index + 1, fightId, eventId],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        }
-      );
+    const updatePromises = fightOrder.map(async (fightData) => {
+      const { id: fightId, order } = fightData;
+      return await supabaseService.updateFightOrder(parseInt(fightId), order);
     });
-  });
-  
-  Promise.all(updatePromises)
-    .then(() => {
-      res.json({ success: true });
-    })
-    .catch(err => {
-      res.status(500).json({ error: err.message });
-    });
+    
+    await Promise.all(updatePromises);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating fight order:', error);
+    res.status(500).json({ error: 'Failed to update fight order' });
+  }
 });
 
-// Test route for iOS app
-app.get('/api/test', (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'API is working',
-    timestamp: new Date().toISOString(),
-    events: 4,
-    fighters: 8,
-    fights: 5
-  });
+// ===== ROTAS PARA CONTROLE DE LIVE ACTIVITIES =====
+
+// Iniciar controle ao vivo de uma luta
+app.post('/api/fights/:id/start-live', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedFight = await supabaseService.startFightLive(parseInt(id));
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error starting fight live:', error);
+    res.status(500).json({ error: 'Failed to start fight live' });
+  }
 });
 
-// iOS-friendly export with simplified dates
-app.get('/api/export-ios', (req, res) => {
-  const currentDate = new Date().toISOString();
-  db.all(`
-    SELECT 
-      e.id,
-      e.name,
-      e.date,
-      e.location,
-      e.venue,
-      e.mainEvent,
-      e.status,
-      e.created_at
-    FROM events e
-    WHERE e.date > ?
-    ORDER BY e.date ASC
-  `, [currentDate], (err, events) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    
-    // Format dates for iOS
-    const formattedEvents = events.map(event => ({
-      ...event,
-      date: event.date ? new Date(event.date).toISOString() : null,
-      created_at: event.created_at ? new Date(event.created_at).toISOString() : null
-    }));
-    
-    res.json({
-      status: 'success',
-      count: formattedEvents.length,
-      events: formattedEvents
-    });
-  });
+// Parar controle ao vivo de uma luta
+app.post('/api/fights/:id/stop-live', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedFight = await supabaseService.stopFightLive(parseInt(id));
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error stopping fight live:', error);
+    res.status(500).json({ error: 'Failed to stop fight live' });
+  }
 });
 
-// Simple export for iOS app testing
-app.get('/api/export-simple', (req, res) => {
-  const currentDate = new Date().toISOString();
-  db.all(`
-    SELECT 
-      e.id,
-      e.name,
-      e.date,
-      e.location,
-      e.venue,
-      e.mainEvent,
-      e.status
-    FROM events e
-    WHERE e.date > ?
-    ORDER BY e.date ASC
-  `, [currentDate], (err, events) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    
-    res.json({
-      status: 'success',
-      count: events.length,
-      events: events
-    });
-  });
+// Controlar round (play/pause/next)
+app.post('/api/fights/:id/control-round', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, roundNumber } = req.body;
+    const updatedFight = await supabaseService.controlRound(parseInt(id), action, roundNumber);
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error controlling round:', error);
+    res.status(500).json({ error: 'Failed to control round' });
+  }
 });
 
-// Export data for iOS app
-app.get('/api/export', (req, res) => {
-  const currentDate = new Date().toISOString();
-  db.all(`
-    SELECT 
-      e.*,
-      json_group_array(
-        json_object(
-          'id', f.id,
-          'fighter1', json_object(
-            'id', f1.id,
-            'name', f1.name,
-            'nickname', f1.nickname,
-            'record', f1.record,
-            'ranking', f1.ranking
-          ),
-          'fighter2', json_object(
-            'id', f2.id,
-            'name', f2.name,
-            'nickname', f2.nickname,
-            'record', f2.record,
-            'ranking', f2.ranking
-          ),
-          'weightClass', f.weightClass,
-          'rounds', f.rounds,
-          'timeRemaining', f.timeRemaining,
-          'status', f.status,
-          'winnerId', f.winnerId
-        )
-      ) as fights
-    FROM events e
-    LEFT JOIN fights f ON e.id = f.eventId
-    LEFT JOIN fighters f1 ON f.fighter1Id = f1.id
-    LEFT JOIN fighters f2 ON f.fighter2Id = f2.id
-    WHERE e.date > ?
-    GROUP BY e.id
-    ORDER BY e.date ASC
-  `, [currentDate], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    
-    // Parse the JSON fights array for each event
-    const events = rows.map(row => ({
-      ...row,
-      fights: JSON.parse(row.fights).filter(fight => fight.id !== null)
-    }));
-    
-    res.json(events);
-  });
+// Salvar resultado da luta
+app.post('/api/fights/:id/save-result', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resultData = req.body;
+    const updatedFight = await supabaseService.saveFightResult(parseInt(id), resultData);
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error saving fight result:', error);
+    res.status(500).json({ error: 'Failed to save fight result' });
+  }
 });
 
-// Socket.io for real-time updates
+// Limpar resultado da luta
+app.post('/api/fights/:id/clear-result', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedFight = await supabaseService.clearFightResult(parseInt(id));
+    res.json(updatedFight);
+  } catch (error) {
+    console.error('Error clearing fight result:', error);
+    res.status(500).json({ error: 'Failed to clear fight result' });
+  }
+});
+
+// Obter lutas ao vivo
+app.get('/api/fights/live', async (req, res) => {
+  try {
+    const liveFights = await supabaseService.getLiveFights();
+    res.json(liveFights);
+  } catch (error) {
+    console.error('Error fetching live fights:', error);
+    res.status(500).json({ error: 'Failed to fetch live fights' });
+  }
+});
+
+// Obter lutas finalizadas
+app.get('/api/fights/finished', async (req, res) => {
+  try {
+    const finishedFights = await supabaseService.getFinishedFights();
+    res.json(finishedFights);
+  } catch (error) {
+    console.error('Error fetching finished fights:', error);
+    res.status(500).json({ error: 'Failed to fetch finished fights' });
+  }
+});
+
+// Obter tempo restante do round
+app.get('/api/fights/:id/round-time', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const remainingTime = await supabaseService.getRoundTimeRemaining(parseInt(id));
+    res.json({ remainingTime });
+  } catch (error) {
+    console.error('Error getting round time:', error);
+    res.status(500).json({ error: 'Failed to get round time' });
+  }
+});
+
+// Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
+
+  // Handle fight status updates
+  socket.on('fightStatusUpdate', async (data) => {
+    try {
+      const { fightId, status } = data;
+      await supabaseService.updateFightStatus(fightId, status);
+      io.emit('fightStatusChanged', { fightId, status });
+    } catch (error) {
+      console.error('Error updating fight status via socket:', error);
+    }
+  });
+
+  // Handle fight order updates
+  socket.on('fightOrderUpdate', async (data) => {
+    try {
+      const { fightId, order } = data;
+      await supabaseService.updateFightOrder(fightId, order);
+      io.emit('fightOrderChanged', { fightId, order });
+    } catch (error) {
+      console.error('Error updating fight order via socket:', error);
+    }
+  });
+
+  // Handle live fight control
+  socket.on('startFightLive', async (data) => {
+    try {
+      const { fightId } = data;
+      const updatedFight = await supabaseService.startFightLive(fightId);
+      io.emit('fightLiveStarted', { fightId, fight: updatedFight });
+    } catch (error) {
+      console.error('Error starting fight live:', error);
+    }
+  });
+
+  socket.on('stopFightLive', async (data) => {
+    try {
+      const { fightId } = data;
+      const updatedFight = await supabaseService.stopFightLive(fightId);
+      io.emit('fightLiveStopped', { fightId, fight: updatedFight });
+    } catch (error) {
+      console.error('Error stopping fight live:', error);
+    }
+  });
+
+  socket.on('controlRound', async (data) => {
+    try {
+      const { fightId, action, roundNumber } = data;
+      const updatedFight = await supabaseService.controlRound(fightId, action, roundNumber);
+      io.emit('roundControlled', { fightId, action, roundNumber, fight: updatedFight });
+    } catch (error) {
+      console.error('Error controlling round:', error);
+    }
+  });
+
+  socket.on('saveFightResult', async (data) => {
+    try {
+      const { fightId, resultData } = data;
+      const updatedFight = await supabaseService.saveFightResult(fightId, resultData);
+      io.emit('fightResultSaved', { fightId, fight: updatedFight });
+    } catch (error) {
+      console.error('Error saving fight result:', error);
+    }
+  });
 });
 
-// Serve admin interface
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    const connectionTest = await supabaseService.testConnection();
+    res.json({
+      status: 'ok',
+      database: connectionTest.success ? 'connected' : 'disconnected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Export data endpoint
+app.get('/api/export', async (req, res) => {
+  try {
+    const events = await supabaseService.getAllEvents();
+    const fighters = await supabaseService.getAllFighters();
+    const fights = await supabaseService.getAllFights();
+    
+    res.json({
+      events,
+      fighters,
+      fights,
+      exportedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error exporting data:', error);
+    res.status(500).json({ error: 'Failed to export data' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Database: ${useSQLite ? 'SQLite' : 'PostgreSQL'}`);
-}); 
+  console.log(`🚀 UFC Admin Server running on port ${PORT}`);
+  console.log(`📊 Database: Supabase`);
+  console.log(`🌐 Access: http://localhost:${PORT}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+});
+
+module.exports = { app, server, io }; 

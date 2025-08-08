@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.ufcapp.widget</string>
+		<string>group.com.granemanndigital.dev</string>
 	</array>
 </dict>
 </plist>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Limpar Cache do Admin</h1>
+        <p>Se você não está vendo os campos de upload de imagem, pode ser um problema de cache.</p>
+        
+        <h3>Passos para resolver:</h3>
+        <ol style="text-align: left;">
+            <li>Clique no botão "Limpar Cache e Recarregar" abaixo</li>
+            <li>Ou use Ctrl+F5 (Windows) / Cmd+Shift+R (Mac)</li>
+            <li>Ou abra o DevTools (F12) e clique com botão direito no botão de reload</li>
+        </ol>
+        
+        <div style="margin: 30px 0;">
+            <a href="http://localhost:3000" class="btn" onclick="clearCache()">Limpar Cache e Recarregar</a>
+        </div>
+        
+        <p><strong>Verifique se os campos aparecem:</strong></p>
+        <ul style="text-align: left;">
+            <li>Campo "Imagem do Evento" (upload de arquivo)</li>
+            <li>Campo "Ou URL da Imagem" (URL)</li>
+            <li>Preview da imagem</li>
+        </ul>
+    </div>
+
+    <script>
+        function clearCache() {
+            // Limpar cache do navegador
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Forçar reload sem cache
+            setTimeout(() => {
+                window.location.href = 'http://localhost:3000';
+            }, 1000);
+        }
+        
+        // Auto-redirect após 5 segundos
+        setTimeout(() => {
+            window.location.href = 'http://localhost:3000';
+        }, 5000);
+    </script>
+</body>
+</html> 

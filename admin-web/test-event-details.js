@@ -1,89 +1,52 @@
-const { SupabaseService } = require('./supabase-config');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 async function testEventDetails() {
-    console.log('📋 Testando detalhes de eventos...\n');
-    const supabaseService = new SupabaseService();
-    
     try {
-        // Buscar eventos existentes
-        console.log('1️⃣ Buscando eventos...');
-        const allEvents = await supabaseService.getAllEvents();
-        console.log(`✅ ${allEvents.length} eventos encontrados`);
+        console.log('🔍 Verificando detalhes do evento...');
         
-        if (allEvents.length === 0) {
-            console.log('❌ Nenhum evento encontrado');
-            return;
-        }
+        // Buscar eventos
+        const eventsResponse = await fetch('http://localhost:3000/api/events');
+        const events = await eventsResponse.json();
         
-        const event = allEvents[0];
-        console.log('Evento para testar:', {
-            id: event.id,
-            name: event.name,
-            date: event.date,
-            mainevent: event.mainevent
-        });
-        
-        // Simular conversão de data (como o frontend faz)
-        console.log('\n2️⃣ Simulando conversão de data...');
-        let dateValue = event.date;
-        if (dateValue) {
-            const date = new Date(dateValue);
-            if (!isNaN(date.getTime())) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                dateValue = `${year}-${month}-${day}T${hours}:${minutes}`;
-                console.log('✅ Data convertida para datetime-local:', dateValue);
+        if (events.length > 0) {
+            const event = events[0];
+            console.log('📋 Evento encontrado:');
+            console.log('  ID:', event.id);
+            console.log('  Nome:', event.name);
+            console.log('  Data:', event.date);
+            console.log('  Localização:', event.location);
+            console.log('  Main Event:', event.mainevent);
+            console.log('  Todos os campos:', Object.keys(event));
+            
+            // Verificar se o ID é realmente um número
+            console.log('\n🔢 Verificando ID:', typeof event.id, event.id);
+            
+            // Tentar uma atualização mais simples
+            console.log('\n🔧 Tentando atualização simples...');
+            const updateData = {
+                name: event.name + ' [TESTE]'
+            };
+            
+            console.log('📤 Dados sendo enviados:', updateData);
+            
+            const updateResponse = await fetch(`http://localhost:3000/api/events/${event.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            
+            console.log('📝 Status:', updateResponse.status);
+            
+            if (updateResponse.ok) {
+                const result = await updateResponse.json();
+                console.log('✅ Sucesso:', result);
             } else {
-                dateValue = event.date.replace(' ', 'T');
-                console.log('✅ Data usando fallback:', dateValue);
+                const error = await updateResponse.text();
+                console.log('❌ Erro:', error);
             }
         }
-        
-        // Simular dados do formulário
-        console.log('\n3️⃣ Simulando dados do formulário...');
-        const formData = {
-            name: event.name,
-            date: dateValue,
-            location: event.location || '',
-            venue: event.venue || '',
-            mainEvent: event.mainevent || ''
-        };
-        
-        console.log('Dados do formulário:', formData);
-        
-        // Testar atualização
-        console.log('\n4️⃣ Testando atualização...');
-        const updatedEvent = await supabaseService.updateEvent(event.id, formData);
-        console.log('✅ Evento atualizado:', {
-            id: updatedEvent.id,
-            name: updatedEvent.name,
-            date: updatedEvent.date,
-            mainevent: updatedEvent.mainevent
-        });
-        
-        // Reverter alterações
-        console.log('\n5️⃣ Revertendo alterações...');
-        const revertedEvent = await supabaseService.updateEvent(event.id, {
-            name: event.name,
-            date: event.date,
-            location: event.location,
-            venue: event.venue,
-            mainEvent: event.mainevent
-        });
-        console.log('✅ Evento revertido:', {
-            id: revertedEvent.id,
-            name: revertedEvent.name,
-            date: revertedEvent.date,
-            mainevent: revertedEvent.mainevent
-        });
-        
-        console.log('\n🎉 Teste de detalhes de eventos concluído com sucesso!');
-        
     } catch (error) {
-        console.error('❌ Erro durante o teste:', error);
+        console.error('💥 Erro:', error.message);
     }
 }
 

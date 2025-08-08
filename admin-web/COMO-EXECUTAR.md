@@ -1,106 +1,108 @@
-# 🚀 Como Executar o Admin UFC
+# 🚀 Como Executar o UFC Admin Web
 
-## ✅ **Status: FUNCIONANDO**
+## 📋 Pré-requisitos
 
-O admin está configurado e funcionando! Só precisa executar corretamente.
+- **Node.js** versão 18.0.0 ou superior
+- **npm** (vem com o Node.js)
 
-## 📋 **Passos para Executar:**
+## 🔧 Configuração Inicial
 
-### **1. Abrir Terminal**
+### 1. Navegar para a pasta correta
 ```bash
-# Navegar para a pasta do projeto
-cd "/Users/rafael.granemann/Documents/xcode/its-time/It's time/admin-web"
+cd "It's time/admin-web"
 ```
 
-### **2. Verificar se está no diretório correto**
+### 2. Verificar se está no diretório correto
 ```bash
 pwd
 # Deve mostrar: /Users/rafael.granemann/Documents/xcode/its-time/It's time/admin-web
-```
-
-### **3. Verificar se os arquivos existem**
-```bash
-ls -la server-supabase.js
-ls -la supabase-config.js
-```
-
-### **4. Executar o servidor**
-```bash
-node server-supabase.js
-```
-
-### **5. Acessar no navegador**
-Abrir: **http://localhost:3000**
-
-## 🔧 **Se Der Erro:**
-
-### **Erro: "Cannot find module"**
-```bash
-# Verificar se está no diretório correto
-pwd
 ls -la
-
-# Se não estiver, navegar corretamente:
-cd "/Users/rafael.granemann/Documents/xcode/its-time/It's time/admin-web"
+# Deve mostrar: server.js, package.json, etc.
 ```
 
-### **Erro: "Port already in use"**
-```bash
-# Parar processos na porta 3000
-lsof -ti:3000 | xargs kill -9
-
-# Ou usar outra porta
-PORT=3001 node server-supabase.js
-```
-
-### **Erro de dependências**
+### 3. Instalar dependências
 ```bash
 npm install
 ```
 
-## 🎯 **Testes Rápidos:**
-
-### **Testar conexão com Supabase:**
+### 4. Configurar variáveis de ambiente
 ```bash
-node test-supabase-connection.js
+cp env.example .env
 ```
 
-### **Testar criação de lutadores:**
+## 🚀 Executar o Servidor
+
+### Opção 1: Modo de Desenvolvimento (com auto-reload)
 ```bash
-node test-fighter-creation.js
+npm run dev
 ```
 
-### **Testar API:**
+### Opção 2: Modo de Produção
 ```bash
-# Health check
-curl http://localhost:3000/api/health
-
-# Listar lutadores
-curl http://localhost:3000/api/fighters
+npm start
 ```
 
-## 📱 **Interface Web:**
+### Opção 3: Executar diretamente
+```bash
+node server.js
+```
 
-Quando o servidor estiver rodando, acesse:
-- **http://localhost:3000** - Interface principal
-- **http://localhost:3000/api/health** - Status da API
+## 🌐 Acessar a Aplicação
 
-## 🎉 **Funcionalidades Disponíveis:**
+Após executar o servidor, acesse:
 
-✅ **Eventos** - Criar, editar, excluir eventos UFC  
-✅ **Lutadores** - Cadastrar lutadores com categoria  
-✅ **Lutas** - Organizar lutas por evento  
-✅ **Controle ao Vivo** - Timer e status das lutas  
+- **Interface Web**: http://localhost:3000
+- **Health Check**: http://localhost:3000/api/health
 
-## 🔍 **Sobre a Categoria:**
+## 🔍 Troubleshooting
 
-A categoria (weightclass) está funcionando perfeitamente:
-- ✅ Backend: Salvando corretamente no Supabase
-- ✅ API: Endpoints funcionando
-- ✅ Testes: Passando todos os testes
+### Erro: "Cannot find module"
+- Verificar se está no diretório correto: `admin-web/`
+- Verificar se o arquivo `server.js` existe: `ls -la server.js`
 
-**O problema pode estar na interface web. Verifique se está usando o campo correto.**
+### Erro: "Port 3000 already in use"
+```bash
+# Encontrar processo usando a porta 3000
+lsof -ti:3000
 
-## 🚀 **PRONTO PARA USO!**
+# Matar o processo
+kill -9 <PID>
+```
 
-Execute os passos acima e o admin estará funcionando! 
+### Erro: "Module not found"
+```bash
+# Reinstalar dependências
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 📝 Logs do Servidor
+
+O servidor mostra logs em tempo real:
+- Conexões de clientes
+- Operações de banco de dados
+- Erros e avisos
+
+## 🛑 Parar o Servidor
+
+Pressione `Ctrl + C` no terminal onde o servidor está rodando.
+
+## 🔄 Reiniciar o Servidor
+
+Após parar, execute novamente:
+```bash
+npm start
+```
+
+## 📱 Desenvolvimento
+
+Para desenvolvimento com auto-reload:
+```bash
+npm run dev
+```
+
+Isso usa o `nodemon` para reiniciar automaticamente quando há mudanças nos arquivos.
+
+---
+
+**🎯 Status Atual**: ✅ Servidor funcionando em http://localhost:3000 

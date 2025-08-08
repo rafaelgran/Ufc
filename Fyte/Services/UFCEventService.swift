@@ -67,6 +67,21 @@ class UFCEventService: ObservableObject {
                 if let activeEvent = events.first(where: { $0.id == activeEventId }) {
                     print("🔍 Debug: Found active event: \(activeEvent.name)")
                     print("🔍 Debug: Updating Live Activity for active event: \(activeEvent.name)")
+                    
+                    // Verificar se há mudanças antes de atualizar
+                    let currentState = currentActivity.content.state
+                    let hasLiveFights = activeEvent.fights?.contains { $0.status == "live" } ?? false
+                    let currentHasLiveFights = !currentState.liveFightFighter1LastName.isEmpty
+                    
+                    print("🔍 Debug: Current state has live fights: \(currentHasLiveFights)")
+                    print("🔍 Debug: New data has live fights: \(hasLiveFights)")
+                    
+                    if hasLiveFights != currentHasLiveFights {
+                        print("🚨 Live fight status changed! Updating Live Activity...")
+                    } else {
+                        print("ℹ️ No live fight status change detected")
+                    }
+                    
                     await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
                 } else {
                     print("🔍 Debug: Active event not found in fetched events")
@@ -112,6 +127,26 @@ class UFCEventService: ObservableObject {
     func refreshDataAndUpdateLiveActivity() async {
         print("🔄 Forcing data refresh and Live Activity update...")
         await fetchEvents()
+    }
+    
+    // Forçar atualização imediata da Live Activity (para uso quando luta vai ao vivo)
+    func forceLiveActivityUpdate() async {
+        print("🚨 Force Live Activity update triggered")
+        
+        // Buscar dados mais recentes
+        do {
+            let fetchedEvents = try await fetchEventsFromSupabase()
+            await MainActor.run {
+                self.events = fetchedEvents
+            }
+            
+            // Atualizar Live Activity imediatamente
+            await updateLiveActivityIfNeeded(with: fetchedEvents)
+            
+            print("✅ Live Activity force update completed")
+        } catch {
+            print("❌ Error in force Live Activity update: \(error)")
+        }
     }
     
     private func fetchCountriesFromSupabase() async throws -> [SupabaseCountry] {

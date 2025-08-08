@@ -7,6 +7,11 @@ let isPaused = false;
 let currentEventFilter = 'upcoming';
 let selectedEvent = null;
 
+let currentControlFight = null;
+let fightTimerInterval = null;
+let fightStartTime = null;
+let totalFightTime = 0; // Tempo total da luta em segundos
+
 // Tab management
 const TAB_ANCHORS = {
     'events': '#events',
@@ -85,6 +90,80 @@ document.addEventListener('DOMContentLoaded', function() {
     if (endFightBtn) {
         endFightBtn.addEventListener('click', endFight);
     }
+    
+    // Event listener para preview de imagem do evento (arquivo)
+    const eventImageFile = document.getElementById('eventImageFile');
+    if (eventImageFile) {
+        eventImageFile.addEventListener('change', function() {
+            const file = this.files[0];
+            const previewDiv = document.getElementById('eventImagePreview');
+            const previewImg = document.getElementById('eventImagePreviewImg');
+            
+            if (file) {
+                // Validar tipo de arquivo
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor, selecione apenas arquivos de imagem.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validar tamanho (máximo 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('A imagem deve ter no máximo 2MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        });
+    }
+    
+
+    
+    // Event listeners para campos de imagem na página de detalhes
+    const eventDetailsImageFile = document.getElementById('eventDetailsImageFile');
+    if (eventDetailsImageFile) {
+        eventDetailsImageFile.addEventListener('change', function() {
+            const file = this.files[0];
+            const previewDiv = document.getElementById('eventDetailsImagePreview');
+            const previewImg = document.getElementById('eventDetailsImagePreviewImg');
+            
+            if (file) {
+                // Validar tipo de arquivo
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor, selecione apenas arquivos de imagem.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validar tamanho (máximo 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('A imagem deve ter no máximo 2MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        });
+    }
+    
+
 });
 
 // Tab management functions
@@ -135,9 +214,8 @@ function initializeTabManagement() {
     Object.keys(TAB_ANCHORS).forEach(tabId => {
         const tabButton = document.getElementById(`${tabId}-tab`);
         if (tabButton) {
-            console.log('Adding click listener to tab:', tabId);
-            tabButton.addEventListener('click', function() {
-                console.log('Tab clicked:', tabId);
+            tabButton.addEventListener('click', function(e) {
+                e.preventDefault();
                 navigateToTab(tabId);
             });
         } else {
@@ -147,8 +225,6 @@ function initializeTabManagement() {
 }
 
 function activateTab(tabId) {
-    console.log('Activating tab:', tabId);
-    
     // Remove active class from all tabs
     Object.keys(TAB_ANCHORS).forEach(id => {
         const tabButton = document.getElementById(`${id}-tab`);
@@ -171,14 +247,12 @@ function activateTab(tabId) {
     if (activeTabButton) {
         activeTabButton.classList.add('active');
         activeTabButton.setAttribute('aria-selected', 'true');
-        console.log('Activated tab button:', tabId);
     } else {
         console.warn('Active tab button not found:', tabId);
     }
     
     if (activeTabPane) {
         activeTabPane.classList.add('show', 'active');
-        console.log('Activated tab pane:', tabId);
     } else {
         console.warn('Active tab pane not found:', tabId);
     }
@@ -190,12 +264,18 @@ function activateTab(tabId) {
 function navigateToTab(tabId) {
     console.log('Navigating to tab:', tabId);
     
-    // Check if it's an event hash
-    if (tabId.startsWith('event-')) {
+    // Check if it's an event hash (for specific event navigation)
+    if (tabId.startsWith('event-') && tabId !== 'event-details') {
         console.log('🔍 Event hash detected in navigateToTab:', tabId);
         // Don't activate tab here, let restoreSelectedEvent handle it
         window.location.hash = tabId;
         return;
+    }
+    
+    // Clear any selected event when navigating to other tabs
+    if (tabId === 'events' || tabId === 'fighters') {
+        selectedEvent = null;
+        localStorage.removeItem('selectedEventId');
     }
     
     // Update URL hash and activate tab directly
@@ -257,23 +337,36 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 // Load all data
 async function loadData() {
     try {
-        await Promise.all([
-            loadEvents(),
-            loadFighters()
+        console.log('=== LOADING ALL DATA ===');
+        
+        // Load all data in parallel
+        const [events, fighters, fights] = await Promise.all([
+            apiCall('events'),
+            apiCall('fighters'),
+            apiCall('fights')
         ]);
         
-        // Load fights separately for internal use in events
-        try {
-            const fights = await apiCall('fights');
-            window.fightsData = fights;
-        } catch (error) {
-            console.error('Failed to load fights:', error);
-        }
+        // Store data globally
+        window.eventsData = events;
+        window.fightersData = fighters;
+        window.fightsData = fights;
         
-        // Check for saved event in localStorage or hash
+        console.log('Data loaded:', {
+            events: events.length,
+            fighters: fighters.length,
+            fights: fights.length
+        });
+        
+        // Display events after all data is loaded
+        displayEvents(events);
+        
+        // Display fighters
+        displayFighters(fighters);
+        
+        // Handle navigation based on current hash
         // Use setTimeout to ensure DOM is ready
         setTimeout(async () => {
-            await restoreSelectedEvent();
+            await handleInitialNavigation();
         }, 100);
     } catch (error) {
         console.error('Failed to load data:', error);
@@ -287,6 +380,54 @@ function updateCurrentTime() {
     const timeElement = document.getElementById('current-time');
     if (timeElement) {
         timeElement.textContent = timeString;
+    }
+}
+
+// Handle initial navigation based on current hash
+async function handleInitialNavigation() {
+    try {
+        const hash = window.location.hash;
+        console.log('🔍 Handling initial navigation for hash:', hash);
+        
+        // Handle event-specific navigation
+        if (hash.startsWith('#event-')) {
+            await restoreSelectedEvent();
+            return;
+        }
+        
+        // Handle tab navigation
+        const tabId = hash.replace('#', '');
+        if (tabId && ['events', 'fighters', 'event-details'].includes(tabId)) {
+            console.log('✅ Activating tab:', tabId);
+            activateTab(tabId);
+            return;
+        }
+        
+        // Handle empty hash or invalid hash
+        if (!hash || hash === '#') {
+            // Check if there's a saved event in localStorage
+            const savedEventId = localStorage.getItem('selectedEventId');
+            if (savedEventId) {
+                console.log('🔍 Found saved event, restoring...');
+                await restoreSelectedEvent();
+            } else {
+                console.log('✅ No saved state, going to events tab');
+                window.location.hash = 'events';
+                activateTab('events');
+            }
+            return;
+        }
+        
+        // Fallback to events tab for unknown hashes
+        console.log('⚠️ Unknown hash, falling back to events tab');
+        window.location.hash = 'events';
+        activateTab('events');
+        
+    } catch (error) {
+        console.error('❌ Error handling initial navigation:', error);
+        // Fallback to events tab
+        window.location.hash = 'events';
+        activateTab('events');
     }
 }
 
@@ -347,9 +488,11 @@ async function loadEvents() {
         // Store events globally for use in other functions
         window.eventsData = events;
         
-        displayEvents(events);
+        // Note: displayEvents is now called by loadData() after all data is loaded
+        return events;
     } catch (error) {
         console.error('Failed to load events:', error);
+        return [];
     }
 }
 
@@ -408,6 +551,32 @@ function filterEventsByType(events, filterType) {
     });
 }
 
+// Função auxiliar para obter o sobrenome de um lutador
+function getFighterLastName(fullName) {
+    if (!fullName) return 'N/A';
+    const nameParts = fullName.trim().split(' ');
+    return nameParts.length > 1 ? nameParts.slice(1).join(' ') : fullName;
+}
+
+// Função auxiliar para obter a luta principal de um evento
+function getMainEventFight(eventId) {
+    if (!window.fightsData) return null;
+    
+    const eventFights = window.fightsData.filter(fight => 
+        fight.eventId == eventId || fight.eventid == eventId
+    );
+    
+    // Buscar lutas do card principal
+    const mainCardFights = eventFights.filter(fight => 
+        fight.fightType === 'main' || fight.fighttype === 'main'
+    );
+    
+    // Ordenar por fightorder e pegar a primeira (luta principal)
+    mainCardFights.sort((a, b) => (a.fightOrder || a.fightorder || 0) - (b.fightOrder || b.fightorder || 0));
+    
+    return mainCardFights.length > 0 ? mainCardFights[0] : null;
+}
+
 function createEventCard(event) {
     const eventDate = new Date(event.date);
     const formattedDate = eventDate.toLocaleDateString('pt-BR', {
@@ -418,10 +587,52 @@ function createEventCard(event) {
         minute: '2-digit'
     });
     
+    // Obter a luta principal
+    const mainFight = getMainEventFight(event.id);
+    let mainFightHtml = '';
+    
+    if (mainFight) {
+        // Buscar dados dos lutadores
+        const fighter1 = window.fightersData ? window.fightersData.find(f => 
+            f.id == mainFight.fighter1Id || f.id == mainFight.fighter1id
+        ) : null;
+        const fighter2 = window.fightersData ? window.fightersData.find(f => 
+            f.id == mainFight.fighter2Id || f.id == mainFight.fighter2id
+        ) : null;
+        
+        if (fighter1 && fighter2) {
+            const fighter1LastName = getFighterLastName(fighter1.name);
+            const fighter2LastName = getFighterLastName(fighter2.name);
+            const weightClass = mainFight.weightClass || mainFight.weightclass || 'N/A';
+            
+            mainFightHtml = `
+                <div class="main-fight-info">
+                    <div class="main-fight-title">
+                        <i class="fas fa-crown me-1" style="color: #ffd700;"></i>Luta Principal
+                    </div>
+                    <div class="main-fight-fighters">
+                        ${fighter1LastName} vs ${fighter2LastName}
+                    </div>
+                    <div class="main-fight-weight">
+                        ${weightClass}
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    const imageHtml = event.image ? `
+        <div class="event-image">
+            <img src="${event.image}" alt="${event.name}" class="img-fluid rounded" style="max-height: 150px; width: 100%; object-fit: cover;">
+        </div>
+    ` : '';
+    
     return `
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="event-card" onclick="selectEvent(${event.id})" data-event-id="${event.id}">
+                ${imageHtml}
                 <div class="event-title">${event.name}</div>
+                ${mainFightHtml}
                 <div class="event-date">
                     <i class="fas fa-calendar me-2"></i>${formattedDate}
                 </div>
@@ -432,7 +643,7 @@ function createEventCard(event) {
                     <button class="btn btn-primary btn-sm" onclick="selectEvent(${event.id}); event.stopPropagation();">
                         <i class="fas fa-eye me-1"></i>Ver Detalhes
                     </button>
-                    <button class="btn btn-danger btn-sm ms-2" onclick="deleteEvent(${event.id}); event.stopPropagation();">
+                    <button class="btn btn-secondary btn-sm ms-2" onclick="deleteEvent(${event.id}); event.stopPropagation();">
                         <i class="fas fa-trash me-1"></i>Excluir
                     </button>
                 </div>
@@ -487,8 +698,24 @@ function navigateToEventDetails(event) {
     document.getElementById('eventDetailsLocation').value = event.location || '';
     document.getElementById('eventDetailsVenue').value = event.venue || '';
     
+    // Update image fields
+    document.getElementById('eventDetailsImageFile').value = '';
+    
     // Update title
     document.getElementById('eventDetailsTitle').textContent = event.name;
+    
+    // Update event image if exists
+    const eventImageContainer = document.getElementById('eventDetailsImage');
+    if (eventImageContainer) {
+        if (event.image) {
+            eventImageContainer.innerHTML = `
+                <img src="${event.image}" alt="${event.name}" class="img-fluid rounded mb-3" style="max-height: 200px; width: 100%; object-fit: cover;">
+            `;
+            eventImageContainer.style.display = 'block';
+        } else {
+            eventImageContainer.style.display = 'none';
+        }
+    }
     
     // Load fights for this event
     loadEventFightsByType(event.id);
@@ -497,30 +724,65 @@ function navigateToEventDetails(event) {
     navigateToTab('event-details');
 }
 
-function loadEventFights(eventId) {
-    // Filter fights for this event
-    const eventFights = window.fightsData ? window.fightsData.filter(fight => fight.eventId == eventId || fight.eventid == eventId) : [];
-    
-    const fightsContainer = document.getElementById('eventFightsList');
-    
-    if (eventFights.length === 0) {
-        fightsContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-fist-raised"></i>
-                <p>Nenhuma luta cadastrada para este evento</p>
-                <button class="btn btn-primary btn-sm" onclick="addFightToEvent(${eventId})">
-                    <i class="fas fa-plus me-2"></i>Adicionar Luta
-                </button>
-            </div>
-        `;
-        return;
+async function loadEventFights(eventId, forceReload = false) {
+    try {
+        let eventFights;
+        
+        if (forceReload) {
+            // Recarregar dados do servidor
+            console.log('🔄 Recarregando dados das lutas do servidor...');
+            const fights = await apiCall('fights');
+            window.fightsData = fights;
+            eventFights = fights.filter(fight => fight.eventId == eventId || fight.eventid == eventId);
+        } else {
+            // Usar dados em cache
+            eventFights = window.fightsData ? window.fightsData.filter(fight => fight.eventId == eventId || fight.eventid == eventId) : [];
+        }
+        
+        const fightsContainer = document.getElementById('eventFightsList');
+        
+        if (eventFights.length === 0) {
+            fightsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-fist-raised"></i>
+                    <p>Nenhuma luta cadastrada para este evento</p>
+                    <button class="btn btn-primary btn-sm" onclick="addFightToEvent(${eventId})">
+                        <i class="fas fa-plus me-2"></i>Adicionar Luta
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        // Sort fights by fightOrder first, then by type (main first, then prelim)
+        eventFights.sort((a, b) => {
+            const orderA = a.fightOrder || a.fightorder || 0;
+            const orderB = b.fightOrder || b.fightorder || 0;
+            
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+            
+            // If same order, main fights come first
+            const typeA = a.fightType || a.fighttype || '';
+            const typeB = b.fightType || b.fighttype || '';
+            
+            if (typeA === 'main' && typeB !== 'main') return -1;
+            if (typeA !== 'main' && typeB === 'main') return 1;
+            return 0;
+        });
+        
+        const fightsHTML = eventFights.map((fight, index) => 
+            createFightItem(fight, index + 1)
+        ).join('');
+        fightsContainer.innerHTML = fightsHTML;
+        
+    } catch (error) {
+        console.error('Error loading event fights:', error);
     }
-    
-    const fightsHTML = eventFights.map(fight => createFightItem(fight)).join('');
-    fightsContainer.innerHTML = fightsHTML;
 }
 
-function createFightItem(fight) {
+function createFightItem(fight, displayNumber = null) {
     const fighter1 = window.fightersData ? window.fightersData.find(f => f.id == fight.fighter1Id || f.id == fight.fighter1id) : null;
     const fighter2 = window.fightersData ? window.fightersData.find(f => f.id == fight.fighter2Id || f.id == fight.fighter2id) : null;
     
@@ -528,31 +790,103 @@ function createFightItem(fight) {
     const isChampionship = (fighter1 && fighter1.ranking === 'C') || (fighter2 && fighter2.ranking === 'C');
     const championshipClass = isChampionship ? 'championship-fight' : '';
     
-    return `
-        <div class="fight-item ${championshipClass}" draggable="true" data-fight-id="${fight.id}" data-fight-order="${fight.fightOrder || fight.fightorder || 0}">
-            <div class="fight-order-badge">${fight.fightOrder || fight.fightorder || '?'}</div>
-            <div class="fight-actions">
-                <button class="btn btn-warning btn-sm" onclick="editFight(${fight.id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                <button class="btn btn-danger btn-sm" onclick="deleteFight(${fight.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+    // Use displayNumber if provided, otherwise use the original fight order
+    const orderNumber = displayNumber !== null ? displayNumber : (fight.fightOrder || fight.fightorder || '?');
+    
+    // Status indicators for live control
+    const isLive = fight.is_live || false;
+    const isFinished = fight.is_finished || false;
+    const liveStatus = isLive ? '<span class="badge bg-danger ms-2">AO VIVO</span>' : '';
+    const finishedStatus = isFinished ? '<span class="badge bg-success ms-2">FINALIZADA</span>' : '';
+    
+    // Result display for finished fights
+    let resultDisplay = '';
+    let winnerDisplay = '';
+    
+    if (isFinished && fight.result_type && fight.winner_id) {
+        // Get winner fighter
+        const winner = window.fightersData ? window.fightersData.find(f => f.id == fight.winner_id) : null;
+        
+        // Format result text
+        let resultText = '';
+        switch (fight.result_type) {
+            case 'DE': resultText = 'Decision'; break;
+            case 'KO': resultText = 'KO'; break;
+            case 'TKO': resultText = 'TKO'; break;
+            case 'SUB': resultText = 'Submission'; break;
+            case 'Draw': resultText = 'Draw'; break;
+            case 'DQ': resultText = 'Disqualification'; break;
+            case 'NC': resultText = 'No Contest'; break;
+            default: resultText = fight.result_type;
+        }
+        
+        // Create result display
+        resultDisplay = `<span class="text-success fw-bold">R${fight.final_round} - ${resultText}</span>`;
+        
+        // Create winner display with check mark
+        if (winner) {
+            // Check if winner is fighter1 or fighter2
+            const isWinnerFighter1 = (fight.winner_id == fight.fighter1Id || fight.winner_id == fight.fighter1id);
+            const isWinnerFighter2 = (fight.winner_id == fight.fighter2Id || fight.winner_id == fight.fighter2id);
+            
+            winnerDisplay = `
+                <div class="fight-fighters">
+                    <div class="fighter">
+                        <div class="fighter-name ${isWinnerFighter1 ? 'text-success fw-bold' : ''}">
+                            ${fighter1 ? fighter1.name : 'Lutador 1'}
+                            ${isWinnerFighter1 ? ' <i class="fas fa-check text-success"></i>' : ''}
             </div>
+                        <div class="fighter-record">${fighter1 ? `${fighter1.wins || 0}-${fighter1.losses || 0}-${fighter1.draws || 0}` : 'N/A'}</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="fighter">
+                        <div class="fighter-name ${isWinnerFighter2 ? 'text-success fw-bold' : ''}">
+                            ${fighter2 ? fighter2.name : 'Lutador 2'}
+                            ${isWinnerFighter2 ? ' <i class="fas fa-check text-success"></i>' : ''}
+                        </div>
+                        <div class="fighter-record">${fighter2 ? `${fighter2.wins || 0}-${fighter2.losses || 0}-${fighter2.draws || 0}` : 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Use winner display if available, otherwise use normal display
+    const fightersDisplay = winnerDisplay || `
             <div class="fight-fighters">
                 <div class="fighter">
                     <div class="fighter-name">${fighter1 ? fighter1.name : 'Lutador 1'}</div>
-                    <div class="fighter-record">${fighter1 ? fighter1.record || 'N/A' : 'N/A'}</div>
+                    <div class="fighter-record">${fighter1 ? `${fighter1.wins || 0}-${fighter1.losses || 0}-${fighter1.draws || 0}` : 'N/A'}</div>
                 </div>
                 <div class="vs-divider">VS</div>
                 <div class="fighter">
                     <div class="fighter-name">${fighter2 ? fighter2.name : 'Lutador 2'}</div>
-                    <div class="fighter-record">${fighter2 ? fighter2.record || 'N/A' : 'N/A'}</div>
+                    <div class="fighter-record">${fighter2 ? `${fighter2.wins || 0}-${fighter2.losses || 0}-${fighter2.draws || 0}` : 'N/A'}</div>
                 </div>
             </div>
+    `;
+    
+    return `
+        <div class="fight-item ${championshipClass}" draggable="true" data-fight-id="${fight.id}" data-fight-order="${fight.fightOrder || fight.fightorder || 0}">
+            <div class="fight-order-badge">${orderNumber}</div>
+            <div class="fight-actions">
+                <button class="btn btn-info btn-sm" onclick="openFightControl(${fight.id})" title="Controle da Luta">
+                    <i class="fas fa-gamepad"></i>
+                </button>
+                <button class="btn btn-warning btn-sm" onclick="editFight(${fight.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                                        <button class="btn btn-secondary btn-sm" onclick="deleteFight(${fight.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+            </div>
+            ${fightersDisplay}
             <div class="fight-details">
                 <strong>${fight.weightClass || fight.weightclass}</strong> • ${fight.rounds || 3} rounds
+                ${resultDisplay ? `<br>${resultDisplay}` : ''}
                 ${isChampionship ? '<br><span style="color: #ffd700; font-weight: bold;">🏆 Luta de Campeonato</span>' : ''}
+                ${liveStatus}
+                ${finishedStatus}
             </div>
         </div>
     `;
@@ -594,11 +928,33 @@ function addFightToEvent(fightType = null) {
 async function handleEventSubmit(e) {
     e.preventDefault();
     
+    // Processar imagem
+    let imageData = null;
+    const imageFile = document.getElementById('eventImageFile').files[0];
+    
+    if (imageFile) {
+        // Converter arquivo para base64
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imageData = e.target.result;
+        };
+        reader.readAsDataURL(imageFile);
+        
+        // Aguardar a conversão
+        await new Promise((resolve) => {
+            reader.onload = function(e) {
+                imageData = e.target.result;
+                resolve();
+            };
+        });
+    }
+    
     const eventData = {
         name: document.getElementById('eventName').value,
         date: document.getElementById('eventDate').value,
         location: document.getElementById('eventLocation').value,
-        venue: document.getElementById('eventVenue').value
+        venue: document.getElementById('eventVenue').value,
+        image: imageData
     };
     
     const eventId = document.getElementById('eventId').value;
@@ -655,6 +1011,17 @@ function editEvent(eventId) {
     
     document.getElementById('eventLocation').value = event.location || '';
     document.getElementById('eventVenue').value = event.venue || '';
+    
+    // Limpar arquivo selecionado
+    document.getElementById('eventImageFile').value = '';
+    
+    // Atualizar preview da imagem se existir
+    if (event.image) {
+        document.getElementById('eventImagePreviewImg').src = event.image;
+        document.getElementById('eventImagePreview').style.display = 'block';
+    } else {
+        document.getElementById('eventImagePreview').style.display = 'none';
+    }
     
     // Update modal title
     document.getElementById('eventModalTitle').textContent = 'Editar Evento';
@@ -726,17 +1093,41 @@ function resetEventForm() {
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
     document.getElementById('eventModalTitle').textContent = 'Novo Evento';
+    document.getElementById('eventImagePreview').style.display = 'none';
+    document.getElementById('eventImageFile').value = '';
 }
 
 // Event details form handler
 async function handleEventDetailsSubmit(e) {
     e.preventDefault();
     
+    // Processar imagem
+    let imageData = null;
+    const imageFile = document.getElementById('eventDetailsImageFile').files[0];
+    
+    if (imageFile) {
+        // Converter arquivo para base64
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imageData = e.target.result;
+        };
+        reader.readAsDataURL(imageFile);
+        
+        // Aguardar a conversão
+        await new Promise((resolve) => {
+            reader.onload = function(e) {
+                imageData = e.target.result;
+                resolve();
+            };
+        });
+    }
+    
     const eventData = {
         name: document.getElementById('eventDetailsName').value,
         date: document.getElementById('eventDetailsDateTime').value,
         location: document.getElementById('eventDetailsLocation').value,
-        venue: document.getElementById('eventDetailsVenue').value
+        venue: document.getElementById('eventDetailsVenue').value,
+        image: imageData
     };
     
     const eventId = document.getElementById('eventDetailsId').value;
@@ -814,10 +1205,13 @@ async function loadFighters() {
     try {
         const fighters = await apiCall('fighters');
         window.fightersData = fighters;
-        displayFighters(fighters);
+        
+        // Note: displayFighters is now called by loadData() after all data is loaded
         populateFighterSelects(fighters);
+        return fighters;
     } catch (error) {
         console.error('Failed to load fighters:', error);
+        return [];
     }
 }
 
@@ -1011,6 +1405,15 @@ function addCategoryEventListeners() {
 }
 
 function openFighterModal() {
+    // Get the currently active category
+    const activeCategoryButton = document.querySelector('#fightersCategoriesList .list-group-item.active');
+    const currentCategory = activeCategoryButton ? activeCategoryButton.getAttribute('data-category') : '';
+    
+    // Set the weight class if a specific category is selected (not "all")
+    if (currentCategory && currentCategory !== 'all') {
+        document.getElementById('fighterWeightClass').value = currentCategory;
+    }
+    
     const modal = new bootstrap.Modal(document.getElementById('fighterModal'));
     modal.show();
 }
@@ -1052,7 +1455,19 @@ async function handleFighterSubmit(e) {
         const modal = bootstrap.Modal.getInstance(document.getElementById('fighterModal'));
         modal.hide();
         
-        await loadFighters();
+        // Reload fighters data
+        const fighters = await loadFighters();
+        
+        // Get the currently active category
+        const activeCategoryButton = document.querySelector('#fightersCategoriesList .list-group-item.active');
+        const currentCategory = activeCategoryButton ? activeCategoryButton.getAttribute('data-category') : 'all';
+        
+        // Update the display for the current category
+        displayFightersByCategory(currentCategory, fighters);
+        
+        // Update category counts
+        updateCategoryCounts(fighters);
+        
         resetFighterForm();
         
     } catch (error) {
@@ -1061,7 +1476,7 @@ async function handleFighterSubmit(e) {
     }
 }
 
-function editFighter(fighterId) {
+async function editFighter(fighterId) {
     const fighter = window.fightersData.find(f => f.id == fighterId);
     if (!fighter) return;
     
@@ -1076,8 +1491,8 @@ function editFighter(fighterId) {
     document.getElementById('fighterCountry').value = fighter.country || '';
     document.getElementById('fighterRanking').value = fighter.ranking || '';
     
-    // Calculate and display record
-    calculateRecord();
+    // Calculate and display record using the fighter's manual values
+    await calculateRecordFromFighter(fighter);
     
     const modal = new bootstrap.Modal(document.getElementById('fighterModal'));
     modal.show();
@@ -1088,26 +1503,154 @@ async function deleteFighter(fighterId) {
     
     try {
         await apiCall(`fighters/${fighterId}`, 'DELETE');
-        await loadFighters();
+        
+        // Reload fighters data
+        const fighters = await loadFighters();
+        
+        // Get the currently active category
+        const activeCategoryButton = document.querySelector('#fightersCategoriesList .list-group-item.active');
+        const currentCategory = activeCategoryButton ? activeCategoryButton.getAttribute('data-category') : 'all';
+        
+        // Update the display for the current category
+        displayFightersByCategory(currentCategory, fighters);
+        
+        // Update category counts
+        updateCategoryCounts(fighters);
+        
     } catch (error) {
         console.error('Failed to delete fighter:', error);
         alert('Erro ao excluir lutador: ' + error.message);
     }
 }
 
-function resetFighterForm() {
+async function resetFighterForm() {
     document.getElementById('fighterForm').reset();
     document.getElementById('fighterId').value = '';
     document.getElementById('fighterCountry').value = '';
-    calculateRecord();
+    await calculateRecord();
 }
 
-function calculateRecord() {
+// Wrapper function for async calculateRecord
+function calculateRecordWrapper() {
+    calculateRecord().catch(error => {
+        console.error('Error in calculateRecordWrapper:', error);
+    });
+}
+
+// Calculate record using fighter's original manual values (for edit mode)
+async function calculateRecordFromFighter(fighter) {
+    const wins = fighter.wins || 0;
+    const losses = fighter.losses || 0;
+    const draws = fighter.draws || 0;
+    
+    // Get fighter ID to calculate record from fights
+    const fighterId = fighter.id;
+    
+    if (fighterId) {
+        try {
+            // Get fighter's fights
+            const response = await fetch(`/api/fighters/${fighterId}/fights`);
+            const fights = await response.json();
+            
+            // Calculate record from finished fights
+            let fightWins = 0;
+            let fightLosses = 0;
+            let fightDraws = 0;
+            
+            fights.forEach(fight => {
+                if (fight.is_finished && fight.winner_id) {
+                    if (fight.winner_id == fighterId) {
+                        fightWins++;
+                    } else if (fight.fighter1id == fighterId || fight.fighter2id == fighterId) {
+                        fightLosses++;
+                    }
+                }
+                // Note: Draws are not currently tracked in the database, so fightDraws remains 0
+            });
+            
+            // Total record = manual record + fight record
+            const totalWins = wins + fightWins;
+            const totalLosses = losses + fightLosses;
+            const totalDraws = draws + fightDraws;
+            
+            document.getElementById('fighterRecordDisplay').value = `${totalWins}-${totalLosses}-${totalDraws}`;
+            
+            // Update breakdown text
+            const breakdownText = `Manual: ${wins}-${losses}-${draws} | Lutas: ${fightWins}-${fightLosses}-${fightDraws}`;
+            document.getElementById('recordBreakdown').textContent = breakdownText;
+            
+            // Add tooltip or info about the breakdown
+            const recordInfo = `Manual: ${wins}-${losses}-${draws} | Fights: ${fightWins}-${fightLosses}-${fightDraws}`;
+            document.getElementById('fighterRecordDisplay').title = recordInfo;
+            
+        } catch (error) {
+            console.error('Error calculating fighter record:', error);
+            // Fallback to manual record only
+            document.getElementById('fighterRecordDisplay').value = `${wins}-${losses}-${draws}`;
+            document.getElementById('recordBreakdown').textContent = `Manual: ${wins}-${losses}-${draws} | Lutas: 0-0-0`;
+        }
+    } else {
+        document.getElementById('fighterRecordDisplay').value = `${wins}-${losses}-${draws}`;
+        document.getElementById('recordBreakdown').textContent = `Manual: ${wins}-${losses}-${draws} | Lutas: 0-0-0`;
+    }
+}
+
+async function calculateRecord() {
     const wins = parseInt(document.getElementById('fighterWins').value) || 0;
     const losses = parseInt(document.getElementById('fighterLosses').value) || 0;
     const draws = parseInt(document.getElementById('fighterDraws').value) || 0;
     
-    document.getElementById('fighterRecordDisplay').value = `${wins}-${losses}-${draws}`;
+    // Get fighter ID to calculate record from fights
+    const fighterId = document.getElementById('fighterId').value;
+    
+    if (fighterId) {
+        try {
+            // Get fighter's fights
+            const response = await fetch(`/api/fighters/${fighterId}/fights`);
+            const fights = await response.json();
+            
+            // Calculate record from finished fights
+            let fightWins = 0;
+            let fightLosses = 0;
+            let fightDraws = 0;
+            
+            fights.forEach(fight => {
+                if (fight.is_finished && fight.winner_id) {
+                    if (fight.winner_id == fighterId) {
+                        fightWins++;
+                    } else if (fight.fighter1id == fighterId || fight.fighter2id == fighterId) {
+                        fightLosses++;
+                    }
+                }
+                // Note: Draws are not currently tracked in the database, so fightDraws remains 0
+            });
+            
+            // Total record = manual record + fight record
+            const totalWins = wins + fightWins;
+            const totalLosses = losses + fightLosses;
+            const totalDraws = draws + fightDraws;
+            
+            document.getElementById('fighterRecordDisplay').value = `${totalWins}-${totalLosses}-${totalDraws}`;
+            
+            // Update breakdown text
+            const breakdownText = `Manual: ${wins}-${losses}-${draws} | Lutas: ${fightWins}-${fightLosses}-${fightDraws}`;
+            document.getElementById('recordBreakdown').textContent = breakdownText;
+            
+            // Add tooltip or info about the breakdown
+            const recordInfo = `Manual: ${wins}-${losses}-${draws} | Fights: ${fightWins}-${fightLosses}-${fightDraws}`;
+            document.getElementById('fighterRecordDisplay').title = recordInfo;
+            
+        } catch (error) {
+            console.error('Error calculating fighter record:', error);
+            // Fallback to manual record only
+            document.getElementById('fighterRecordDisplay').value = `${wins}-${losses}-${draws}`;
+            document.getElementById('recordBreakdown').textContent = `Manual: ${wins}-${losses}-${draws} | Lutas: 0-0-0`;
+        }
+    } else {
+        // No fighter ID (new fighter), just show manual record
+        document.getElementById('fighterRecordDisplay').value = `${wins}-${losses}-${draws}`;
+        document.getElementById('recordBreakdown').textContent = `Manual: ${wins}-${losses}-${draws} | Lutas: 0-0-0`;
+    }
 }
 
 function populateFighterSelects(fighters) {
@@ -1136,6 +1679,15 @@ async function handleFightSubmit(e) {
         return;
     }
     
+    // Calculate the next fightorder for this event
+    const eventFights = window.fightsData ? window.fightsData.filter(fight => 
+        fight.eventId == selectedEvent.id || fight.eventid == selectedEvent.id
+    ) : [];
+    
+    const nextFightOrder = eventFights.length > 0 
+        ? Math.max(...eventFights.map(f => f.fightorder || f.fightOrder || 0)) + 1 
+        : 1;
+    
     const fightData = {
         eventid: selectedEvent.id,
         fighter1id: document.getElementById('fighter1').value,
@@ -1143,23 +1695,34 @@ async function handleFightSubmit(e) {
         weightclass: document.getElementById('fightWeightClass').value,
         fighttype: document.getElementById('fightType').value,
         rounds: parseInt(document.getElementById('fightRounds').value),
-        fightorder: 1 // Default order
+        fightorder: nextFightOrder
     };
     
     const fightId = document.getElementById('fightId').value;
     
     try {
+        let savedFight;
         if (fightId) {
-            await apiCall(`fights/${fightId}`, 'PUT', fightData);
+            savedFight = await apiCall(`fights/${fightId}`, 'PUT', fightData);
         } else {
-            await apiCall('fights', 'POST', fightData);
+            savedFight = await apiCall('fights', 'POST', fightData);
         }
         
+        // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('fightModal'));
         modal.hide();
         
-        await loadEventFights(selectedEvent.id);
+        // Reload fights data globally
+        const fights = await apiCall('fights');
+        window.fightsData = fights;
+        
+        // Reload event fights to update the display
+        loadEventFightsByType(selectedEvent.id);
+        
+        // Reset form
         resetFightForm();
+        
+        console.log('✅ Luta salva com sucesso:', savedFight);
         
     } catch (error) {
         console.error('Failed to save fight:', error);
@@ -1176,11 +1739,29 @@ async function editFight(fightId) {
     document.getElementById('fightType').value = fight.fightType || fight.fighttype || '';
     document.getElementById('fightRounds').value = fight.rounds || 3;
     
-    // Set fighters after populating selects
-    setTimeout(() => {
-        document.getElementById('fighter1').value = fight.fighter1Id || fight.fighter1id || '';
-        document.getElementById('fighter2').value = fight.fighter2Id || fight.fighter2id || '';
-    }, 100);
+    // Populate fighter selects based on weight class first
+    filterFightersByWeightClass();
+    
+    // Set fighters after populating selects with a more robust approach
+    const setFighters = () => {
+        const fighter1Select = document.getElementById('fighter1');
+        const fighter2Select = document.getElementById('fighter2');
+        const fighter1Id = fight.fighter1Id || fight.fighter1id || '';
+        const fighter2Id = fight.fighter2Id || fight.fighter2id || '';
+        
+        // Check if selects are populated
+        if (fighter1Select.options.length > 1 && fighter2Select.options.length > 1) {
+            fighter1Select.value = fighter1Id;
+            fighter2Select.value = fighter2Id;
+            console.log('✅ Lutadores definidos na modal:', { fighter1Id, fighter2Id });
+        } else {
+            // If selects are not populated yet, try again after a short delay
+            setTimeout(setFighters, 50);
+        }
+    };
+    
+    // Start the process
+    setFighters();
     
     const modal = new bootstrap.Modal(document.getElementById('fightModal'));
     modal.show();
@@ -1197,7 +1778,7 @@ async function deleteFight(fightId) {
     
     try {
         await apiCall(`fights/${fightId}`, 'DELETE');
-        await loadEventFights(selectedEvent.id);
+        await loadEventFights(selectedEvent.id, true);
     } catch (error) {
         console.error('Failed to delete fight:', error);
         alert('Erro ao excluir luta: ' + error.message);
@@ -1300,7 +1881,7 @@ function loadEventFightsByType(eventId) {
     const mainCardFights = eventFights.filter(fight => fight.fightType === 'main' || fight.fighttype === 'main');
     const prelimFights = eventFights.filter(fight => fight.fightType === 'prelim' || fight.fighttype === 'prelim');
     
-    // Sort fights by fightOrder
+    // Sort fights by fightOrder within each type
     mainCardFights.sort((a, b) => (a.fightOrder || a.fightorder || 0) - (b.fightOrder || b.fightorder || 0));
     prelimFights.sort((a, b) => (a.fightOrder || a.fightorder || 0) - (b.fightOrder || b.fightorder || 0));
     
@@ -1321,7 +1902,10 @@ function loadEventFightsByType(eventId) {
             </div>
         `;
     } else {
-        const mainCardHTML = mainCardFights.map(fight => createFightItem(fight)).join('');
+        // Create main card fights with sequential numbering starting from 1
+        const mainCardHTML = mainCardFights.map((fight, index) => 
+            createFightItem(fight, index + 1)
+        ).join('');
         mainCardContainer.innerHTML = mainCardHTML;
         initializeDragAndDrop(mainCardContainer, 'main');
     }
@@ -1339,7 +1923,10 @@ function loadEventFightsByType(eventId) {
             </div>
         `;
     } else {
-        const prelimsHTML = prelimFights.map(fight => createFightItem(fight)).join('');
+        // Create prelim fights with sequential numbering continuing from main card
+        const prelimsHTML = prelimFights.map((fight, index) => 
+            createFightItem(fight, mainCardFights.length + index + 1)
+        ).join('');
         prelimsContainer.innerHTML = prelimsHTML;
         initializeDragAndDrop(prelimsContainer, 'prelim');
     }
@@ -1361,6 +1948,11 @@ function goBackToEvents() {
 function initializeDragAndDrop(container, fightType) {
     const fightItems = container.querySelectorAll('.fight-item');
     
+    console.log(`Initializing drag and drop for ${fightType}:`, { 
+        containerId: container.id, 
+        fightItemsCount: fightItems.length 
+    });
+    
     fightItems.forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
         item.addEventListener('dragend', handleDragEnd);
@@ -1368,15 +1960,19 @@ function initializeDragAndDrop(container, fightType) {
         item.addEventListener('drop', handleDrop);
         item.addEventListener('dragenter', handleDragEnter);
         item.addEventListener('dragleave', handleDragLeave);
+        
+        console.log('Added drag listeners to fight item:', item.dataset.fightId);
     });
 }
 
 function handleDragStart(e) {
+    console.log('Drag start:', e.target.dataset.fightId);
     e.target.classList.add('dragging');
     e.dataTransfer.setData('text/plain', e.target.dataset.fightId);
 }
 
 function handleDragEnd(e) {
+    console.log('Drag end:', e.target.dataset.fightId);
     e.target.classList.remove('dragging');
 }
 
@@ -1398,14 +1994,20 @@ function handleDrop(e) {
     const draggedFightId = e.dataTransfer.getData('text/plain');
     const targetFightItem = e.target.closest('.fight-item');
     
+    console.log('Drop event:', { draggedFightId, targetFightItem: targetFightItem?.dataset.fightId });
+    
     if (targetFightItem && targetFightItem.dataset.fightId !== draggedFightId) {
         const container = targetFightItem.parentElement;
         const fightItems = Array.from(container.querySelectorAll('.fight-item'));
         const draggedItem = container.querySelector(`[data-fight-id="${draggedFightId}"]`);
         
+        console.log('Container:', container.id, 'Fight items count:', fightItems.length);
+        
         if (draggedItem) {
             const targetIndex = fightItems.indexOf(targetFightItem);
             const draggedIndex = fightItems.indexOf(draggedItem);
+            
+            console.log('Reordering:', { targetIndex, draggedIndex });
             
             // Reorder the items
             if (targetIndex > draggedIndex) {
@@ -1413,6 +2015,9 @@ function handleDrop(e) {
             } else {
                 targetFightItem.parentNode.insertBefore(draggedItem, targetFightItem);
             }
+            
+            // Determine fight type based on container ID
+            const fightType = container.id === 'mainCardFightsList' ? 'main' : 'prelim';
             
             // Update fight order in database
             updateFightOrder(container, fightType);
@@ -1427,10 +2032,70 @@ function handleDrop(e) {
 
 async function updateFightOrder(container, fightType) {
     const fightItems = Array.from(container.querySelectorAll('.fight-item'));
-    const fightOrder = fightItems.map((item, index) => ({
-        id: parseInt(item.dataset.fightId),
-        order: index + 1
-    }));
+    
+    // Get all fights for this event to calculate proper order
+    const eventFights = window.fightsData ? window.fightsData.filter(fight => 
+        fight.eventId == selectedEvent.id || fight.eventid == selectedEvent.id
+    ) : [];
+    
+    // Get the dragged fights (those in this container)
+    const draggedFightIds = fightItems.map(item => parseInt(item.dataset.fightId));
+    
+    // Calculate new order based on container position
+    let newOrder = 1;
+    const fightOrder = [];
+    
+    // First, handle main card fights (they come first)
+    if (fightType === 'main') {
+        // Add main card fights in their new order
+        fightItems.forEach((item, index) => {
+            const fightId = parseInt(item.dataset.fightId);
+            fightOrder.push({
+                id: fightId,
+                order: newOrder++
+            });
+        });
+        
+        // Add prelim fights after main card (keep their existing order)
+        const prelimFights = eventFights.filter(fight => 
+            (fight.fightType === 'prelim' || fight.fighttype === 'prelim') &&
+            !draggedFightIds.includes(fight.id)
+        );
+        prelimFights.sort((a, b) => (a.fightOrder || a.fightorder || 0) - (b.fightOrder || b.fightorder || 0));
+        
+        prelimFights.forEach(fight => {
+            fightOrder.push({
+                id: fight.id,
+                order: newOrder++
+            });
+        });
+    } else {
+        // Handle prelim fights
+        // Add main card fights first (keep their existing order)
+        const mainCardFights = eventFights.filter(fight => 
+            (fight.fightType === 'main' || fight.fighttype === 'main') &&
+            !draggedFightIds.includes(fight.id)
+        );
+        mainCardFights.sort((a, b) => (a.fightOrder || a.fightorder || 0) - (b.fightOrder || b.fightorder || 0));
+        
+        mainCardFights.forEach(fight => {
+            fightOrder.push({
+                id: fight.id,
+                order: newOrder++
+            });
+        });
+        
+        // Add prelim fights in their new order
+        fightItems.forEach((item, index) => {
+            const fightId = parseInt(item.dataset.fightId);
+            fightOrder.push({
+                id: fightId,
+                order: newOrder++
+            });
+        });
+    }
+    
+    console.log('Updating fight order:', { fightType, fightOrder, eventId: selectedEvent?.id });
     
     try {
         await apiCall(`events/${selectedEvent.id}/fight-order`, 'PUT', { fightOrder });
@@ -1447,6 +2112,8 @@ async function updateFightOrder(container, fightType) {
         // Reload fights data
         const fights = await apiCall('fights');
         window.fightsData = fights;
+        
+        console.log('Fight order updated successfully');
         
     } catch (error) {
         console.error('Failed to update fight order:', error);
@@ -1476,7 +2143,458 @@ function checkAndUpdateChampionshipFights(eventId, eventFights) {
         
         // Log championship fights detected
         console.log('Championship fights detected:', championshipDescriptions);
+    }
+}
+
+// ===== FUNÇÕES PARA CONTROLE DE LIVE ACTIVITIES =====
+
+// Abrir modal de controle da luta
+async function openFightControl(fightId) {
+    try {
+        // Buscar dados da luta
+        const fight = window.fightsData.find(f => f.id === fightId);
+        if (!fight) {
+            alert('Luta não encontrada');
+            return;
+        }
         
-        console.log('Championship fights detected:', championshipDescriptions);
+        currentControlFight = fight;
+        document.getElementById('controlFightId').value = fightId;
+        
+        // Popular informações da luta
+        populateFightControlInfo(fight);
+        
+        // Popular selects
+        populateFightControlSelects(fight);
+        
+
+        
+
+        
+        // Atualizar estado dos botões
+        updateControlButtons(fight);
+        
+        // Abrir modal
+        const modal = new bootstrap.Modal(document.getElementById('fightControlModal'));
+        modal.show();
+        
+
+        
+    } catch (error) {
+        console.error('Error opening fight control:', error);
+        alert('Erro ao abrir controle da luta');
+    }
+}
+
+// Popular informações da luta
+function populateFightControlInfo(fight) {
+    const fighter1 = window.fightersData.find(f => f.id === fight.fighter1Id || f.id === fight.fighter1id);
+    const fighter2 = window.fightersData.find(f => f.id === fight.fighter2Id || f.id === fight.fighter2id);
+    
+    // Calcular tempo total da luta
+    const rounds = fight.rounds || 3;
+    let timeString;
+    if (rounds === 5) {
+        timeString = "30min 20seg";
+    } else {
+        timeString = "17min 20seg";
+    }
+    
+    const infoHtml = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6 class="text-warning mb-2">Lutador 1</h6>
+                    <div class="text-white">
+                        <strong>Nome:</strong> ${fighter1 ? fighter1.name : 'N/A'}<br>
+                        <strong>Record:</strong> ${fighter1 ? `${fighter1.wins || 0}-${fighter1.losses || 0}-${fighter1.draws || 0}` : 'N/A'}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h6 class="text-warning mb-2">Lutador 2</h6>
+                    <div class="text-white">
+                        <strong>Nome:</strong> ${fighter2 ? fighter2.name : 'N/A'}<br>
+                        <strong>Record:</strong> ${fighter2 ? `${fighter2.wins || 0}-${fighter2.losses || 0}-${fighter2.draws || 0}` : 'N/A'}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-3">
+                    <h6 class="text-warning mb-2">Detalhes da Luta</h6>
+                    <div class="text-white">
+                        <strong>Categoria:</strong> ${fight.weightClass || fight.weightclass}<br>
+                        <strong>Rounds:</strong> ${fight.rounds || 3}<br>
+                        <strong>Duração:</strong> ${timeString}<br>
+                        <strong>Status:</strong> 
+                        ${fight.is_live ? '<span class="badge bg-danger">IN PROGRESS</span>' : ''}
+                        ${fight.is_finished ? '<span class="badge bg-success">FINALIZADA</span>' : ''}
+                        ${!fight.is_live && !fight.is_finished ? '<span class="badge bg-secondary">AGUARDANDO</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('fightControlInfo').innerHTML = infoHtml;
+}
+
+// Popular selects do formulário
+function populateFightControlSelects(fight) {
+    const fighter1 = window.fightersData.find(f => f.id === fight.fighter1Id || f.id === fight.fighter1id);
+    const fighter2 = window.fightersData.find(f => f.id === fight.fighter2Id || f.id === fight.fighter2id);
+    
+    // Popular select de vencedor
+    const winnerSelect = document.getElementById('winnerSelect');
+    winnerSelect.innerHTML = '<option value="">Selecione...</option>';
+    
+    if (fighter1) {
+        winnerSelect.innerHTML += `<option value="${fighter1.id}">${fighter1.name}</option>`;
+    }
+    if (fighter2) {
+        winnerSelect.innerHTML += `<option value="${fighter2.id}">${fighter2.name}</option>`;
+    }
+    
+    // Gerar opções de round baseadas no número real de rounds da luta
+    const finalRoundSelect = document.getElementById('finalRound');
+    const maxRounds = fight.rounds || 3;
+    
+    finalRoundSelect.innerHTML = '<option value="">Selecione...</option>';
+    for (let i = 1; i <= maxRounds; i++) {
+        finalRoundSelect.innerHTML += `<option value="${i}">Round ${i}</option>`;
+    }
+    
+    // Se já tem resultado, preencher
+    if (fight.result_type) {
+        document.getElementById('resultType').value = fight.result_type;
+        handleResultTypeChange(); // Aplicar lógica de habilitação/desabilitação
+    }
+    if (fight.final_round) {
+        document.getElementById('finalRound').value = fight.final_round;
+    }
+    if (fight.final_time) {
+        document.getElementById('finalTime').value = fight.final_time;
+    }
+    if (fight.winner_id) {
+        document.getElementById('winnerSelect').value = fight.winner_id;
+    }
+    
+    // Adicionar event listeners para os selects
+    document.getElementById('resultType').addEventListener('change', handleResultTypeChange);
+    document.getElementById('finalRound').addEventListener('change', handleFinalRoundChange);
+}
+
+// Função para lidar com mudança no tipo de resultado
+function handleResultTypeChange() {
+    const resultType = document.getElementById('resultType').value;
+    const finalRoundSelect = document.getElementById('finalRound');
+    const finalTimeInput = document.getElementById('finalTime');
+    
+    // Obter o número de rounds da luta atual
+    const fightId = document.getElementById('controlFightId').value;
+    const currentFight = window.fightsData.find(f => f.id === parseInt(fightId));
+    const maxRounds = currentFight ? (currentFight.rounds || 3) : 3;
+    
+    if (resultType === 'DE') {
+        // Para decisão, preencher automaticamente com o número real de rounds da luta
+        finalRoundSelect.value = maxRounds;
+        finalTimeInput.value = '05:00';
+        
+        // Não desabilitar os campos - apenas preencher automaticamente
+        finalRoundSelect.disabled = false;
+        finalTimeInput.disabled = false;
+    } else {
+        // Para outros tipos, habilitar os campos
+        finalRoundSelect.disabled = false;
+        finalTimeInput.disabled = false;
+        
+        // Limpar valores se não estavam preenchidos
+        if (!finalRoundSelect.value) {
+            finalRoundSelect.value = '';
+        }
+        if (!finalTimeInput.value) {
+            finalTimeInput.value = '';
+        }
+    }
+}
+
+// Função para lidar com mudança no round final
+function handleFinalRoundChange() {
+    const finalRound = document.getElementById('finalRound').value;
+    const finalTimeInput = document.getElementById('finalTime');
+    
+    if (finalRound) {
+        // Se round final foi selecionado, definir tempo padrão do round
+        finalTimeInput.value = '05:00';
+    }
+}
+
+
+
+// Atualizar estado dos botões
+function updateControlButtons(fight) {
+    const startBtn = document.getElementById('startLiveBtn');
+    const stopBtn = document.getElementById('stopLiveBtn');
+    
+    if (fight.is_live) {
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'block';
+    } else {
+        startBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+    }
+}
+
+// Iniciar luta ao vivo
+async function startFightLive() {
+    try {
+        const fightId = document.getElementById('controlFightId').value;
+        
+        // Buscar dados da luta para calcular o tempo total
+        const fight = window.fightsData.find(f => f.id === parseInt(fightId));
+        if (!fight) {
+            alert('Luta não encontrada');
+            return;
+        }
+        
+        // Calcular tempo total da luta baseado no número de rounds
+        const rounds = fight.rounds || 3;
+        if (rounds === 5) {
+            totalFightTime = 30 * 60 + 20; // 30min 20seg para 5 rounds
+        } else {
+            totalFightTime = 17 * 60 + 20; // 17min 20seg para 3 rounds
+        }
+        
+        // Iniciar cronômetro da luta
+        fightStartTime = new Date();
+        startFightTimer();
+        
+        const response = await apiCall(`fights/${fightId}/start-live`, 'POST');
+        
+        if (response) {
+            // Atualizar dados da luta
+            const fightIndex = window.fightsData.findIndex(f => f.id === parseInt(fightId));
+            if (fightIndex !== -1) {
+                window.fightsData[fightIndex] = { ...window.fightsData[fightIndex], ...response };
+            }
+            
+            // Atualizar interface
+            updateControlButtons(response);
+            
+            // Atualizar informações da luta
+            populateFightControlInfo(response);
+            
+            // Recarregar lutas do evento
+            if (selectedEvent) {
+                await loadEventFights(selectedEvent.id, true);
+            }
+        }
+    } catch (error) {
+        console.error('Error starting fight live:', error);
+        alert('Erro ao iniciar luta ao vivo');
+    }
+}
+
+// Parar luta ao vivo
+async function stopFightLive() {
+    try {
+        const fightId = document.getElementById('controlFightId').value;
+        
+        // Parar timer
+        stopFightTimer();
+        fightStartTime = null;
+        
+        const response = await apiCall(`fights/${fightId}/stop-live`, 'POST');
+        
+        if (response) {
+            // Atualizar dados da luta
+            const fightIndex = window.fightsData.findIndex(f => f.id === parseInt(fightId));
+            if (fightIndex !== -1) {
+                window.fightsData[fightIndex] = { ...window.fightsData[fightIndex], ...response };
+            }
+            
+            // Atualizar interface
+            updateControlButtons(response);
+            
+            // Atualizar informações da luta
+            populateFightControlInfo(response);
+            
+            // Recarregar lutas do evento
+            if (selectedEvent) {
+                await loadEventFights(selectedEvent.id, true);
+            }
+        }
+    } catch (error) {
+        console.error('Error stopping fight live:', error);
+        alert('Erro ao parar luta ao vivo');
+    }
+}
+
+
+
+
+
+// Salvar resultado da luta
+async function saveFightResult() {
+    try {
+        const fightId = document.getElementById('controlFightId').value;
+        const resultType = document.getElementById('resultType').value;
+        const finalRound = document.getElementById('finalRound').value;
+        const finalTime = document.getElementById('finalTime').value;
+        const winnerId = document.getElementById('winnerSelect').value;
+        
+        // Validações
+        if (!resultType || !finalRound || !finalTime || !winnerId) {
+            alert('Por favor, preencha todos os campos do resultado');
+            return;
+        }
+        
+        // Se for decisão dos juízes, o round final deve ser o último
+        if (resultType === 'DE') {
+            const fight = window.fightsData.find(f => f.id === parseInt(fightId));
+            const maxRounds = fight ? (fight.rounds || 3) : 3;
+            if (parseInt(finalRound) !== maxRounds) {
+                alert(`Para decisão dos juízes, o round final deve ser o último round da luta (${maxRounds})`);
+                return;
+            }
+        }
+        
+        const resultData = {
+            resultType: resultType,
+            finalRound: parseInt(finalRound),
+            finalTime: finalTime,
+            winnerId: parseInt(winnerId)
+        };
+        
+        const response = await apiCall(`fights/${fightId}/save-result`, 'POST', resultData);
+        
+        if (response) {
+            // Atualizar dados da luta
+            const fightIndex = window.fightsData.findIndex(f => f.id === parseInt(fightId));
+            if (fightIndex !== -1) {
+                window.fightsData[fightIndex] = { ...window.fightsData[fightIndex], ...response };
+            }
+            
+
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('fightControlModal'));
+            modal.hide();
+            
+            // Recarregar lutas do evento
+            if (selectedEvent) {
+                await loadEventFights(selectedEvent.id, true);
+            }
+            
+            alert('Resultado salvo com sucesso!');
+        }
+    } catch (error) {
+        console.error('Error saving fight result:', error);
+        alert('Erro ao salvar resultado da luta');
+    }
+}
+
+// Limpar resultado da luta
+async function clearFightResult() {
+    if (confirm('Tem certeza que deseja limpar o resultado da luta? Esta ação irá remover todos os dados salvos.')) {
+        try {
+            const fightId = document.getElementById('controlFightId').value;
+            
+            if (!fightId) {
+                alert('ID da luta não encontrado');
+                return;
+            }
+            
+            // Chamar API para limpar resultado no banco de dados
+            const response = await apiCall(`fights/${fightId}/clear-result`, 'POST');
+            
+            if (response) {
+                // Atualizar dados da luta no frontend
+                const fightIndex = window.fightsData.findIndex(f => f.id === parseInt(fightId));
+                if (fightIndex !== -1) {
+                    window.fightsData[fightIndex] = { ...window.fightsData[fightIndex], ...response };
+                }
+                
+                // Limpar campos do formulário
+                document.getElementById('resultType').value = '';
+                document.getElementById('finalRound').value = '';
+                document.getElementById('finalTime').value = '';
+                document.getElementById('winnerSelect').value = '';
+                
+                // Parar timer da luta se estiver rodando
+                stopFightTimer();
+                
+                // Resetar cronômetro da luta
+                const fightTimerElement = document.getElementById('fightTimer');
+                if (fightTimerElement) {
+                    fightTimerElement.textContent = '00:00';
+                }
+                
+                // Resetar botões de controle ao vivo
+                document.getElementById('startLiveBtn').style.display = 'inline-block';
+                document.getElementById('stopLiveBtn').style.display = 'none';
+                
+                // Recarregar lutas do evento para atualizar a interface
+                if (selectedEvent) {
+                    await loadEventFights(selectedEvent.id, true);
+                }
+                
+                alert('Resultado da luta foi limpo com sucesso!');
+            }
+            
+        } catch (error) {
+            console.error('Error clearing fight result:', error);
+            alert('Erro ao limpar resultado da luta');
+        }
+    }
+}
+
+// Event listener para mudança no tipo de resultado
+document.addEventListener('DOMContentLoaded', function() {
+    const resultTypeSelect = document.getElementById('resultType');
+    if (resultTypeSelect) {
+        resultTypeSelect.addEventListener('change', handleResultTypeChange);
+    }
+    
+    const finalRoundSelect = document.getElementById('finalRound');
+    if (finalRoundSelect) {
+        finalRoundSelect.addEventListener('change', handleFinalRoundChange);
+    }
+}); 
+
+// Iniciar timer da luta (cronômetro total)
+function startFightTimer() {
+    stopFightTimer(); // Parar timer anterior se existir
+    
+    fightTimerInterval = setInterval(() => {
+        if (fightStartTime) {
+            const elapsed = Math.floor((new Date() - fightStartTime) / 1000);
+            const remaining = Math.max(0, totalFightTime - elapsed);
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            
+            // Atualizar o display do cronômetro da luta
+            const fightTimerElement = document.getElementById('fightTimer');
+            if (fightTimerElement) {
+                fightTimerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Se o tempo acabou, parar o timer
+            if (remaining <= 0) {
+                stopFightTimer();
+            }
+        }
+    }, 1000);
+}
+
+// Parar timer da luta
+function stopFightTimer() {
+    if (fightTimerInterval) {
+        clearInterval(fightTimerInterval);
+        fightTimerInterval = null;
     }
 } 

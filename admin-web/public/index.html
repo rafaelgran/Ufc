@@ -6,43 +6,111 @@
     <title>UFC Events Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ufc-red: #d20a11;
-            --ufc-dark: #1a1a1a;
-            --ufc-gray: #2a2a2a;
-            --ufc-light-gray: #3a3a3a;
-            --ufc-accent: #ffcc40;
+            --ufc-dark: #1c1c1c;
+            --ufc-gray: #222222;
+            --ufc-light-gray: #333333;
+            --ufc-accent: #FBFF05;
+            --ufc-accent-hover: #bdc103;
+            --ufc-success: #9BFF05;
+            --ufc-info: #05B0FF;
         }
         
         body {
             background: var(--ufc-dark);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
+        /* Inter Font Classes */
+        .font-inter {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .font-light {
+            font-weight: 300;
+        }
+        
+        .font-regular {
+            font-weight: 400;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        /* Typography Scale */
+        .text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .text-base {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        
+        .text-2xl {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+        
+        .text-3xl {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+        }
+        
+        /* Navbar */
         .navbar {
             background: var(--ufc-gray) !important;
-            border-bottom: 3px solid var(--ufc-red);
+            border-bottom: 3px solid var(--ufc-accent);
         }
         
         .navbar-brand {
             color: var(--ufc-accent) !important;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 1.5rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
+        /* Tabs */
         .nav-tabs {
-            border-bottom: 2px solid var(--ufc-red);
+            border-bottom: 2px solid var(--ufc-accent);
         }
         
         .nav-tabs .nav-link {
-            color: #fff;
+            color: white;
             border: none;
             background: transparent;
             border-radius: 0;
             padding: 12px 20px;
             font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         .nav-tabs .nav-link:hover {
@@ -51,11 +119,12 @@
         }
         
         .nav-tabs .nav-link.active {
-            color: white;
-            background: var(--ufc-red);
+            color: black;
+            background: var(--ufc-accent);
             border: none;
         }
         
+        /* Cards */
         .card {
             background: var(--ufc-gray);
             border: 1px solid var(--ufc-light-gray);
@@ -68,39 +137,106 @@
             border-bottom: 1px solid var(--ufc-light-gray);
             color: var(--ufc-accent);
             font-weight: 600;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
+        /* Buttons - Primary (Amarelo com fundo) */
         .btn-primary {
-            background: var(--ufc-red);
-            border: none;
+            background: var(--ufc-accent);
+            border: 2px solid var(--ufc-accent);
+            color: black;
+            font-weight: 600;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         .btn-primary:hover {
-            background: #b0090e;
+            background: var(--ufc-accent-hover);
+            border-color: var(--ufc-accent-hover);
+            color: black;
         }
         
+        /* Buttons - Secondary (Amarelo com borda) */
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--ufc-accent);
+            color: var(--ufc-accent);
+            font-weight: 600;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--ufc-accent);
+            border-color: var(--ufc-accent);
+            color: black;
+        }
+        
+        /* Buttons - Success (Verde para vitórias) */
+        .btn-success {
+            background: var(--ufc-success);
+            border: 2px solid var(--ufc-success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            border-color: #218838;
+            color: white;
+        }
+        
+        /* Buttons - Info (Azul para controle de luta) */
+        .btn-info {
+            background: var(--ufc-info);
+            border: 2px solid var(--ufc-info);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+            color: white;
+        }
+        
+        /* Buttons - Warning (Amarelo para ações especiais) */
         .btn-warning {
             background: var(--ufc-accent);
-            border: none;
-            color: var(--ufc-dark);
+            border: 2px solid var(--ufc-accent);
+            color: black;
+            font-weight: 600;
         }
         
         .btn-warning:hover {
-            background: #e6b800;
+            background: var(--ufc-accent-hover);
+            border-color: var(--ufc-accent-hover);
+            color: black;
         }
         
+        /* Form Controls */
         .form-control, .form-select {
             background: var(--ufc-light-gray);
             border: 1px solid #555;
             color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         .form-control:focus, .form-select:focus {
             background: var(--ufc-light-gray);
             border-color: var(--ufc-accent);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(255, 204, 64, 0.25);
         }
         
-        /* Fighters Categories Sidebar Styles */
+        .form-control::placeholder {
+            color: #aaa;
+        }
+        
+        /* Labels */
+        .form-label {
+            color: white;
+            font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        /* Fighters Categories Sidebar */
         .list-group-item {
             background: var(--ufc-gray);
             border: 1px solid var(--ufc-light-gray);
@@ -115,14 +251,15 @@
         }
         
         .list-group-item.active {
-            background: var(--ufc-red);
-            border-color: var(--ufc-red);
-            color: white;
+            background: var(--ufc-accent);
+            border-color: var(--ufc-accent);
+            color: black;
         }
         
         .list-group-item.active:hover {
-            background: #b0090e;
-            border-color: #b0090e;
+            background: var(--ufc-accent-hover);
+            border-color: var(--ufc-accent-hover);
+            color: black;
         }
         
         .list-group-item .badge {
@@ -131,8 +268,8 @@
         }
         
         .list-group-item.active .badge {
-            background: rgba(255, 255, 255, 0.2) !important;
-            color: white;
+            background: rgba(0, 0, 0, 0.2) !important;
+            color: black;
         }
         
         .list-group-item i {
@@ -140,29 +277,40 @@
             text-align: center;
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .col-md-3 {
-                margin-bottom: 1rem;
-            }
+        /* Status badges */
+        .badge.bg-success {
+            background: var(--ufc-success) !important;
         }
         
-        .form-control:focus {
-            color: white;
-            box-shadow: 0 0 0 0.2rem rgba(255, 204, 64, 0.25);
+        .badge.bg-warning {
+            background: var(--ufc-accent) !important;
+            color: black;
         }
         
-        .form-control::placeholder {
-            color: #aaa;
+        .badge.bg-danger {
+            background: #dc3545 !important;
         }
         
-        .form-label {
-            color: #fff;
-            font-weight: 500;
+        .badge.bg-info {
+            background: var(--ufc-info) !important;
         }
         
+        /* Text colors */
+        .text-warning {
+            color: var(--ufc-accent) !important;
+        }
+        
+        .text-success {
+            color: var(--ufc-success) !important;
+        }
+        
+        .text-info {
+            color: var(--ufc-info) !important;
+        }
+        
+        /* Card content */
         .card-body p {
-            color: #fff;
+            color: white;
         }
         
         .card-body p strong {
@@ -170,11 +318,15 @@
         }
         
         .card-body p span {
-            color: #fff;
+            color: white;
         }
-        
+        .text-muted
+        /* Tables */
         .table {
             color: white;
+        }
+        .text-muted {
+            color: #999 !important;
         }
         
         .table th {
@@ -186,8 +338,11 @@
         .table td {
             border-color: #555;
             vertical-align: middle;
+            background-color: var(--ufc-gray);
+            color: #fff;
         }
         
+        /* Event cards */
         .event-card {
             background: var(--ufc-gray);
             border: 1px solid var(--ufc-light-gray);
@@ -205,7 +360,7 @@
         }
         
         .event-card.selected {
-            border-color: var(--ufc-red);
+            border-color: var(--ufc-accent);
             background: var(--ufc-light-gray);
         }
         
@@ -253,8 +408,8 @@
         }
         
         .status-live {
-            background: var(--ufc-red);
-            color: white;
+            background: var(--ufc-accent);
+            color: black;
             animation: pulse 2s infinite;
         }
         
@@ -271,6 +426,45 @@
         .event-actions .btn {
             margin-right: 8px;
             font-size: 0.85rem;
+        }
+        
+        /* Main fight info in event cards */
+        .main-fight-info {
+            background-color: var(--ufc-light-gray);
+            border-radius: 8px;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        
+        .main-fight-title {
+            color: var(--ufc-accent);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+            display: none;
+        }
+        
+        .main-fight-fighters {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .main-fight-weight {
+            color: #ccc;
+            font-size: 0.8rem;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .col-md-3 {
+                margin-bottom: 1rem;
+            }
         }
         
         .filter-switch {
@@ -329,7 +523,7 @@
         
         .fighter-name {
             font-weight: 600;
-            color: var(--ufc-accent);
+            color: #FFF;
         }
         
         .fighter-record {
@@ -406,7 +600,7 @@
         }
         
         .fighter-count-badge {
-            background: var(--ufc-red) !important;
+            background: var(--ufc-dark) !important;
             color: white !important;
         }
         
@@ -539,10 +733,10 @@
         
         .fight-order-badge {
             position: absolute;
-            top: -8px;
-            left: -8px;
-            background: var(--ufc-red);
-            color: white;
+            top: calc(50% - 13px);
+            left: 8px;
+            background: var(--ufc-accent);
+            color: var(--ufc-dark);
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -555,7 +749,7 @@
         
         .fight-actions {
             position: absolute;
-            top: 10px;
+            bottom: 10px;
             right: 10px;
             display: flex;
             gap: 5px;
@@ -571,8 +765,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-fist-raised me-2"></i>
-                UFC Events Admin
+                <i class="fas fa-stop me-2"></i>
+                FYTE Admin
             </a>
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text">
@@ -760,6 +954,7 @@
                         <i class="fas fa-arrow-left me-2"></i>Voltar aos Eventos
                     </button>
                     <h3 id="eventDetailsTitle"><i class="fas fa-calendar-alt me-2"></i>Detalhes do Evento</h3>
+                    <div id="eventDetailsImage" style="display: none;"></div>
                 </div>
                 
                 <div class="row">
@@ -788,15 +983,26 @@
                                         <label for="eventDetailsVenue" class="form-label">Venue</label>
                                         <input type="text" class="form-control" id="eventDetailsVenue">
                                     </div>
+                                    <div class="mb-3">
+                                        <label for="eventDetailsImageFile" class="form-label">Imagem do Evento</label>
+                                        <input type="file" class="form-control" id="eventDetailsImageFile" accept="image/*">
+                                        <div class="form-text">Selecione uma imagem para o evento (JPG, PNG, GIF)</div>
+                                    </div>
+                                    <div class="mb-3" id="eventDetailsImagePreview" style="display: none;">
+                                        <label class="form-label">Preview da Imagem</label>
+                                        <div class="text-center">
+                                            <img id="eventDetailsImagePreviewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                                        </div>
+                                    </div>
 
                                     <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-save me-2"></i>Salvar Evento
                                         </button>
-                                        <button type="button" class="btn btn-success" onclick="createNewEvent()">
+                                        <button type="button" class="btn btn-secondary" onclick="createNewEvent()">
                                             <i class="fas fa-plus me-2"></i>Novo Evento
                                         </button>
-                                        <button type="button" class="btn btn-danger" onclick="deleteCurrentEvent()">
+                                        <button type="button" class="btn btn-secondary" onclick="deleteCurrentEvent()">
                                             <i class="fas fa-trash me-2"></i>Excluir Evento
                                         </button>
                                     </div>
@@ -887,6 +1093,18 @@
                             <label for="eventVenue" class="form-label">Venue</label>
                             <input type="text" class="form-control" id="eventVenue">
                         </div>
+                        <div class="mb-3">
+                            <label for="eventImageFile" class="form-label">Imagem do Evento</label>
+                            <input type="file" class="form-control" id="eventImageFile" accept="image/*">
+                            <div class="form-text">Selecione uma imagem para o evento (JPG, PNG, GIF)</div>
+                        </div>
+                        <div class="mb-3" id="eventImagePreview" style="display: none;">
+                            <label class="form-label">Preview da Imagem</label>
+                            <div class="text-center">
+                                <img id="eventImagePreviewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
+                        </div>
+                        
 
                     </div>
                     <div class="modal-footer">
@@ -921,25 +1139,26 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="fighterWins" class="form-label">Vitórias</label>
-                                    <input type="number" class="form-control" id="fighterWins" min="0" value="0" onchange="calculateRecord()">
+                                    <input type="number" class="form-control" id="fighterWins" min="0" value="0" onchange="calculateRecordWrapper()">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="fighterLosses" class="form-label">Derrotas</label>
-                                    <input type="number" class="form-control" id="fighterLosses" min="0" value="0" onchange="calculateRecord()">
+                                    <input type="number" class="form-control" id="fighterLosses" min="0" value="0" onchange="calculateRecordWrapper()">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="fighterDraws" class="form-label">Empates</label>
-                                    <input type="number" class="form-control" id="fighterDraws" min="0" value="0" onchange="calculateRecord()">
+                                    <input type="number" class="form-control" id="fighterDraws" min="0" value="0" onchange="calculateRecordWrapper()">
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="fighterRecordDisplay" class="form-label">Record Calculado</label>
                             <input type="text" class="form-control" id="fighterRecordDisplay" readonly>
+                            <small class="form-text text-muted" id="recordBreakdown">Manual + Resultados das lutas finalizadas</small>
                         </div>
                         <div class="mb-3">
                             <label for="fighterWeightClass" class="form-label">Categoria</label>
@@ -1254,6 +1473,140 @@
                         <button type="submit" class="btn btn-primary">Salvar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fight Control Modal -->
+    <div class="modal fade" id="fightControlModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-warning btn-sm me-3" onclick="clearFightResult()" title="Limpar Resultado">
+                            <i class="fas fa-eraser me-1"></i>Limpar Resultado
+                        </button>
+                        <h5 class="modal-title mb-0">Controle da Luta</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="controlFightId">
+                    
+                    <!-- Fight Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-dark border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Luta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="fightControlInfo" class="text-white">
+                                        <!-- Fight info will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Control Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-dark border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="fas fa-broadcast-tower me-2"></i>Controle ao Vivo</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <button class="btn btn-info" id="startLiveBtn" onclick="startFightLive()">
+                                                    <i class="fas fa-play me-2"></i>Iniciar ao Vivo
+                                                </button>
+                                                <button class="btn btn-info" id="stopLiveBtn" onclick="stopFightLive()" style="display: none;">
+                                                    <i class="fas fa-stop me-2"></i>Parar ao Vivo
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-center">
+                                                <div class="h3 text-danger fw-bold" id="fightTimer">00:00</div>
+                                                <div class="text-white fw-medium">Cronômetro da Luta</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result Section -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card bg-dark border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-trophy me-2"></i>Resultado da Luta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="fightResultForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="resultType" class="form-label text-white fw-bold">Tipo de Vitória</label>
+                                                    <select class="form-select" id="resultType" required>
+                                                        <option value="">Selecione...</option>
+                                                        <option value="DE">DE - Decisão dos Juízes</option>
+                                                        <option value="KO">KO - Nocaute</option>
+                                                        <option value="TKO">TKO - Nocaute Técnico</option>
+                                                        <option value="SUB">SUB - Finalização</option>
+                                                        <option value="Draw">Draw - Empate</option>
+                                                        <option value="DQ">DQ - Desqualificação</option>
+                                                        <option value="NC">NC - No Contest</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="finalRound" class="form-label text-white fw-bold">Round Final</label>
+                                                    <select class="form-select" id="finalRound" required>
+                                                        <option value="">Selecione...</option>
+                                                        <option value="1">Round 1</option>
+                                                        <option value="2">Round 2</option>
+                                                        <option value="3">Round 3</option>
+                                                        <option value="4">Round 4</option>
+                                                        <option value="5">Round 5</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="finalTime" class="form-label text-white fw-bold">Tempo Final</label>
+                                                    <input type="text" class="form-control" id="finalTime" placeholder="MM:SS" required>
+                                                    <div class="form-text text-secondary">Formato: MM:SS (ex: 02:30)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="winnerSelect" class="form-label text-white fw-bold">Vencedor</label>
+                                                    <select class="form-select" id="winnerSelect" required>
+                                                        <option value="">Selecione...</option>
+                                                        <!-- Fighter options will be populated -->
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFightResult()">Salvar Resultado</button>
+                </div>
             </div>
         </div>
     </div>

@@ -8,171 +8,7 @@
 import ActivityKit
 import WidgetKit
 import SwiftUI
-
-// Função auxiliar para obter emoji da bandeira do país
-func getCountryFlagEmoji(for country: String?) -> String {
-    guard let country = country else { return "" }
-    
-    // Mapeamento de países para emojis de bandeira
-    let countryToFlag: [String: String] = [
-        "United States": "🇺🇸",
-        "Brazil": "🇧🇷",
-        "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-        "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-        "Ireland": "🇮🇪",
-        "Canada": "🇨🇦",
-        "Australia": "🇦🇺",
-        "New Zealand": "🇳🇿",
-        "South Africa": "🇿🇦",
-        "Nigeria": "🇳🇬",
-        "Ghana": "🇬🇭",
-        "Cameroon": "🇨🇲",
-        "Morocco": "🇲🇦",
-        "Tunisia": "🇹🇳",
-        "Algeria": "🇩🇿",
-        "Egypt": "🇪🇬",
-        "Kenya": "🇰🇪",
-        "Uganda": "🇺🇬",
-        "Tanzania": "🇹🇿",
-        "Ethiopia": "🇪🇹",
-        "Somalia": "🇸🇴",
-        "Sudan": "🇸🇩",
-        "South Sudan": "🇸🇸",
-        "Eritrea": "🇪🇷",
-        "Djibouti": "🇩🇯",
-        "Comoros": "🇰🇲",
-        "United Arab Emirates": "🇦🇪",
-        "Madagascar": "🇲🇬",
-        "Mauritius": "🇲🇺",
-        "Seychelles": "🇸🇨",
-        "Reunion": "🇷🇪",
-        "Mayotte": "🇾🇹",
-        "France": "🇫🇷",
-        "Germany": "🇩🇪",
-        "Italy": "🇮🇹",
-        "Spain": "🇪🇸",
-        "Portugal": "🇵🇹",
-        "Netherlands": "🇳🇱",
-        "Belgium": "🇧🇪",
-        "Switzerland": "🇨🇭",
-        "Austria": "🇦🇹",
-        "Sweden": "🇸🇪",
-        "Norway": "🇳🇴",
-        "Denmark": "🇩🇰",
-        "Finland": "🇫🇮",
-        "Iceland": "🇮🇸",
-        "Poland": "🇵🇱",
-        "Czech Republic": "🇨🇿",
-        "Slovakia": "🇸🇰",
-        "Hungary": "🇭🇺",
-        "Romania": "🇷🇴",
-        "Bulgaria": "🇧🇬",
-        "Greece": "🇬🇷",
-        "Turkey": "🇹🇷",
-        "Cyprus": "🇨🇾",
-        "Malta": "🇲🇹",
-        "Croatia": "🇭🇷",
-        "Slovenia": "🇸🇮",
-        "Bosnia and Herzegovina": "🇧🇦",
-        "Serbia": "🇷🇸",
-        "Montenegro": "🇲🇪",
-        "North Macedonia": "🇲🇰",
-        "Albania": "🇦🇱",
-        "Kosovo": "🇽🇰",
-        "Moldova": "🇲🇩",
-        "Ukraine": "🇺🇦",
-        "Belarus": "🇧🇾",
-        "Lithuania": "🇱🇹",
-        "Latvia": "🇱🇻",
-        "Estonia": "🇪🇪",
-        "Russia": "🇷🇺",
-        "Kazakhstan": "🇰🇿",
-        "Uzbekistan": "🇺🇿",
-        "Kyrgyzstan": "🇰🇬",
-        "Tajikistan": "🇹🇯",
-        "Turkmenistan": "🇹🇲",
-        "Azerbaijan": "🇦🇿",
-        "Georgia": "🇬🇪",
-        "Armenia": "🇦🇲",
-        "Iran": "🇮🇷",
-        "Iraq": "🇮🇶",
-        "Syria": "🇸🇾",
-        "Lebanon": "🇱🇧",
-        "Jordan": "🇯🇴",
-        "Israel": "🇮🇱",
-        "Palestine": "🇵🇸",
-        "Saudi Arabia": "🇸🇦",
-        "Yemen": "🇾🇪",
-        "Oman": "🇴🇲",
-        "United Arab Emirates": "🇦🇪",
-        "Qatar": "🇶🇦",
-        "Bahrain": "🇧🇭",
-        "Kuwait": "🇰🇼",
-        "Afghanistan": "🇦🇫",
-        "Pakistan": "🇵🇰",
-        "India": "🇮🇳",
-        "Nepal": "🇳🇵",
-        "Bhutan": "🇧🇹",
-        "Bangladesh": "🇧🇩",
-        "Sri Lanka": "🇱🇰",
-        "Maldives": "🇲🇻",
-        "China": "🇨🇳",
-        "Japan": "🇯🇵",
-        "South Korea": "🇰🇷",
-        "North Korea": "🇰🇵",
-        "Mongolia": "🇲🇳",
-        "Taiwan": "🇹🇼",
-        "Hong Kong": "🇭🇰",
-        "Macau": "🇲🇴",
-        "Vietnam": "🇻🇳",
-        "Laos": "🇱🇦",
-        "Cambodia": "🇰🇭",
-        "Thailand": "🇹🇭",
-        "Myanmar": "🇲🇲",
-        "Malaysia": "🇲🇾",
-        "Singapore": "🇸🇬",
-        "Indonesia": "🇮🇩",
-        "Philippines": "🇵🇭",
-        "Brunei": "🇧🇳",
-        "East Timor": "🇹🇱",
-        "Papua New Guinea": "🇵🇬",
-        "Fiji": "🇫🇯",
-        "Vanuatu": "🇻🇺",
-        "New Caledonia": "🇳🇨",
-        "Solomon Islands": "🇸🇧",
-        "Samoa": "🇼🇸",
-        "American Samoa": "🇦🇸",
-        "Tonga": "🇹🇴",
-        "Tuvalu": "🇹🇻",
-        "Kiribati": "🇰🇮",
-        "Nauru": "🇳🇷",
-        "Palau": "🇵🇼",
-        "Micronesia": "🇫🇲",
-        "Marshall Islands": "🇲🇭",
-        "Mexico": "🇲🇽",
-        "Guatemala": "🇬🇹",
-        "Belize": "🇧🇿",
-        "El Salvador": "🇸🇻",
-        "Honduras": "🇭🇳",
-        "Nicaragua": "🇳🇮",
-        "Costa Rica": "🇨🇷",
-        "Panama": "🇵🇦",
-        "Colombia": "🇨🇴",
-        "Venezuela": "🇻🇪",
-        "Guyana": "🇬🇾",
-        "Suriname": "🇸🇷",
-        "French Guiana": "🇬🇫",
-        "Ecuador": "🇪🇨",
-        "Peru": "🇵🇪",
-        "Bolivia": "🇧🇴",
-        "Paraguay": "🇵🇾",
-        "Uruguay": "🇺🇾",
-        "Argentina": "🇦🇷",
-        "Chile": "🇨🇱"
-    ]
-    
-    return countryToFlag[country] ?? ""
-}
+import SVGKit
 
 // MARK: - Font Extension for Widget
 extension Font {
@@ -228,6 +64,11 @@ struct UFCEventLiveActivityAttributes: ActivityAttributes {
         var liveFightFighter1Country: String?
         var liveFightFighter2Country: String?
         var liveFightWeightClass: String?
+        // NOVOS CAMPOS: SVGs das bandeiras
+        var mainEventFighter1FlagSvg: String?
+        var mainEventFighter2FlagSvg: String?
+        var liveFightFighter1FlagSvg: String?
+        var liveFightFighter2FlagSvg: String?
     }
     
     var eventName: String
@@ -335,11 +176,9 @@ struct UFCEventLiveActivity: Widget {
                                         .font(.widgetRajdhani(size: 24, weight: .bold))
                                         .foregroundColor(.white)
                                     
-                                    if let country = context.state.liveFightFighter1Country {
-                                        FlagSvgView(countryCode: country, size: 16)
-                                    } else {
-                                        Text("❌")
-                                            .font(.system(size: 16))
+                                    // Usar apenas SVG
+                                    if let flagSvg = context.state.liveFightFighter1FlagSvg, !flagSvg.isEmpty {
+                                        FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter1Country)
                                     }
                                 }
                                 
@@ -349,12 +188,10 @@ struct UFCEventLiveActivity: Widget {
                                 
                                 // Fighter 2
                                 HStack(spacing: 4) {
-                                if let country = context.state.liveFightFighter2Country {
-                                    FlagSvgView(countryCode: country, size: 16)
-                                } else {
-                                    Text("❌")
-                                        .font(.system(size: 16))
-                                }
+                                    // Usar apenas SVG
+                                    if let flagSvg = context.state.liveFightFighter2FlagSvg, !flagSvg.isEmpty {
+                                        FlagSvgView(svgString: flagSvg, size: 16, countryName: context.state.liveFightFighter2Country)
+                                    }
                                     
                                     Text(context.state.liveFightFighter2LastName)
                                         .font(.widgetRajdhani(size: 24, weight: .bold))
@@ -381,6 +218,8 @@ struct UFCEventLiveActivity: Widget {
                             print("🔍 Debug: - liveFightFighter2LastName: '\(context.state.liveFightFighter2LastName)'")
                             print("🔍 Debug: - liveFightFighter1Ranking: '\(context.state.liveFightFighter1Ranking ?? "nil")'")
                             print("🔍 Debug: - liveFightFighter2Ranking: '\(context.state.liveFightFighter2Ranking ?? "nil")'")
+                            print("🔍 Debug: - liveFightFighter1FlagSvg: '\(context.state.liveFightFighter1FlagSvg?.prefix(50) ?? "nil")...'")
+                            print("🔍 Debug: - liveFightFighter2FlagSvg: '\(context.state.liveFightFighter2FlagSvg?.prefix(50) ?? "nil")...'")
                         }
                     }
                     .padding(.horizontal, 16)
@@ -537,7 +376,11 @@ extension UFCEventLiveActivityAttributes.ContentState {
             liveFightFighter2Ranking: nil,
             liveFightFighter1Country: nil,
             liveFightFighter2Country: nil,
-            liveFightWeightClass: nil
+            liveFightWeightClass: nil,
+            mainEventFighter1FlagSvg: nil,
+            mainEventFighter2FlagSvg: nil,
+            liveFightFighter1FlagSvg: nil,
+            liveFightFighter2FlagSvg: nil
         )
     }
     
@@ -572,7 +415,11 @@ extension UFCEventLiveActivityAttributes.ContentState {
             liveFightFighter2Ranking: "#15",
             liveFightFighter1Country: "Japan",
             liveFightFighter2Country: "South Korea",
-            liveFightWeightClass: "Flyweight"
+            liveFightWeightClass: "Flyweight",
+            mainEventFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#009b3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#fedf00\" d=\"M320 240L240 120l80-60 80 60z\"/><circle fill=\"#002776\" cx=\"320\" cy=\"240\" r=\"40\"/><path fill=\"#fff\" d=\"M320 220c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 32c-6.6 0-12-5.4-12-12s5.4-12 12-12 12 5.4 12 12-5.4 12-12 12z\"/></svg>",
+            mainEventFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#bd3d44\" d=\"M0 0h640v480H0\"/><path stroke=\"#fff\" stroke-width=\"37\" d=\"M0 55.3h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640\"/><rect fill=\"#192f5d\" width=\"247\" height=\"259\"/><g fill=\"#fff\"><g id=\"d\"><g id=\"c\"><g id=\"e\"><g id=\"b\"><path id=\"a\" d=\"M24.8 25l3.2 9.8h10.3l-8.4 6.1 3.2 9.8-8.3-6-8.3 6 3.2-9.8-8.4-6.1h10.3z\"/><use href=\"#a\" y=\"19.5\"/><use href=\"#a\" y=\"39\"/></g><use href=\"#b\" y=\"78\"/></g><use href=\"#c\" y=\"156\"/></g><use href=\"#d\" y=\"312\"/></g></svg>",
+            liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
+            liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>"
         )
     }
 }

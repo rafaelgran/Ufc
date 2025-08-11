@@ -20,18 +20,26 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     // MARK: - Remote Notifications
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("🚀 didRegisterForRemoteNotificationsWithDeviceToken CALLED!")
+        
         // Converter o token para string hexadecimal
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         
         print("📱 Device Token: \(token)")
         
-        // Registrar dispositivo usando o serviço
+        // TODO: Implementar autenticação real do Supabase
+        // Por enquanto, vamos usar service_role key diretamente
+        // Em produção, você deve implementar autenticação real
+        let serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlneHp0cGpyb2pkbXl6emhxeHN2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzMwMTkyNSwiZXhwIjoyMDY4ODc3OTI1fQ.vKFJ5j2SlMonBypOQzZXywKl7UaA19LeroBnqj1Qnw0"
+        RemoteNotificationService.shared.setCurrentUserJWT(serviceRoleKey)
+        
+        // Registrar dispositivo usando o serviço (AGORA com JWT configurado)
         RemoteNotificationService.shared.registerDevice(with: token)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("❌ Failed to register for remote notifications: \(error)")
+        print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
     }
     
     // MARK: - Notification Handling

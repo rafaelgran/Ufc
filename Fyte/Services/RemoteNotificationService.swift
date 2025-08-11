@@ -27,50 +27,78 @@ class RemoteNotificationService: ObservableObject {
     // MARK: - Server Communication
     
     private func sendTokenToServer(_ token: String) {
-        // URL do seu servidor - ajuste conforme necessário
-        // Para desenvolvimento, você pode usar:
-        // - https://httpbin.org/post (para testar)
-        // - Sua URL real do servidor
-        guard let url = URL(string: "https://httpbin.org/post") else {
-            print("❌ Invalid server URL")
+        print("🚀 sendTokenToServer called with token: \(token)")
+        
+        // URL do Supabase Edge Function
+        guard let url = URL(string: "https://igxztpjrojdmyzzhqxsv.supabase.co/functions/v1/register-device") else {
+            print("❌ Invalid Supabase URL")
             return
         }
+        
+        print("🌐 Sending token to URL: \(url)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        // Adicionar header de autorização com JWT
+        if let jwt = getCurrentUserJWT() {
+            request.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
+            print("🔑 Service Role Key header added: Bearer \(jwt.prefix(50))...")
+        } else {
+            print("❌ No Service Role Key available, cannot register device")
+            return
+        }
+        
         let body: [String: Any] = [
             "device_token": token,
-            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
-            "device_type": "iOS",
-            "platform": "iOS",
-            "timestamp": Date().timeIntervalSince1970
+            "platform": "iOS"
         ]
+        
+        print("📦 Request body: \(body)")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            print("✅ Request body serialized successfully")
         } catch {
             print("❌ Error serializing request body: \(error)")
             return
         }
         
+        print("📤 Starting URLSession request...")
+        
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
+                print("📥 Response received!")
+                
                 if let error = error {
-                    print("❌ Error sending token to server: \(error)")
+                    print("❌ Error sending token to Supabase: \(error)")
                     self?.isRegistered = false
                 } else if let httpResponse = response as? HTTPURLResponse {
+                    print("📊 HTTP Status: \(httpResponse.statusCode)")
+                    
+                    if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                        print("📄 Response data: \(responseString)")
+                    }
+                    
                     if httpResponse.statusCode == 200 {
-                        print("✅ Device registered successfully with server")
+                        print("✅ Device registered successfully with Supabase")
                         self?.isRegistered = true
                     } else {
-                        print("❌ Server error: \(httpResponse.statusCode)")
+                        print("❌ Supabase error: \(httpResponse.statusCode)")
+                        if let data = data, let errorMessage = String(data: data, encoding: .utf8) {
+                            print("❌ Error details: \(errorMessage)")
+                        }
                         self?.isRegistered = false
                     }
+                } else {
+                    print("❌ No HTTP response received")
+                    self?.isRegistered = false
                 }
             }
         }.resume()
+        
+        print("📤 URLSession request started")
     }
     
     // MARK: - Notification Handling
@@ -234,7 +262,7 @@ class RemoteNotificationService: ObservableObject {
     }
     
     /// Solicita permissões de notificação
-    private func requestNotificationPermissions() {
+    func requestNotificationPermissions() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             DispatchQueue.main.async {
                 if granted {
@@ -462,6 +490,21 @@ class RemoteNotificationService: ObservableObject {
         let weightClass = firstFight.weightClass
         
         return "\(fighter1Name) vs \(fighter2Name) (\(weightClass))"
+    }
+    
+    // MARK: - JWT Management
+    
+    /// Obtém o JWT do usuário atual
+    private func getCurrentUserJWT() -> String? {
+        // Por enquanto, vamos usar uma abordagem simples
+        // Em produção, você deve integrar com o sistema de autenticação do Supabase
+        return UserDefaults.standard.string(forKey: "user_jwt")
+    }
+    
+    /// Define o JWT do usuário atual
+    func setCurrentUserJWT(_ jwt: String) {
+        UserDefaults.standard.set(jwt, forKey: "user_jwt")
+        print("✅ JWT stored for user")
     }
 }
 

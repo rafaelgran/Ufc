@@ -359,6 +359,23 @@ struct HeaderView: View {
                         }
                     }
                     
+                    // Test Push Registration Button
+                    Button(action: {
+                        print("🧪 Testing push notification registration...")
+                        
+                        // Forçar nova solicitação de push notifications
+                        DispatchQueue.main.async {
+                            UIApplication.shared.registerForRemoteNotifications()
+                        }
+                        
+                        // Também solicitar permissões
+                        RemoteNotificationService.shared.requestNotificationPermissions()
+                    }) {
+                        Image(systemName: "bell.badge")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 20))
+                    }
+                    
                     
                     Button(action: {
                         // Profile action

@@ -83,6 +83,9 @@ struct ContentView: View {
         await eventService.fetchEvents()
         lastUpdateTime = Date()
         
+        // Atualizar notificações para todos os eventos (útil quando horários mudam no banco)
+        RemoteNotificationService.shared.updateAllEventNotifications(for: eventService.events)
+        
         // Update widget with next event
         updateWidgetWithNextEvent()
         

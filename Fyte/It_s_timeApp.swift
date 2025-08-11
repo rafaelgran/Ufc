@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct It_s_timeApp: App {
+    
+    // Registrar o AppDelegate para notificações remotas
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     init() {
         // Register custom fonts
         CustomFonts.registerFonts()

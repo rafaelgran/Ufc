@@ -88,6 +88,9 @@ class LiveActivityService: ObservableObject {
             return
         }
         
+        // Agendar notificações para o evento
+        await scheduleEventNotifications(for: event)
+        
         // Parar atividade anterior se existir
         await stopCurrentActivity()
         
@@ -914,6 +917,17 @@ class LiveActivityService: ObservableObject {
         
         // Evento está próximo se começa em até 15 minutos
         return totalMinutes <= 15 && totalMinutes > 0
+    }
+    
+    // Agendar notificações para um evento
+    private func scheduleEventNotifications(for event: UFCEvent) async {
+        // Importar o RemoteNotificationService
+        let notificationService = RemoteNotificationService.shared
+        
+        // Agendar notificações
+        notificationService.scheduleEventNotifications(for: event)
+        
+        print("📅 Scheduled notifications for event: \(event.name)")
     }
 }
 

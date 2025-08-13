@@ -76,7 +76,7 @@ class LiveActivityService: ObservableObject {
         print("🔍 Debug: LiveActivityService initialized")
     }
     
-    // Iniciar Live Activity para um evento
+    // Iniciar Live Activity para um evento específico
     func startEventActivity(for event: UFCEvent) async {
         print("🔍 Debug: startEventActivity called for event: \(event.name)")
         
@@ -176,11 +176,18 @@ class LiveActivityService: ObservableObject {
                     eventId: event.id
                 ),
                 content: ActivityContent(state: initialState, staleDate: nil),
-                pushType: nil
+                pushType: .token // Habilitar notificações push para acordar a Live Activity
             )
             
             currentActivity = activity
             print("✅ Live Activity iniciada para: \(event.name)")
+            print("🔔 Push notifications habilitadas para acordar a Live Activity")
+            
+            // Aguardar um pouco para o push token estar disponível
+            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 segundo
+            
+            // Enviar push token da Live Activity para o servidor
+            await sendLiveActivityPushTokenToServer()
             
             // Iniciar timer de atualização
             startUpdateTimer(for: event)
@@ -928,6 +935,176 @@ class LiveActivityService: ObservableObject {
         notificationService.scheduleEventNotifications(for: event)
         
         print("📅 Scheduled notifications for event: \(event.name)")
+    }
+    
+    // MARK: - Push Notification Handling for Live Activities
+    
+    /// Processa notificação push para acordar a Live Activity
+    func handlePushNotificationForLiveActivity(_ userInfo: [AnyHashable: Any]) async {
+        print("🔔 Handling push notification for Live Activity: \(userInfo)")
+        
+        // Verificar se é uma notificação para acordar Live Activity
+        guard let type = userInfo["type"] as? String,
+              type == "wake_live_activity" else {
+            print("⚠️ Not a wake Live Activity notification")
+            return
+        }
+        
+        // Extrair informações do evento
+        guard let eventId = userInfo["event_id"] as? Int,
+              let eventName = userInfo["event_name"] as? String else {
+            print("❌ Missing event information in push notification")
+            return
+        }
+        
+        print("🎯 Wake Live Activity notification for event: \(eventName) (ID: \(eventId))")
+        
+        // Verificar se já há uma Live Activity ativa para este evento
+        if let currentActivity = currentActivity,
+           currentActivity.attributes.eventId == eventId {
+            print("✅ Live Activity already active for event: \(eventName)")
+            
+            // Atualizar a Live Activity existente com dados mais recentes
+            if let event = await fetchEventFromServer(eventId: eventId) {
+                await forceUpdateLiveActivity(event: event)
+            }
+            return
+        }
+        
+        // Buscar dados do evento do servidor
+        if let event = await fetchEventFromServer(eventId: eventId) {
+            print("📱 Starting Live Activity from push notification for event: \(event.name)")
+            await startEventActivity(for: event)
+        } else {
+            print("❌ Could not fetch event data from server")
+        }
+    }
+    
+    /// Busca dados do evento do servidor
+    private func fetchEventFromServer(eventId: Int) async -> UFCEvent? {
+        print("🌐 Fetching event data from server for ID: \(eventId)")
+        
+        // URL da Edge Function para buscar evento
+        guard let url = URL(string: "https://igxztpjrojdmyzzhqxsv.supabase.co/functions/v1/get-event") else {
+            print("❌ Invalid Supabase URL")
+            return nil
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Adicionar header de autorização
+        if let jwt = getCurrentUserJWT() {
+            request.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let body: [String: Any] = [
+            "event_id": eventId
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ Error serializing request body: \(error)")
+            return nil
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200 {
+                
+                // Decodificar resposta do servidor
+                let decoder = JSONDecoder()
+                let event = try decoder.decode(UFCEvent.self, from: data)
+                print("✅ Event data fetched successfully: \(event.name)")
+                return event
+                
+            } else {
+                print("❌ Server error: \(response)")
+                return nil
+            }
+            
+        } catch {
+            print("❌ Error fetching event data: \(error)")
+            return nil
+        }
+    }
+    
+    /// Obtém o JWT do usuário atual
+    private func getCurrentUserJWT() -> String? {
+        return UserDefaults.standard.string(forKey: "user_jwt")
+    }
+    
+    /// Envia o push token da Live Activity para o servidor
+    private func sendLiveActivityPushTokenToServer() async {
+        guard let activity = currentActivity else {
+            print("❌ No active Live Activity to get push token")
+            return
+        }
+        
+        // Obter o push token da Live Activity
+        let pushToken = activity.pushToken
+        
+        guard let tokenString = pushToken?.description else {
+            print("❌ Live Activity push token not available yet")
+            return
+        }
+        
+        print("🔔 Live Activity push token: \(tokenString)")
+        
+        // URL da Edge Function para registrar push token da Live Activity
+        guard let url = URL(string: "https://igxztpjrojdmyzzhqxsv.supabase.co/functions/v1/register-live-activity") else {
+            print("❌ Invalid Supabase URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Adicionar header de autorização
+        if let jwt = getCurrentUserJWT() {
+            request.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let body: [String: Any] = [
+            "live_activity_push_token": tokenString,
+            "platform": "iOS",
+            "token_type": "live_activity",
+            "event_id": activity.attributes.eventId,
+            "event_name": activity.attributes.eventName
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ Error serializing request body: \(error)")
+            return
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📊 Live Activity push token registration status: \(httpResponse.statusCode)")
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📄 Response: \(responseString)")
+                }
+                
+                if httpResponse.statusCode == 200 {
+                    print("✅ Live Activity push token registered successfully with server")
+                } else {
+                    print("❌ Live Activity push token registration failed")
+                }
+            }
+            
+        } catch {
+            print("❌ Error sending Live Activity push token: \(error)")
+        }
     }
 }
 

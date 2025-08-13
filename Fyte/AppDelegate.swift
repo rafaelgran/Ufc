@@ -126,7 +126,93 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("📱 Received remote notification: \(userInfo)")
         
-        // Indicar que a notificação foi processada
-        completionHandler(.newData)
+        // Processar notificação para acordar Live Activity
+        if let type = userInfo["type"] as? String,
+           type == "wake_live_activity" {
+            print("🔔 Wake Live Activity notification received in background")
+            
+            // Processar a notificação de acordar Live Activity
+            Task {
+                await LiveActivityService.shared.handlePushNotificationForLiveActivity(userInfo)
+                completionHandler(.newData)
+            }
+        } else {
+            // Processar outras notificações normalmente
+            RemoteNotificationService.shared.handleServerPushNotification(userInfo)
+            completionHandler(.newData)
+        }
+    }
+    
+    // MARK: - Live Activity Push Token Handling
+    
+    /// Obtém o push token da Live Activity ativa para enviar ao servidor
+    func getLiveActivityPushToken() -> String? {
+        // Verificar se há uma Live Activity ativa
+        let activities = Activity<UFCEventLiveActivityAttributes>.activities
+        
+        guard let activeActivity = activities.first else {
+            print("❌ No active Live Activity found")
+            return nil
+        }
+        
+        // Obter o push token da Live Activity
+        let pushToken = activeActivity.pushToken
+        print("🔔 Live Activity push token: \(pushToken?.description ?? "nil")")
+        
+        return pushToken?.description
+    }
+    
+    /// Envia o push token da Live Activity para o servidor
+    func sendLiveActivityPushTokenToServer() {
+        guard let pushToken = getLiveActivityPushToken() else {
+            print("❌ No Live Activity push token available")
+            return
+        }
+        
+        print("🚀 Sending Live Activity push token to server: \(pushToken)")
+        
+        // URL da Edge Function para registrar push token da Live Activity
+        guard let url = URL(string: "https://igxztpjrojdmyzzhqxsv.supabase.co/functions/v1/register-live-activity") else {
+            print("❌ Invalid Supabase URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlneHp0cGpyb2pkbXl6emhxeHN2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzMwMTkyNSwiZXhwIjoyMDY4ODc3OTI1fQ.vKFJ5j2SlMonBypOQzZXywKl7UaA19LeroBnqj1Qnw0", forHTTPHeaderField: "Authorization")
+        
+        let body: [String: Any] = [
+            "live_activity_push_token": pushToken,
+            "platform": "iOS",
+            "token_type": "live_activity"
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ Error serializing request body: \(error)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error sending Live Activity push token: \(error)")
+                } else if let httpResponse = response as? HTTPURLResponse {
+                    print("📊 Live Activity push token registration status: \(httpResponse.statusCode)")
+                    
+                    if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                        print("📄 Response: \(responseString)")
+                    }
+                    
+                    if httpResponse.statusCode == 200 {
+                        print("✅ Live Activity push token registered successfully")
+                    } else {
+                        print("❌ Live Activity push token registration failed")
+                    }
+                }
+            }
+        }.resume()
     }
 }

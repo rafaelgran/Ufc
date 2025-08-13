@@ -149,6 +149,8 @@ class RemoteNotificationService: ObservableObject {
                 handleEventReminderNotification(userInfo)
             case "fight_result":
                 handleFightResultNotification(userInfo)
+            case "wake_live_activity":
+                handleWakeLiveActivityNotification(userInfo)
             case "general":
                 handleGeneralNotification(userInfo)
             default:
@@ -189,6 +191,25 @@ class RemoteNotificationService: ObservableObject {
     private func handleGeneralNotification(_ userInfo: [AnyHashable: Any]) {
         if let message = userInfo["message"] as? String {
             print("📢 General notification: \(message)")
+        }
+    }
+    
+    /// Processa notificação para acordar Live Activity
+    private func handleWakeLiveActivityNotification(_ userInfo: [AnyHashable: Any]) {
+        print("🔔 Wake Live Activity notification received: \(userInfo)")
+        
+        // Extrair informações do evento
+        guard let eventId = userInfo["event_id"] as? Int,
+              let eventName = userInfo["event_name"] as? String else {
+            print("❌ Missing event information in wake notification")
+            return
+        }
+        
+        print("🎯 Processing wake Live Activity for event: \(eventName) (ID: \(eventId))")
+        
+        // Processar a notificação de acordar Live Activity
+        Task {
+            await LiveActivityService.shared.handlePushNotificationForLiveActivity(userInfo)
         }
     }
     

@@ -1,0 +1,27 @@
+{
+  "name": "it's-time",
+  "version": "1.0.0",
+  "description": "Um aplicativo iOS para acompanhar eventos do UFC em tempo real, similar ao app BoxBox de Formula 1, com foco em experiência em tempo real e widgets.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelgran/Ufc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rafaelgran/Ufc/issues"
+  },
+  "homepage": "https://github.com/rafaelgran/Ufc#readme",
+  "dependencies": {
+    "@expo/vector-icons": "^14.1.0",
+    "expo": "^53.0.20",
+    "expo-constants": "^17.1.7",
+    "expo-notifications": "^0.31.4",
+    "expo-server-sdk": "^3.15.0"
+  }
+}

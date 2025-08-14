@@ -1,5 +1,6 @@
 import UIKit
 import UserNotifications
+import ActivityKit
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 

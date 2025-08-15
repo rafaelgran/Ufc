@@ -18,13 +18,13 @@ class LiveActivityFighterAPIExample {
     func exampleFetchFighterNames() async {
         print("🔍 Exemplo: Buscando nomes dos lutadores...")
         
-        let (fighter1, fighter2) = await fetchLiveFighterNames()
+        let (fighter1, fighter2) = await FighterDataService.shared.fetchLiveFightFighters()
         
         if let fighter1 = fighter1, let fighter2 = fighter2 {
             print("✅ Lutadores encontrados:")
-            print("   🥊 Lutador 1: \(fighter1)")
-            print("   🥊 Lutador 2: \(fighter2)")
-            print("   🎯 Luta: \(fighter1) vs \(fighter2)")
+            print("   🥊 Lutador 1: \(fighter1.name)")
+            print("   🥊 Lutador 2: \(fighter2.name)")
+            print("   🎯 Luta: \(fighter1.name) vs \(fighter2.name)")
         } else {
             print("❌ Não foi possível obter os nomes dos lutadores")
         }
@@ -35,7 +35,7 @@ class LiveActivityFighterAPIExample {
     func exampleForceUpdateLiveActivity() async {
         print("🔄 Exemplo: Forçando atualização da Live Activity...")
         
-        await forceUpdateLiveActivity()
+        await forceUpdateLiveActivityForLiveFight()
         
         print("✅ Atualização concluída!")
         print("🎯 Os nomes dos lutadores da luta ao vivo foram atualizados")
@@ -48,11 +48,11 @@ class LiveActivityFighterAPIExample {
         
         // Inicia as atualizações automáticas em background
         Task {
-            await startLiveFighterUpdates()
+            await startLiveFightMonitoring()
         }
         
         print("✅ Sistema de atualizações automáticas iniciado!")
-        print("📱 A Live Activity será atualizada a cada 15 segundos")
+        print("📱 A Live Activity será atualizada a cada 5 segundos")
         print("🎯 Os nomes dos lutadores da luta ao vivo serão atualizados automaticamente")
     }
     
@@ -83,7 +83,7 @@ class LiveActivityFighterAPIExample {
     func exampleFetchCompleteFighterData() async {
         print("🔍 Exemplo: Buscando dados completos dos lutadores...")
         
-        let (fighter1, fighter2) = await fetchLiveFighterCompleteData()
+        let (fighter1, fighter2) = await FighterDataService.shared.fetchLiveFightFighters()
         
         if let fighter1 = fighter1, let fighter2 = fighter2 {
             print("✅ Dados completos dos lutadores:")
@@ -133,7 +133,8 @@ class LiveActivityFighterAPIExample {
     func exampleTestLiveActivityUpdate() async {
         print("🧪 Exemplo: Testando atualização da Live Activity...")
         
-        await testLiveActivityUpdate()
+        // Usar a função de debug que existe
+        debugLiveActivityState()
         
         print("✅ Teste concluído! Verifique os logs para mais detalhes")
     }
@@ -143,7 +144,7 @@ class LiveActivityFighterAPIExample {
     func exampleForceFullNames() async {
         print("🚀 Exemplo: Forçando nomes completos...")
         
-        await forceUpdateWithFullNames()
+        await forceUpdateLiveActivityForLiveFight()
         
         print("✅ Nomes completos forçados! Verifique a Live Activity")
     }

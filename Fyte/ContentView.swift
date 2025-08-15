@@ -75,6 +75,18 @@ struct ContentView: View {
                 await refreshData()
             }
         }
+        .onReceive(Timer.publish(every: 5, on: .main, in: .common).autoconnect()) { _ in
+            Task {
+                // Verificar mudanças imediatas nas lutas ao vivo quando há uma Live Activity ativa
+                await eventService.detectLiveFightChangesAndUpdate()
+            }
+        }
+        .onReceive(Timer.publish(every: 3, on: .main, in: .common).autoconnect()) { _ in
+            Task {
+                // Verificação ainda mais frequente quando há uma Live Activity ativa
+                await eventService.detectLiveFightChangesAndUpdate()
+            }
+        }
         .onChange(of: selectedEventFilter) { oldValue, newValue in
         }
     }
@@ -91,6 +103,9 @@ struct ContentView: View {
         
         // Verificar se algum evento está próximo para iniciar Live Activity
         await checkAndStartLiveActivities()
+        
+        // Verificar mudanças imediatas nas lutas ao vivo
+        await eventService.detectLiveFightChangesAndUpdate()
     }
     
     private func updateWidgetWithNextEvent() {
@@ -303,6 +318,12 @@ struct ContentView: View {
         
         let nextEvent = sortedEvents.first
         return nextEvent
+    }
+    
+    // Função para forçar atualização imediata da Live Activity
+    func forceLiveActivityUpdate() async {
+        print("🚨 Force Live Activity update triggered from ContentView")
+        await eventService.detectLiveFightChangesAndUpdate()
     }
 }
 

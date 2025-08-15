@@ -468,6 +468,12 @@ class LiveActivityService: ObservableObject {
         print("🔍 Debug: updateLiveActivity totalRounds = \(hasLiveFight ? String(describing: displayFight?.rounds) : String(describing: mainEventFight?.rounds)), hasLiveFight = \(hasLiveFight), displayFight?.status = \(displayFight?.status ?? "nil")")
         
         await activity.updateCompat(liveState)
+        print("✅ Live Activity atualizada para status LIVE")
+        
+        // Verificar se deve auto-iniciar a próxima luta
+        if let event = event {
+            await autoStartNextFight(for: event)
+        }
     }
     
             // Atualizar luta atual
@@ -985,8 +991,45 @@ class LiveActivityService: ObservableObject {
         await updateToLiveStatus(currentFight: currentState.currentFight, event: event)
         print("🔍 Debug: updateToLiveStatus concluído")
         
+        // Verificar se deve auto-iniciar a próxima luta
+        await autoStartNextFight(for: event)
+        
         // Reiniciar o timer com dados atualizados
         startUpdateTimer(for: event)
+    }
+    
+    // Função para automaticamente iniciar a próxima luta quando uma luta é finalizada
+    func autoStartNextFight(for event: UFCEvent) async {
+        print("🚀 Live Activity: Verificando se deve iniciar próxima luta automaticamente...")
+        
+        guard let fights = event.fights, !fights.isEmpty else {
+            print("⚠️ Live Activity: Nenhuma luta encontrada para auto-start")
+            return
+        }
+        
+        // Verificar se há lutas ao vivo
+        let liveFights = fights.filter { $0.status == "live" }
+        if !liveFights.isEmpty {
+            print("✅ Live Activity: Já há lutas ao vivo, não é necessário auto-start")
+            return
+        }
+        
+        // Verificar se há lutas não finalizadas que deveriam estar ao vivo
+        let unfinishedFights = fights.filter { !$0.isFinished && $0.status != "finished" }
+        let sortedUnfinishedFights = unfinishedFights.sorted { fight1, fight2 in
+            let order1 = fight1.fightOrder ?? Int.max
+            let order2 = fight2.fightOrder ?? Int.max
+            return order1 < order2 // Ordem crescente (menor primeiro)
+        }
+        
+        if let nextFight = sortedUnfinishedFights.first {
+            print("🚀 Live Activity: Auto-iniciando próxima luta: \(nextFight.weightClass ?? "N/A") (ID: \(nextFight.id), fightOrder: \(nextFight.fightOrder ?? -1))")
+            
+            // Atualizar a Live Activity para mostrar a próxima luta
+            await forceUpdateLiveActivity(event: event)
+        } else {
+            print("⚠️ Live Activity: Nenhuma luta não finalizada encontrada para auto-start")
+        }
     }
     
     // Verificar se um evento está próximo de começar

@@ -71,18 +71,24 @@ class UFCEventService: ObservableObject {
                     // Verificar se há mudanças antes de atualizar
                     let currentState = currentActivity.content.state
                     let hasLiveFights = activeEvent.fights?.contains { $0.status == "live" } ?? false
+                    let hasUnfinishedFights = activeEvent.fights?.contains { !$0.isFinished && $0.status != "finished" } ?? false
                     let currentHasLiveFights = !currentState.liveFightFighter1LastName.isEmpty
                     
                     print("🔍 Debug: Current state has live fights: \(currentHasLiveFights)")
                     print("🔍 Debug: New data has live fights: \(hasLiveFights)")
+                    print("🔍 Debug: New data has unfinished fights: \(hasUnfinishedFights)")
                     
-                    if hasLiveFights != currentHasLiveFights {
-                        print("🚨 Live fight status changed! Updating Live Activity...")
+                    // Atualizar se há mudança no status de lutas ao vivo OU se há lutas não finalizadas que deveriam estar ao vivo
+                    if hasLiveFights != currentHasLiveFights || (hasUnfinishedFights && !currentHasLiveFights) {
+                        print("🚨 Live fight status changed or new fight should be live! Updating Live Activity...")
+                        await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
+                    } else if hasUnfinishedFights {
+                        // Sempre atualizar se há lutas não finalizadas para garantir que a próxima luta seja exibida
+                        print("🔄 Unfinished fights detected, updating Live Activity to show next fight...")
+                        await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
                     } else {
                         print("ℹ️ No live fight status change detected")
                     }
-                    
-                    await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
                 } else {
                     print("🔍 Debug: Active event not found in fetched events")
                 }
@@ -121,6 +127,75 @@ class UFCEventService: ObservableObject {
         }
         
         print("🔍 Debug: Live Activity update logic completed")
+    }
+    
+    // Função para detectar mudanças imediatas no status das lutas e forçar atualização da Live Activity
+    func detectLiveFightChangesAndUpdate() async {
+        print("🔍 Debug: Detecting live fight changes...")
+        
+        // Buscar dados mais recentes do servidor
+        do {
+            let fetchedEvents = try await fetchEventsFromSupabase()
+            
+            // Verificar se há uma Live Activity ativa
+            let liveActivityService = await LiveActivityService.shared
+            await liveActivityService.checkActiveActivities()
+            
+            let isActive = await liveActivityService.isActivityActive
+            if isActive {
+                let currentActivity = await liveActivityService.currentActivity
+                
+                if let currentActivity = currentActivity {
+                    let activeEventId = currentActivity.attributes.eventId
+                    
+                    // Encontrar o evento ativo nos dados atualizados
+                    if let activeEvent = fetchedEvents.first(where: { $0.id == activeEventId }) {
+                        let currentState = currentActivity.content.state
+                        let hasLiveFights = activeEvent.fights?.contains { $0.status == "live" } ?? false
+                        let currentHasLiveFights = !currentState.liveFightFighter1LastName.isEmpty
+                        
+                        print("🔍 Debug: Live fight change detection:")
+                        print("   - Current state has live fights: \(currentHasLiveFights)")
+                        print("   - New data has live fights: \(hasLiveFights)")
+                        
+                        // Verificar se há mudanças específicas nas lutas ao vivo
+                        let currentLiveFighters = "\(currentState.liveFightFighter1LastName) vs \(currentState.liveFightFighter2LastName)"
+                        let newLiveFight = activeEvent.fights?.first { $0.status == "live" }
+                        let newLiveFighters = newLiveFight != nil ? "\(newLiveFight!.fighter1.name) vs \(newLiveFight!.fighter2.name)" : "N/A"
+                        
+                        print("🔍 Debug: Fighter comparison:")
+                        print("   - Current live fighters: '\(currentLiveFighters)'")
+                        print("   - New live fighters: '\(newLiveFighters)'")
+                        
+                        // Se há mudança no status de lutas ao vivo OU se os lutadores ao vivo mudaram, forçar atualização imediata
+                        if hasLiveFights != currentHasLiveFights || 
+                           (hasLiveFights && currentHasLiveFights && currentLiveFighters != newLiveFighters) {
+                            print("🚨 Live fight change detected! Forcing immediate update...")
+                            print("   - Status change: \(currentHasLiveFights) -> \(hasLiveFights)")
+                            print("   - Fighters change: '\(currentLiveFighters)' -> '\(newLiveFighters)'")
+                            
+                            // Forçar atualização imediata
+                            await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
+                            
+                            // Aguardar um pouco e verificar novamente para garantir que a atualização foi aplicada
+                            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 segundo
+                            await liveActivityService.forceUpdateLiveActivity(event: activeEvent)
+                            
+                        } else {
+                            print("ℹ️ No live fight change detected")
+                        }
+                    }
+                }
+            }
+            
+            // Atualizar os dados locais
+            await MainActor.run {
+                self.events = fetchedEvents
+            }
+            
+        } catch {
+            print("❌ Error detecting live fight changes: \(error)")
+        }
     }
     
     // Forçar refresh dos dados e atualizar Live Activity

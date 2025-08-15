@@ -11,8 +11,24 @@ import WidgetKit
 
 // MARK: - Data Models for API
 
-
 // MARK: - Live Activity Attributes
+// ✅ LÓGICA CORRIGIDA: Estados do evento baseados no status real das lutas
+// 
+// Estados corretos:
+// - "starting": Evento ainda não começou (todas as lutas estão "scheduled")
+// - "live": Evento está acontecendo (há pelo menos uma luta "live" ou lutas "finished" + "scheduled")
+// - "finished": Evento realmente terminou (TODAS as lutas estão "finished")
+//
+// ❌ LÓGICA ANTERIOR INCORRETA:
+// - "finished" era usado incorretamente quando a Live Activity era parada
+// - Status baseado apenas em tempo ou presença de luta ao vivo
+// - Não verificava se todas as lutas estavam realmente finalizadas
+//
+// ✅ NOVA IMPLEMENTAÇÃO:
+// - determineEventStatus(): Determina status real baseado no estado das lutas
+// - areAllFightsFinished(): Verifica se todas as lutas estão finalizadas
+// - getFightsStatusBreakdown(): Obtém breakdown detalhado do status
+// - Todas as funções agora usam a lógica correta de estados
 struct UFCEventLiveActivityAttributes: ActivityAttributes {
     public     struct ContentState: Codable, Hashable {
         var timeRemaining: String
@@ -111,9 +127,18 @@ class LiveActivityService: ObservableObject {
         // Obter luta que deve ser exibida no destaque
         let displayFight = getDisplayFight(for: event)
         
-        // Verificar se há luta ao vivo
+        // ✅ DEBUG: Logs detalhados para rastrear o problema
+        print("🔍 Debug: startEventActivity - Evento: \(event.name)")
+        print("🔍 Debug: startEventActivity - DisplayFight: \(displayFight?.fighter1.name ?? "nil") vs \(displayFight?.fighter2.name ?? "nil") (status: \(displayFight?.status ?? "nil"))")
+        print("🔍 Debug: startEventActivity - MainEventFight: \(mainEventFight?.fighter1.name ?? "nil") vs \(mainEventFight?.fighter2.name ?? "nil") (fightOrder: \(mainEventFight?.fightOrder ?? 0))")
+        print("🔍 Debug: startEventActivity - CurrentFight: \(currentFight ?? "nil")")
+        print("🔍 Debug: startEventActivity - NextFight: \(nextFight?.fighter1.name ?? "nil") vs \(nextFight?.fighter2.name ?? "nil")")
+        
+        // ✅ CORRIGIDO: Usar nova lógica para determinar status real do evento
+        let eventStatus = determineEventStatus(for: event)
         let hasLiveFight = displayFight?.status == "live"
-        let eventStatus = hasLiveFight ? "live" : "starting"
+        
+        print("🔍 Debug: startEventActivity - EventStatus: \(eventStatus), HasLiveFight: \(hasLiveFight)")
         
         // Extrair nomes dos lutadores
         let currentFighter1LastName = displayFight?.fighter1.name ?? ""
@@ -123,13 +148,20 @@ class LiveActivityService: ObservableObject {
         let mainEventFighter1LastName = extractLastName(from: mainEventFight?.fighter1.name ?? "")
         let mainEventFighter2LastName = extractLastName(from: mainEventFight?.fighter2.name ?? "")
         
-        // Criar estado inicial
+        print("🔍 Debug: startEventActivity - Nomes extraídos:")
+        print("   - currentFighter1LastName: '\(currentFighter1LastName)'")
+        print("   - currentFighter2LastName: '\(currentFighter2LastName)'")
+        print("   - mainEventFighter1LastName: '\(mainEventFighter1LastName)'")
+        print("   - mainEventFighter2LastName: '\(mainEventFighter2LastName)'")
+        
+        // ✅ CORRIGIDO: Criar estado inicial com lógica clara
         let initialState = UFCEventLiveActivityAttributes.ContentState(
             timeRemaining: hasLiveFight ? "LIVE" : "Starting Soon",
             eventStatus: eventStatus,
             currentFight: currentFight,
             finishedFights: finishedFights,
             totalFights: totalFights,
+            // ===== LUTA ATUAL (ao vivo OU principal) =====
             fighter1LastName: hasLiveFight ? currentFighter1LastName : mainEventFighter1LastName,
             fighter2LastName: hasLiveFight ? currentFighter2LastName : mainEventFighter2LastName,
             nextFighter1LastName: nextFighter1LastName,
@@ -140,7 +172,7 @@ class LiveActivityService: ObservableObject {
             fighter2Country: hasLiveFight ? displayFight?.fighter2.country : mainEventFight?.fighter2.country,
             fighter1Record: hasLiveFight ? displayFight?.fighter1.record : nil,
             fighter2Record: hasLiveFight ? displayFight?.fighter2.record : nil,
-            currentFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
+            currentFightWeightClass: hasLiveFight ? displayFight?.weightClass : mainEventFight?.weightClass,
             // ===== LUTA PRINCIPAL (fightOrder 1) =====
             mainEventFighter1LastName: mainEventFighter1LastName,
             mainEventFighter2LastName: mainEventFighter2LastName,
@@ -150,6 +182,7 @@ class LiveActivityService: ObservableObject {
             mainEventFighter2Country: mainEventFight?.fighter2.country,
             mainEventWeightClass: mainEventFight?.weightClass,
             // ===== LUTA AO VIVO (status "live") =====
+            // ✅ CORRIGIDO: Luta ao vivo só é preenchida se realmente houver uma luta ao vivo
             liveFightFighter1LastName: hasLiveFight ? currentFighter1LastName : "",
             liveFightFighter2LastName: hasLiveFight ? currentFighter2LastName : "",
             liveFightFighter1Ranking: hasLiveFight ? displayFight?.fighter1.ranking : nil,
@@ -158,10 +191,11 @@ class LiveActivityService: ObservableObject {
             liveFightFighter2Country: hasLiveFight ? displayFight?.fighter2.country : nil,
             liveFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
             // ===== SVGs DAS BANDEIRAS =====
-            mainEventFighter1FlagSvg: mainEventFight?.fighter1.flagSvg,
-            mainEventFighter2FlagSvg: mainEventFight?.fighter2.flagSvg,
-            liveFightFighter1FlagSvg: hasLiveFight ? displayFight?.fighter1.flagSvg : nil,
-            liveFightFighter2FlagSvg: hasLiveFight ? displayFight?.fighter2.flagSvg : nil,
+            // ✅ CORRIGIDO: SVGs otimizados para reduzir tamanho do payload
+            mainEventFighter1FlagSvg: optimizeSvg(mainEventFight?.fighter1.flagSvg),
+            mainEventFighter2FlagSvg: optimizeSvg(mainEventFight?.fighter2.flagSvg),
+            liveFightFighter1FlagSvg: hasLiveFight ? optimizeSvg(displayFight?.fighter1.flagSvg) : nil,
+            liveFightFighter2FlagSvg: hasLiveFight ? optimizeSvg(displayFight?.fighter2.flagSvg) : nil,
             // ===== ROUNDS =====
             roundStartTime: nil,
             totalRounds: hasLiveFight ? displayFight?.rounds : mainEventFight?.rounds
@@ -200,16 +234,29 @@ class LiveActivityService: ObservableObject {
         }
     }
     
-    // Parar Live Activity atual
+    // ✅ CORRIGIDO: Parar Live Activity atual com lógica correta
     func stopCurrentActivity() async {
         guard let activity = currentActivity else { return }
         
         updateTimer?.invalidate()
         updateTimer = nil
         
+        // ✅ CORRIGIDO: Usar status correto baseado no evento atual
+        let eventStatus: String
+        // eventId é Int, não optional, então não precisa de if let
+        let eventId = activity.attributes.eventId
+        // Tentar buscar o evento para determinar o status real
+        if let event = await fetchEventFromServer(eventId: eventId) {
+            eventStatus = determineEventStatus(for: event)
+            print("🔍 Debug: stopCurrentActivity - Status real do evento: '\(eventStatus)'")
+        } else {
+            eventStatus = "finished" // Fallback se não conseguir buscar o evento
+            print("⚠️ Debug: stopCurrentActivity - Não foi possível buscar evento, usando fallback 'finished'")
+        }
+        
         let finalState = UFCEventLiveActivityAttributes.ContentState(
             timeRemaining: "FINALIZADO",
-            eventStatus: "finished",
+            eventStatus: eventStatus, // ✅ Usar status real do evento
             currentFight: nil,
             finishedFights: 0,
             totalFights: 0,
@@ -254,7 +301,7 @@ class LiveActivityService: ObservableObject {
         currentActivity = nil
         isActivityActive = false
         
-        print("🛑 Live Activity finalizada")
+        print("🛑 Live Activity finalizada com status: '\(eventStatus)'")
     }
     
     // Obter luta atual
@@ -334,20 +381,57 @@ class LiveActivityService: ObservableObject {
         }
     }
     
+    // ✅ CORRIGIDO: Função para otimizar SVGs e reduzir drasticamente o tamanho do payload
+    private func optimizeSvg(_ svg: String?) -> String? {
+        guard let svg = svg, !svg.isEmpty else { return nil }
+        
+        // ✅ CORRIGIDO: Otimização mais agressiva para reduzir payload
+        if svg.count > 500 { // Reduzido de 1000 para 500
+            print("🔍 Debug: SVG muito grande (\(svg.count) chars), otimizando agressivamente...")
+            
+            // Extrair apenas viewBox e criar SVG ultra-simplificado
+            if let viewBoxRange = svg.range(of: "viewBox=\""),
+               let viewBoxEndRange = svg.range(of: "\"", range: viewBoxRange.upperBound..<svg.endIndex) {
+                
+                let viewBoxEnd = viewBoxRange.upperBound
+                let viewBoxValueEnd = viewBoxEndRange.upperBound
+                
+                // Criar SVG ultra-simplificado com apenas viewBox
+                let optimizedSvg = "<svg viewBox=\"" + 
+                                 String(svg[viewBoxEnd..<viewBoxValueEnd]) + 
+                                 "\"></svg>"
+
+                print("🔍 Debug: SVG otimizado de \(svg.count) para \(optimizedSvg.count) chars")
+                return optimizedSvg
+            }
+        }
+        
+        return svg
+    }
+    
     // Obter a luta que deve ser exibida no destaque da Live Activity
     private func getDisplayFight(for event: UFCEvent) -> UFCFight? {
         guard let fights = event.fights, !fights.isEmpty else { 
+            print("🔍 Debug: getDisplayFight - Nenhuma luta encontrada para evento: \(event.name)")
             return nil 
         }
+        
+        print("🔍 Debug: getDisplayFight - Analisando \(fights.count) lutas para evento: \(event.name)")
         
         // Primeiro, verificar se há alguma luta ao vivo
         let liveFight = fights.first { $0.status == "live" }
         if let liveFight = liveFight {
+            print("🔍 Debug: getDisplayFight - Luta ao vivo encontrada: \(liveFight.fighter1.name) vs \(liveFight.fighter2.name) (status: \(liveFight.status ?? "nil"))")
             return liveFight
         }
         
         // Se não há luta ao vivo, usar a luta de destaque (fightOrder 1)
         let highlightFight = getHighlightFight(for: event)
+        if let highlightFight = highlightFight {
+            print("🔍 Debug: getDisplayFight - Usando luta de destaque: \(highlightFight.fighter1.name) vs \(highlightFight.fighter2.name) (fightOrder: \(highlightFight.fightOrder), status: \(highlightFight.status ?? "nil"))")
+        } else {
+            print("🔍 Debug: getDisplayFight - Nenhuma luta de destaque encontrada")
+        }
         return highlightFight
     }
     
@@ -380,6 +464,11 @@ class LiveActivityService: ObservableObject {
             currentFighter1LastName = displayFight?.fighter1.name ?? ""
             currentFighter2LastName = displayFight?.fighter2.name ?? ""
             
+            // ✅ DEBUG: Logs detalhados para rastrear o problema
+            print("🔍 Debug: updateToLiveStatus - DisplayFight encontrado: \(displayFight?.fighter1.name ?? "") vs \(displayFight?.fighter2.name ?? "")")
+            print("🔍 Debug: updateToLiveStatus - Status da luta: \(displayFight?.status ?? "nil")")
+            print("🔍 Debug: updateToLiveStatus - Nomes extraídos: '\(currentFighter1LastName)' vs '\(currentFighter2LastName)'")
+            
             // Calcular próxima luta
             let nextFight = getNextFight(for: event, finishedFights: finishedFights)
             nextFighter1LastName = extractLastName(from: nextFight?.fighter1.name ?? "")
@@ -392,9 +481,19 @@ class LiveActivityService: ObservableObject {
             mainEventFight = getHighlightFight(for: event)
         }
         
-        // Verificar se realmente há uma luta ao vivo
+        // ✅ CORRIGIDO: Usar nova lógica para determinar status real do evento
+        let eventStatus: String
+        if let unwrappedEvent = event {
+            eventStatus = determineEventStatus(for: unwrappedEvent)
+        } else {
+            eventStatus = currentState.eventStatus // Manter status atual se não houver evento
+        }
         let hasLiveFight = displayFight?.status == "live"
-        let eventStatus = hasLiveFight ? "live" : "starting"
+        
+        // ✅ DEBUG: Logs detalhados para rastrear o problema
+        print("🔍 Debug: updateToLiveStatus - HasLiveFight: \(hasLiveFight)")
+        print("🔍 Debug: updateToLiveStatus - DisplayFight status: \(displayFight?.status ?? "nil")")
+        print("🔍 Debug: updateToLiveStatus - Nomes finais: '\(currentFighter1LastName)' vs '\(currentFighter2LastName)'")
         
         // Determinar o roundStartTime
         var roundStartTime: String? = currentState.roundStartTime
@@ -438,7 +537,7 @@ class LiveActivityService: ObservableObject {
             fighter2Country: hasLiveFight ? displayFight?.fighter2.country : currentState.mainEventFighter2Country,
             fighter1Record: hasLiveFight ? displayFight?.fighter1.record : nil,
             fighter2Record: hasLiveFight ? displayFight?.fighter2.record : nil,
-            currentFightWeightClass: hasLiveFight ? displayFight?.weightClass : nil,
+            currentFightWeightClass: hasLiveFight ? displayFight?.weightClass : currentState.mainEventWeightClass,
             // ===== LUTA PRINCIPAL (fightOrder 1) =====
             mainEventFighter1LastName: currentState.mainEventFighter1LastName,
             mainEventFighter2LastName: currentState.mainEventFighter2LastName,
@@ -476,9 +575,9 @@ class LiveActivityService: ObservableObject {
         }
     }
     
-            // Atualizar luta atual
-        func updateCurrentFight(_ fight: String) async {
-            print("🔍 Debug: updateCurrentFight called with fight: \(fight)")
+    // Atualizar luta atual
+    func updateCurrentFight(_ fight: String) async {
+        print("🔍 Debug: updateCurrentFight called with fight: \(fight)")
         guard let activity = currentActivity else { return }
         
         let currentState = activity.content.state
@@ -526,9 +625,9 @@ class LiveActivityService: ObservableObject {
         await activity.updateCompat(updatedState)
     }
     
-            // Atualizar número de lutas finalizadas e próxima luta
-        func updateFinishedFights(_ finishedFights: Int, event: UFCEvent) async {
-            print("🔍 Debug: updateFinishedFights called with finishedFights: \(finishedFights)")
+    // Atualizar número de lutas finalizadas e próxima luta
+    func updateFinishedFights(_ finishedFights: Int, event: UFCEvent) async {
+        print("🔍 Debug: updateFinishedFights called with finishedFights: \(finishedFights)")
         guard let activity = currentActivity else { return }
         
         let currentState = activity.content.state
@@ -585,7 +684,10 @@ class LiveActivityService: ObservableObject {
         await activity.updateCompat(updatedState)
     }
     
-    // Timer para atualizar o countdown
+    // ✅ CORRIGIDO: Timer para atualizar o countdown com debounce para evitar múltiplas chamadas
+    private var lastUpdateTime: Date = Date.distantPast
+    private let updateDebounceInterval: TimeInterval = 5.0 // 5 segundos entre atualizações
+    
     private func startUpdateTimer(for event: UFCEvent) {
         updateTimer?.invalidate()
         
@@ -610,7 +712,16 @@ class LiveActivityService: ObservableObject {
                     }
                 }
                 
-                await self?.updateCountdown(for: event)
+                // ✅ CORRIGIDO: Debounce para evitar múltiplas chamadas simultâneas
+                if let self = self {
+                    let now = Date()
+                    if now.timeIntervalSince(self.lastUpdateTime) >= self.updateDebounceInterval {
+                        self.lastUpdateTime = now
+                        await self.updateCountdown(for: event)
+                    } else {
+                        print("🔍 Debug: updateCountdown debounced, aguardando \(self.updateDebounceInterval) segundos")
+                    }
+                }
             }
         }
     }
@@ -638,62 +749,19 @@ class LiveActivityService: ObservableObject {
             print("   - count1 < 5: \(currentState.liveFightFighter1LastName.count < 5)")
             print("   - count2 < 5: \(currentState.liveFightFighter2LastName.count < 5)")
             
-            // FORÇAR NOMES COMPLETOS quando o evento estiver ao vivo
-            let forceFullNames = currentState.liveFightFighter1LastName.isEmpty || 
-                                currentState.liveFightFighter2LastName.isEmpty ||
-                                currentState.liveFightFighter1LastName.count < 5 ||
-                                currentState.liveFightFighter2LastName.count < 5
+            // ✅ CORRIGIDO: Se os nomes estão vazios OU são dados mockup, buscar dados reais do banco
+            let isEmptyNames = currentState.liveFightFighter1LastName.isEmpty || 
+                              currentState.liveFightFighter2LastName.isEmpty
+            let isMockupData = currentState.liveFightFighter1LastName == "Taira Kai" || 
+                              currentState.liveFightFighter2LastName == "Park Jun-yong"
             
-            print("🔍 Debug: updateCountdown - forceFullNames = \(forceFullNames)")
+            print("🔍 Debug: updateCountdown - isEmptyNames = \(isEmptyNames), isMockupData = \(isMockupData)")
             
-            if forceFullNames {
-                print("🔍 Debug: updateCountdown - FORÇANDO nomes completos!")
+            if isEmptyNames || isMockupData {
+                print("🔍 Debug: updateCountdown - NOMES VAZIOS OU MOCKUP DETECTADOS! Buscando dados reais do banco...")
                 
-                // Criar estado com nomes completos forçados
-                let updatedState = UFCEventLiveActivityAttributes.ContentState(
-                    timeRemaining: timeRemaining,
-                    eventStatus: currentState.eventStatus,
-                    currentFight: "Taira Kai vs Park Jun-yong",
-                    finishedFights: currentState.finishedFights,
-                    totalFights: currentState.totalFights,
-                    fighter1LastName: currentState.fighter1LastName,
-                    fighter2LastName: currentState.fighter2LastName,
-                    nextFighter1LastName: currentState.nextFighter1LastName,
-                    nextFighter2LastName: currentState.nextFighter2LastName,
-                    fighter1Ranking: currentState.fighter1Ranking,
-                    fighter2Ranking: currentState.fighter2Ranking,
-                    fighter1Country: currentState.fighter1Country,
-                    fighter2Country: currentState.fighter2Country,
-                    fighter1Record: currentState.fighter1Record,
-                    fighter2Record: currentState.fighter2Record,
-                    currentFightWeightClass: currentState.currentFightWeightClass,
-                    mainEventFighter1LastName: currentState.mainEventFighter1LastName,
-                    mainEventFighter2LastName: currentState.mainEventFighter2LastName,
-                    mainEventFighter1Ranking: currentState.mainEventFighter1Ranking,
-                    mainEventFighter2Ranking: currentState.mainEventFighter2Ranking,
-                    mainEventFighter1Country: currentState.mainEventFighter1Country,
-                    mainEventFighter2Country: currentState.mainEventFighter2Country,
-                    mainEventWeightClass: currentState.mainEventWeightClass,
-                    // NOMES COMPLETOS FORÇADOS
-                    liveFightFighter1LastName: "Taira Kai",
-                    liveFightFighter2LastName: "Park Jun-yong",
-                    liveFightFighter1Ranking: "#12",
-                    liveFightFighter2Ranking: "#15",
-                    liveFightFighter1Country: "Japan",
-                    liveFightFighter2Country: "South Korea",
-                    liveFightWeightClass: "Flyweight",
-                    // ===== SVGs DAS BANDEIRAS =====
-                    mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
-                    mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
-                    liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
-                    liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
-                    // ===== ROUNDS =====
-                    roundStartTime: currentState.roundStartTime,
-                    totalRounds: currentState.totalRounds
-                )
-                
-                print("🔍 Debug: updateCountdown - Atualizando Live Activity com nomes completos forçados!")
-                await activity.updateCompat(updatedState)
+                // Buscar dados reais do banco e atualizar a Live Activity
+                await updateToLiveStatus(event: event)
                 return
             }
             
@@ -812,8 +880,18 @@ class LiveActivityService: ObservableObject {
         }
     }
     
-    // Verificar se uma Live Activity específica ainda deve estar ativa
+    // ✅ CORRIGIDO: Verificar se uma Live Activity específica ainda deve estar ativa
     func shouldKeepActivityActive(for event: UFCEvent) -> Bool {
+        // ✅ CORRIGIDO: Usar status real do evento em vez de apenas tempo
+        let eventStatus = determineEventStatus(for: event)
+        
+        // Se o evento está realmente finalizado, não manter ativa
+        if eventStatus == "finished" {
+            print("🔍 Debug: shouldKeepActivityActive - Evento está 'finished', não manter ativa")
+            return false
+        }
+        
+        // Para eventos não finalizados, verificar tempo como fallback
         let timeRemaining = event.timeRemaining
         let totalMinutes = timeRemaining.days * 24 * 60 + timeRemaining.hours * 60 + timeRemaining.minutes
         
@@ -821,16 +899,109 @@ class LiveActivityService: ObservableObject {
         // 1. Evento ainda não começou (tempo positivo)
         // 2. Evento está acontecendo agora (entre 0 e -480 minutos = 8 horas)
         // 3. Evento acabou há menos de 8 horas (tempo suficiente para eventos longos)
-        return totalMinutes > -480
+        let shouldKeep = totalMinutes > -480
+        
+        print("🔍 Debug: shouldKeepActivityActive - Status: '\(eventStatus)', Tempo: \(totalMinutes)min, Manter ativa: \(shouldKeep)")
+        return shouldKeep
     }
     
-    // Verificar se um evento está em andamento (live)
+    // ✅ CORRIGIDO: Verificar se um evento está em andamento (live)
     func isEventLive(for event: UFCEvent) -> Bool {
-        let timeRemaining = event.timeRemaining
-        let totalMinutes = timeRemaining.days * 24 * 60 + timeRemaining.hours * 60 + timeRemaining.minutes
+        // ✅ CORRIGIDO: Usar status real do evento em vez de apenas tempo
+        let eventStatus = determineEventStatus(for: event)
+        let isLive = eventStatus == "live"
         
-        // Evento está live se já começou mas ainda não passou 2 horas (tempo mais realista)
-        return totalMinutes <= 0 && totalMinutes > -120
+        print("🔍 Debug: isEventLive - Status: '\(eventStatus)', Está ao vivo: \(isLive)")
+        return isLive
+    }
+    
+    // ✅ NOVA FUNÇÃO: Determinar status real do evento baseado no estado das lutas
+    // ✅ FUNÇÃO CORRIGIDA: Determinar status real do evento baseado no estado das lutas
+    private func determineEventStatus(for event: UFCEvent) -> String {
+        guard let fights = event.fights, !fights.isEmpty else { 
+            print("🔍 Debug: determineEventStatus - Nenhuma luta encontrada, retornando 'starting'")
+            return "starting" 
+        }
+        
+        print("🔍 Debug: determineEventStatus - Analisando \(fights.count) lutas para evento: \(event.name)")
+        
+        // ✅ MELHORADO: Usar função auxiliar para verificar se todas as lutas estão finalizadas
+        if areAllFightsFinished(for: event) {
+            print("🔍 Debug: determineEventStatus - TODAS as lutas estão finalizadas, retornando 'finished'")
+            return "finished" // ✅ Evento realmente terminou
+        }
+        
+        // ✅ MELHORADO: Usar função auxiliar para obter breakdown do status
+        let (scheduledCount, liveCount, finishedCount, _) = getFightsStatusBreakdown(for: event)
+        
+        // Verificar se há alguma luta ao vivo
+        if liveCount > 0 {
+            print("🔍 Debug: determineEventStatus - Há \(liveCount) luta(s) ao vivo, retornando 'live'")
+            return "live" // ✅ Evento está acontecendo
+        }
+        
+        // ✅ CORRIGIDO: Verificar se há lutas finalizadas (evento em andamento)
+        if finishedCount > 0 {
+            print("🔍 Debug: determineEventStatus - Há \(finishedCount) luta(s) finalizada(s), retornando 'live'")
+            return "live" // ✅ Evento está em andamento (entre lutas)
+        }
+        
+        // Verificar se há lutas agendadas
+        if scheduledCount > 0 {
+            print("🔍 Debug: determineEventStatus - Há \(scheduledCount) luta(s) agendada(s), retornando 'starting'")
+            return "starting" // ✅ Evento ainda não começou
+        }
+        
+        // Verificar se há lutas em outros status (fallback)
+        let otherStatuses = fights.compactMap { $0.status }.filter { $0 != "finished" && $0 != "live" && $0 != "scheduled" }
+        if !otherStatuses.isEmpty {
+            print("🔍 Debug: determineEventStatus - Status não reconhecidos: \(otherStatuses), retornando 'starting'")
+        }
+        
+        print("🔍 Debug: determineEventStatus - Fallback para 'starting'")
+        return "starting" // Fallback
+    }
+    
+    // ✅ NOVA FUNÇÃO: Verificar se o evento deve ser considerado finalizado
+    private func shouldEventBeFinished(for event: UFCEvent) -> Bool {
+        let eventStatus = determineEventStatus(for: event)
+        let shouldFinish = eventStatus == "finished"
+        
+        print("🔍 Debug: shouldEventBeFinished - Status: '\(eventStatus)', Deve finalizar: \(shouldFinish)")
+        return shouldFinish
+    }
+    
+    // ✅ NOVA FUNÇÃO: Verificar se todas as lutas de um evento estão finalizadas
+    private func areAllFightsFinished(for event: UFCEvent) -> Bool {
+        guard let fights = event.fights, !fights.isEmpty else { 
+            print("🔍 Debug: areAllFightsFinished - Nenhuma luta encontrada")
+            return false 
+        }
+        
+        let allFinished = fights.allSatisfy { fight in
+            fight.status == "finished"
+        }
+        
+        let finishedCount = fights.filter { $0.status == "finished" }.count
+        let totalCount = fights.count
+        
+        print("🔍 Debug: areAllFightsFinished - \(finishedCount)/\(totalCount) lutas finalizadas, Todas finalizadas: \(allFinished)")
+        return allFinished
+    }
+    
+    // ✅ NOVA FUNÇÃO: Obter breakdown detalhado do status das lutas
+    private func getFightsStatusBreakdown(for event: UFCEvent) -> (scheduled: Int, live: Int, finished: Int, total: Int) {
+        guard let fights = event.fights, !fights.isEmpty else { 
+            return (0, 0, 0, 0) 
+        }
+        
+        let scheduledCount = fights.filter { $0.status == "scheduled" }.count
+        let liveCount = fights.filter { $0.status == "live" }.count
+        let finishedCount = fights.filter { $0.status == "finished" }.count
+        let totalCount = fights.count
+        
+        print("🔍 Debug: getFightsStatusBreakdown - Scheduled: \(scheduledCount), Live: \(liveCount), Finished: \(finishedCount), Total: \(totalCount)")
+        return (scheduledCount, liveCount, finishedCount, totalCount)
     }
     
     // Atualizar Live Activity com nomes reais dos lutadores da API
@@ -910,11 +1081,17 @@ class LiveActivityService: ObservableObject {
         let currentState = activity.content.state
         let timeRemaining = formatTimeRemaining(for: event)
         
-        // Determinar status do evento
-        let eventStatus = timeRemaining == "00:00:00" || timeRemaining == "EVENTO INICIADO" ? "live" : "starting"
+        // ✅ CORRIGIDO: Usar nova lógica para determinar status real do evento
+        let eventStatus = determineEventStatus(for: event)
         
         // Verificar se há luta ao vivo
         let hasLiveFight = displayFight?.status == "live"
+        
+        // ✅ DEBUG: Logs detalhados para rastrear o problema
+        print("🔍 Debug: forceUpdateLiveActivity - DisplayFight encontrado: \(displayFight?.fighter1.name ?? "") vs \(displayFight?.fighter2.name ?? "")")
+        print("🔍 Debug: forceUpdateLiveActivity - Status da luta: \(displayFight?.status ?? "nil")")
+        print("🔍 Debug: forceUpdateLiveActivity - HasLiveFight: \(hasLiveFight)")
+        print("🔍 Debug: forceUpdateLiveActivity - Nomes extraídos: '\(extractLastName(from: displayFight?.fighter1.name ?? ""))' vs '\(extractLastName(from: displayFight?.fighter2.name ?? ""))'")
         
         // Determinar o roundStartTime
         var roundStartTime: String? = currentState.roundStartTime
@@ -966,8 +1143,9 @@ class LiveActivityService: ObservableObject {
             mainEventFighter1Country: currentState.mainEventFighter1Country,
             mainEventFighter2Country: currentState.mainEventFighter2Country,
             mainEventWeightClass: currentState.mainEventWeightClass,
-            liveFightFighter1LastName: hasLiveFight ? (displayFight?.fighter1.name ?? "") : "",
-            liveFightFighter2LastName: hasLiveFight ? (displayFight?.fighter2.name ?? "") : "",
+            // ✅ CORRIGIDO: Sempre atualizar os nomes da luta ao vivo, independente do status
+            liveFightFighter1LastName: displayFight?.fighter1.name ?? "",
+            liveFightFighter2LastName: displayFight?.fighter2.name ?? "",
             liveFightFighter1Ranking: hasLiveFight ? displayFight?.fighter1.ranking : nil,
             liveFightFighter2Ranking: hasLiveFight ? displayFight?.fighter2.ranking : nil,
             liveFightFighter1Country: hasLiveFight ? displayFight?.fighter1.country : nil,
@@ -998,47 +1176,26 @@ class LiveActivityService: ObservableObject {
         startUpdateTimer(for: event)
     }
     
-    // Função para automaticamente iniciar a próxima luta quando uma luta é finalizada
-    func autoStartNextFight(for event: UFCEvent) async {
-        print("🚀 Live Activity: Verificando se deve iniciar próxima luta automaticamente...")
-        
-        guard let fights = event.fights, !fights.isEmpty else {
-            print("⚠️ Live Activity: Nenhuma luta encontrada para auto-start")
-            return
-        }
-        
-        // Verificar se há lutas ao vivo
-        let liveFights = fights.filter { $0.status == "live" }
-        if !liveFights.isEmpty {
-            print("✅ Live Activity: Já há lutas ao vivo, não é necessário auto-start")
-            return
-        }
-        
-        // Verificar se há lutas não finalizadas que deveriam estar ao vivo
-        let unfinishedFights = fights.filter { !$0.isFinished && $0.status != "finished" }
-        let sortedUnfinishedFights = unfinishedFights.sorted { fight1, fight2 in
-            let order1 = fight1.fightOrder ?? Int.max
-            let order2 = fight2.fightOrder ?? Int.max
-            return order1 < order2 // Ordem crescente (menor primeiro)
-        }
-        
-        if let nextFight = sortedUnfinishedFights.first {
-            print("🚀 Live Activity: Auto-iniciando próxima luta: \(nextFight.weightClass ?? "N/A") (ID: \(nextFight.id), fightOrder: \(nextFight.fightOrder ?? -1))")
-            
-            // Atualizar a Live Activity para mostrar a próxima luta
-            await forceUpdateLiveActivity(event: event)
-        } else {
-            print("⚠️ Live Activity: Nenhuma luta não finalizada encontrada para auto-start")
-        }
-    }
-    
-    // Verificar se um evento está próximo de começar
+    // ✅ CORRIGIDO: Verificar se um evento está próximo de começar
     func isEventNearStart(for event: UFCEvent) -> Bool {
+        // ✅ CORRIGIDO: Usar status real do evento em vez de apenas tempo
+        let eventStatus = determineEventStatus(for: event)
+        
+        // Se o evento já está ao vivo ou finalizado, não está próximo de começar
+        if eventStatus == "live" || eventStatus == "finished" {
+            print("🔍 Debug: isEventNearStart - Evento já está '\(eventStatus)', não está próximo de começar")
+            return false
+        }
+        
+        // Para eventos "starting", verificar tempo como fallback
         let timeRemaining = event.timeRemaining
         let totalMinutes = timeRemaining.days * 24 * 60 + timeRemaining.hours * 60 + timeRemaining.minutes
         
         // Evento está próximo se começa em até 15 minutos
-        return totalMinutes <= 15 && totalMinutes > 0
+        let isNear = totalMinutes <= 15 && totalMinutes > 0
+        
+        print("🔍 Debug: isEventNearStart - Status: '\(eventStatus)', Tempo: \(totalMinutes)min, Está próximo: \(isNear)")
+        return isNear
     }
     
     // Agendar notificações para um evento
@@ -1244,11 +1401,12 @@ extension LiveActivityService {
             }
         }
         
-        // Iniciar se o evento está próximo de começar ou está acontecendo agora
+        // ✅ CORRIGIDO: Iniciar se o evento está próximo de começar ou está acontecendo agora
         if isEventNearStart(for: event) || isEventLive(for: event) {
+            let eventStatus = determineEventStatus(for: event)
             let timeRemaining = event.timeRemaining
             let totalMinutes = timeRemaining.days * 24 * 60 + timeRemaining.hours * 60 + timeRemaining.minutes
-            print("🔍 Debug: Starting Live Activity for event: \(event.name), minutes remaining: \(totalMinutes)")
+            print("🔍 Debug: Starting Live Activity for event: \(event.name), status: '\(eventStatus)', minutes remaining: \(totalMinutes)")
             await startEventActivity(for: event)
         }
     }
@@ -1261,13 +1419,15 @@ extension LiveActivityService {
             return
         }
         
-        // Verificar se ainda deve manter a Live Activity ativa
+        // ✅ CORRIGIDO: Verificar se ainda deve manter a Live Activity ativa
         if shouldKeepActivityActive(for: event) {
-            print("🔍 Debug: Keeping Live Activity active for event: \(event.name)")
+            let eventStatus = determineEventStatus(for: event)
+            print("🔍 Debug: Keeping Live Activity active for event: \(event.name), status: '\(eventStatus)'")
             return
         }
         
-        print("🛑 Stopping Live Activity for finished event: \(event.name)")
+        let eventStatus = determineEventStatus(for: event)
+        print("🛑 Stopping Live Activity for event: \(event.name), status: '\(eventStatus)'")
         await stopCurrentActivity()
     }
 }

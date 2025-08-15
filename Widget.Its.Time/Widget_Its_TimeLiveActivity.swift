@@ -394,6 +394,12 @@ struct UFCEventLiveActivity: Widget {
                         print("🔍 Debug: liveFightFighter2LastName = '\(context.state.liveFightFighter2LastName)'")
                         print("🔍 Debug: eventStatus = '\(context.state.eventStatus)'")
                         
+                        // ✅ DEBUG: Logs detalhados para rastrear o problema na interface
+                        let _ = print("🔍 Debug: Interface - liveFightFighter1LastName: '\(context.state.liveFightFighter1LastName)'")
+                        let _ = print("🔍 Debug: Interface - liveFightFighter2LastName: '\(context.state.liveFightFighter2LastName)'")
+                        let _ = print("🔍 Debug: Interface - HasLiveFight: \(hasLiveFight)")
+                        let _ = print("🔍 Debug: Interface - EventStatus: '\(context.state.eventStatus)'")
+                        
                         if hasLiveFight {
                             // ===== SEÇÃO 2: LUTA AO VIVO (quando há luta ao vivo) =====
                             VStack(spacing: 4) {

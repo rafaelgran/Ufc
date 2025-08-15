@@ -237,7 +237,7 @@ class FighterDataService {
                 mainEventFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#bd3d44\" d=\"M0 0h640v480H0\"/><path stroke=\"#fff\" stroke-width=\"37\" d=\"M0 55.3h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640\"/><rect fill=\"#192f5d\" width=\"247\" height=\"259\"/><g fill=\"#fff\"><g id=\"d\"><g id=\"c\"><g id=\"e\"><g id=\"b\"><path id=\"a\" d=\"M24.8 25l3.2 9.8h10.3l-8.4 6.1 3.2 9.8-8.3-6-8.3 6 3.2-9.8-8.4-6.1h10.3z\"/><use href=\"#a\" y=\"19.5\"/><use href=\"#a\" y=\"39\"/></g><use href=\"#b\" y=\"78\"/></g><use href=\"#c\" y=\"156\"/></g><use href=\"#d\" y=\"312\"/></g></svg>",
                 liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
                 liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
-                roundStartTime: nil,
+                roundStartTime: "2024-04-13 22:15:00",
                 totalRounds: 5
             )
             
@@ -477,34 +477,10 @@ struct UFCEventLiveActivity: Widget {
                                     }
                                 }
                                 
-                                // Barra de progresso da luta ao vivo
-                                GeometryReader { geometry in
-                                    ZStack(alignment: .leading) {
-                                        // Background
-                                        Rectangle()
-                                            .fill(Color(red: 0.133, green: 0.133, blue: 0.133))
-                                            .frame(height: 5)
-                                            .frame(maxWidth: .infinity)
-                                            .cornerRadius(10)
-                                        
-                                        // Progress (17:20 = 1040 segundos)
-                                        Rectangle()
-                                            .fill(
-                                                // Lógica do haschampion: amarelo se tem campeão, vermelho se não tem
-                                                context.state.mainEventFighter1Ranking == "C" || context.state.mainEventFighter2Ranking == "C" || 
-                                                context.state.liveFightFighter1Ranking == "C" || context.state.liveFightFighter2Ranking == "C" ?
-                                                Color(red: 0.984, green: 1.0, blue: 0.020) : // Amarelo se tem campeão
-                                                Color(red: 1.0, green: 0.020, blue: 0.314)   // Vermelho se não tem campeão
-                                            )
-                                            .frame(width: geometry.size.width * calculateProgress(context: context), height: 5)
-                                            .onAppear {
-                                                print("🔍 Debug: Barra de progresso renderizada - width: \(geometry.size.width * calculateProgress(context: context))")
-                                            }
-                                            .cornerRadius(10)
-                                    }
-                                }
-                                .frame(height: 4)
-                                .padding(.top, 8)
+                                // Barra de progresso da luta ao vivo (restaurada com timer)
+                                ProgressBarRestored(context: context)
+                                    .frame(height: 5)
+                                    .padding(.top, 8)
                                 
                                 // Retângulos baseados no número de rounds
                                 let totalRounds = context.state.totalRounds ?? 3
@@ -719,76 +695,46 @@ struct UFCEventLiveActivity: Widget {
     }
 }
 
-// MARK: - Progress Calculation
-    func calculateProgress(context: ActivityViewContext<UFCEventLiveActivityAttributes>) -> CGFloat {
-        print("🔍 Debug: calculateProgress - FUNÇÃO CHAMADA")
-        // Determinar duração baseada no número de rounds
-        let totalRounds = context.state.totalRounds ?? 3 // Padrão é 3 rounds
-        let totalDuration: TimeInterval = totalRounds == 5 ? 1820 : 1040 // 30:20 para 5 rounds, 17:20 para 3 rounds
-        print("🔍 Debug: calculateProgress - totalRounds = \(totalRounds), totalDuration = \(totalDuration) segundos (\(totalDuration/60) minutos)")
-        
-        // Verificar se o evento está ao vivo
-        let isEventLive = context.state.eventStatus == "live"
-        let hasLiveFight = !context.state.liveFightFighter1LastName.isEmpty && !context.state.liveFightFighter2LastName.isEmpty
-        
-        print("🔍 Debug: calculateProgress - isEventLive = \(isEventLive), hasLiveFight = \(hasLiveFight), eventStatus = '\(context.state.eventStatus)', liveFightFighter1LastName = '\(context.state.liveFightFighter1LastName)', liveFightFighter2LastName = '\(context.state.liveFightFighter2LastName)'")
-        
-        // Se não está ao vivo, retornar 1% (barra vazia)
-        if !isEventLive || !hasLiveFight {
-            print("🔍 Debug: calculateProgress - Evento não está ao vivo, retornando 1%")
-            return 0.01
-        }
-        
-        // Se está ao vivo, calcular progresso baseado no roundStartTime
-        let currentTime = Date()
-        
-        // Verificar se temos o roundStartTime
-        guard let roundStartTimeString = context.state.roundStartTime,
-              !roundStartTimeString.isEmpty else {
-            print("🔍 Debug: calculateProgress - roundStartTime não disponível, usando tempo absoluto")
-            // Fallback: usar tempo absoluto se roundStartTime não estiver disponível
-            let calendar = Calendar.current
-            let totalSeconds = calendar.component(.second, from: currentTime) + 
-                              calendar.component(.minute, from: currentTime) * 60 +
-                              calendar.component(.hour, from: currentTime) * 3600
-            
-            let progress = CGFloat(totalSeconds % Int(totalDuration)) / CGFloat(totalDuration)
-            let finalProgress = min(max(progress, 0.01), 1.0)
-            print("🔍 Debug: calculateProgress - Fallback, progresso: \(finalProgress * 100)%")
-            return finalProgress
-        }
-        
+// MARK: - Função calculateProgressWidth (Implementação Original que Funcionava)
+func calculateProgressWidth(context: ActivityViewContext<UFCEventLiveActivityAttributes>) -> CGFloat {
+    // Determinar duração baseada no número de rounds
+    let totalRounds = context.state.totalRounds ?? 3 // Padrão é 3 rounds
+    let totalDuration: TimeInterval = totalRounds == 5 ? 1820 : 1040 // 30:20 para 5 rounds, 17:20 para 3 rounds
+    
+    // Verificar se o evento está ao vivo
+    let isEventLive = context.state.eventStatus == "live"
+    let hasLiveFight = !context.state.liveFightFighter1LastName.isEmpty && !context.state.liveFightFighter2LastName.isEmpty
+    
+    // Se não está ao vivo, retornar 1% (barra vazia)
+    if !isEventLive || !hasLiveFight {
+        return 0.01
+    }
+    
+    // Se está ao vivo, calcular progresso baseado no tempo atual para movimento contínuo
+    let currentTime = Date()
+    
+    // Verificar se temos o roundStartTime para calcular o progresso real
+    if let roundStartTimeString = context.state.roundStartTime,
+       !roundStartTimeString.isEmpty {
         // Converter roundStartTime para Date
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = TimeZone.current
         
-        guard let roundStartTime = dateFormatter.date(from: roundStartTimeString) else {
-            print("🔍 Debug: calculateProgress - Erro ao converter roundStartTime: \(roundStartTimeString)")
-            return 0.01
+        if let roundStartTime = dateFormatter.date(from: roundStartTimeString) {
+            let elapsed = currentTime.timeIntervalSince(roundStartTime)
+            let progress = CGFloat(elapsed / totalDuration)
+            return max(0.01, min(progress, 1.0))
         }
-        
-        // Calcular tempo decorrido desde o início da luta
-        let timeElapsed = currentTime.timeIntervalSince(roundStartTime)
-        print("🔍 Debug: calculateProgress - roundStartTime: \(roundStartTimeString)")
-        print("🔍 Debug: calculateProgress - currentTime: \(dateFormatter.string(from: currentTime))")
-        print("🔍 Debug: calculateProgress - timeElapsed: \(timeElapsed) segundos")
-        
-        // Se o tempo decorrido é negativo (luta ainda não começou), retornar 1%
-        if timeElapsed < 0 {
-            print("🔍 Debug: calculateProgress - Luta ainda não começou, retornando 1%")
-            return 0.01
-        }
-        
-        // Calcular progresso baseado no tempo decorrido
-        let progress = CGFloat(timeElapsed) / CGFloat(totalDuration)
-        
-        // Garantir que sempre comece em 1% (0.01) e pare em 100% (1.0)
-        let finalProgress = min(max(progress, 0.01), 1.0)
-        
-        print("🔍 Debug: calculateProgress - Evento ao vivo, progresso: \(finalProgress * 100)%")
-        return finalProgress
     }
+    
+    // Se não há roundStartTime válido, usar um progresso contínuo baseado no tempo atual
+    let totalSeconds = Int(currentTime.timeIntervalSince1970)
+    let progress = CGFloat(totalSeconds % Int(totalDuration)) / CGFloat(totalDuration)
+    return max(0.01, min(progress, 1.0))
+}
+
+
 
 
 
@@ -843,7 +789,7 @@ extension UFCEventLiveActivityAttributes.ContentState {
             mainEventFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#bd3d44\" d=\"M0 0h640v480H0\"/><path stroke=\"#fff\" stroke-width=\"37\" d=\"M0 55.3h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640\"/><rect fill=\"#192f5d\" width=\"247\" height=\"259\"/><g fill=\"#fff\"><g id=\"d\"><g id=\"c\"><g id=\"e\"><g id=\"b\"><path id=\"a\" d=\"M24.8 25l3.2 9.8h10.3l-8.4 6.1 3.2 9.8-8.3-6-8.3 6 3.2-9.8-8.4-6.1h10.3z\"/><use href=\"#a\" y=\"19.5\"/><use href=\"#a\" y=\"39\"/></g><use href=\"#b\" y=\"78\"/></g><use href=\"#c\" y=\"156\"/></g><use href=\"#d\" y=\"312\"/></g></svg>",
             liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
             liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
-            roundStartTime: nil,
+            roundStartTime: "2024-04-13 22:15:00",
             totalRounds: 5
         )
     }
@@ -884,10 +830,58 @@ extension UFCEventLiveActivityAttributes.ContentState {
             mainEventFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#bd3d44\" d=\"M0 0h640v480H0\"/><path stroke=\"#fff\" stroke-width=\"37\" d=\"M0 55.3h640M0 129h640M0 203h640M0 277h640M0 351h640M0 425h640\"/><rect fill=\"#192f5d\" width=\"247\" height=\"259\"/><g fill=\"#fff\"><g id=\"d\"><g id=\"c\"><g id=\"e\"><g id=\"b\"><path id=\"a\" d=\"M24.8 25l3.2 9.8h10.3l-8.4 6.1 3.2 9.8-8.3-6-8.3 6 3.2-9.8-8.4-6.1h10.3z\"/><use href=\"#a\" y=\"19.5\"/><use href=\"#a\" y=\"39\"/></g><use href=\"#b\" y=\"78\"/></g><use href=\"#c\" y=\"156\"/></g><use href=\"#d\" y=\"312\"/></g></svg>",
             liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
             liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
-            roundStartTime: nil,
+            roundStartTime: "2024-04-13 22:15:00",
             totalRounds: 5
         )
     }
+}
+
+// MARK: - Progress Bar View usando SwiftUI nativo com animação contínua
+struct ProgressBarRestored: View {
+    let context: ActivityViewContext<UFCEventLiveActivityAttributes>
+    @State private var animationProgress: CGFloat = 0.01
+
+    
+    var body: some View {
+        Rectangle()
+            .fill(Color(red: 0.133, green: 0.133, blue: 0.133)) // #222222
+            .frame(height: 4)
+            .frame(maxWidth: .infinity)
+            .cornerRadius(10)
+            .overlay(
+                Rectangle()
+                    .fill(
+                        // Lógica do haschampion: amarelo se tem campeão, vermelho se não tem
+                        context.state.mainEventFighter1Ranking == "C" || context.state.mainEventFighter2Ranking == "C" || 
+                        context.state.liveFightFighter1Ranking == "C" || context.state.liveFightFighter2Ranking == "C" ?
+                        Color(red: 0.984, green: 1.0, blue: 0.020) : // Amarelo se tem campeão
+                        Color(red: 1.0, green: 0.020, blue: 0.314)   // Vermelho se não tem campeão
+                    )
+                    .frame(height: 4)
+                    .frame(maxWidth: .infinity)
+                    .cornerRadius(10)
+                    .scaleEffect(x: animationProgress, y: 1, anchor: .leading)
+                    .animation(.linear(duration: 1), value: animationProgress)
+            )
+        .onAppear {
+            print("🔍 ProgressBarRestored: onAppear chamado")
+            animationProgress = calculateProgressWidth(context: context)
+        }
+        .onChange(of: context.state.eventStatus) { _, newStatus in
+            print("🔍 ProgressBarRestored: eventStatus mudou para '\(newStatus)'")
+        }
+        .onChange(of: context.state.liveFightFighter1LastName) { _, newName in
+            print("🔍 ProgressBarRestored: liveFightFighter1LastName mudou para '\(newName)'")
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            let newProgress = calculateProgressWidth(context: context)
+            if newProgress != animationProgress {
+                animationProgress = newProgress
+            }
+        }
+    }
+    
+
 }
 
 #Preview("Notification", as: .content, using: UFCEventLiveActivityAttributes.preview) {
@@ -905,8 +899,8 @@ func startLiveFighterUpdates() async {
     // Primeira atualização imediata
     await updateLiveActivityWithLiveFightData()
     
-    // Configurar timer para atualizações a cada 30 segundos
-    let updateInterval: TimeInterval = 30
+    // Configurar timer para atualizações a cada 10 segundos (mais frequente)
+    let updateInterval: TimeInterval = 10
     
     while true {
         do {
@@ -1168,8 +1162,8 @@ func updateLiveActivityWithLiveFightData() async {
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
             liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
-            roundStartTime: currentState.roundStartTime,
-            totalRounds: currentState.totalRounds
+            roundStartTime: "2024-04-13 22:15:00",
+            totalRounds: 5
         )
         
         await activity.update(using: updatedState)
@@ -1180,6 +1174,8 @@ func updateLiveActivityWithLiveFightData() async {
         print("   - liveFightFighter1LastName: '\(fighter1.name)'")
         print("   - liveFightFighter2LastName: '\(fighter2.name)'")
         print("   - currentFight: '\(fighter1.name) vs \(fighter2.name)'")
+        
+        // A barra de progresso será atualizada automaticamente pelo ProgressBarRestored
         
     } else {
         print("⚠️ Live Activity: Nenhuma Live Activity ativa encontrada")
@@ -1229,8 +1225,8 @@ private func updateWithSampleData() async {
             mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
             liveFightFighter1FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><circle fill=\"#bc002d\" cx=\"320\" cy=\"240\" r=\"120\"/></svg>",
             liveFightFighter2FlagSvg: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 480\"><path fill=\"#fff\" d=\"M0 0h640v480H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v480H0z\"/><path fill=\"#0047a0\" d=\"M0 0h640v240H0z\"/><path fill=\"#fff\" d=\"M0 0h640v160H0z\"/><path fill=\"#cd2e3a\" d=\"M0 0h640v80H0z\"/></svg>",
-            roundStartTime: currentState.roundStartTime,
-            totalRounds: currentState.totalRounds
+            roundStartTime: "2024-04-13 22:15:00",
+            totalRounds: 5
         )
         
         await activity.update(using: updatedState)
@@ -1250,5 +1246,91 @@ private func updateWithSampleData() async {
         print("❌ Nenhuma Live Activity ativa encontrada para atualizar")
     }
 }
+
+/// Função para sincronizar a barra de progresso com o tempo real
+func synchronizeProgressBar() async {
+    print("🔄 Live Activity: Sincronizando barra de progresso...")
+    
+    // Aguardar um pequeno delay para garantir que a UI foi atualizada
+    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 segundos
+    
+    // Forçar atualização da Live Activity para sincronizar a barra de progresso
+    if let activity = Activity<UFCEventLiveActivityAttributes>.activities.first {
+        let currentState = activity.content.state
+        
+        // Criar estado atualizado com o tempo atual para sincronizar progresso
+        let updatedState = UFCEventLiveActivityAttributes.ContentState(
+            timeRemaining: currentState.timeRemaining,
+            eventStatus: currentState.eventStatus,
+            currentFight: currentState.currentFight,
+            finishedFights: currentState.finishedFights,
+            totalFights: currentState.totalFights,
+            fighter1LastName: currentState.fighter1LastName,
+            fighter2LastName: currentState.fighter2LastName,
+            nextFighter1LastName: currentState.nextFighter1LastName,
+            nextFighter2LastName: currentState.nextFighter2LastName,
+            fighter1Ranking: currentState.fighter1Ranking,
+            fighter2Ranking: currentState.fighter2Ranking,
+            fighter1Country: currentState.fighter1Country,
+            fighter2Country: currentState.fighter2Country,
+            fighter1Record: currentState.fighter1Record,
+            fighter2Record: currentState.fighter2Record,
+            currentFightWeightClass: currentState.currentFightWeightClass,
+            mainEventFighter1LastName: currentState.mainEventFighter1LastName,
+            mainEventFighter2LastName: currentState.mainEventFighter2LastName,
+            mainEventFighter1Ranking: currentState.mainEventFighter1Ranking,
+            mainEventFighter2Ranking: currentState.mainEventFighter2Ranking,
+            mainEventFighter1Country: currentState.mainEventFighter1Country,
+            mainEventFighter2Country: currentState.mainEventFighter2Country,
+            mainEventWeightClass: currentState.mainEventWeightClass,
+            liveFightFighter1LastName: currentState.liveFightFighter1LastName,
+            liveFightFighter2LastName: currentState.liveFightFighter2LastName,
+            liveFightFighter1Ranking: currentState.liveFightFighter1Ranking,
+            liveFightFighter2Ranking: currentState.liveFightFighter2Ranking,
+            liveFightFighter1Country: currentState.liveFightFighter1Country,
+            liveFightFighter2Country: currentState.liveFightFighter2Country,
+            liveFightWeightClass: currentState.liveFightWeightClass,
+            mainEventFighter1FlagSvg: currentState.mainEventFighter1FlagSvg,
+            mainEventFighter2FlagSvg: currentState.mainEventFighter2FlagSvg,
+            liveFightFighter1FlagSvg: currentState.liveFightFighter1FlagSvg,
+            liveFightFighter2FlagSvg: currentState.liveFightFighter2FlagSvg,
+            roundStartTime: currentState.roundStartTime,
+            totalRounds: currentState.totalRounds
+        )
+        
+        // Atualizar para sincronizar
+        await activity.update(using: updatedState)
+        print("✅ Live Activity: Barra de progresso sincronizada!")
+    }
+}
+
+// MARK: - Função de progresso corrigida (removida - conflitava com ProgressBarRestored)
+
+// MARK: - Teste da Barra de Progresso
+func testProgressBar() {
+    print("🧪 Teste da Barra de Progresso:")
+    print("   - Verificando se há Live Activity ativa...")
+    
+    let activities = Activity<UFCEventLiveActivityAttributes>.activities
+    print("   - Total de Live Activities: \(activities.count)")
+    
+    if let activity = activities.first {
+        let state = activity.content.state
+        print("   - Estado da Live Activity:")
+        print("     * eventStatus: '\(state.eventStatus)'")
+        print("     * liveFightFighter1LastName: '\(state.liveFightFighter1LastName)'")
+        print("     * liveFightFighter2LastName: '\(state.liveFightFighter2LastName)'")
+        print("     * hasLiveFight: \(!state.liveFightFighter1LastName.isEmpty && !state.liveFightFighter2LastName.isEmpty)")
+        
+        if state.eventStatus == "live" && !state.liveFightFighter1LastName.isEmpty && !state.liveFightFighter2LastName.isEmpty {
+            print("   ✅ Condições para barra de progresso ativa estão satisfeitas")
+        } else {
+            print("   ❌ Condições para barra de progresso ativa NÃO estão satisfeitas")
+        }
+    } else {
+        print("   ❌ Nenhuma Live Activity ativa encontrada")
+    }
+}
+
 
 

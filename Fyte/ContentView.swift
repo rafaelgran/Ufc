@@ -70,7 +70,7 @@ struct ContentView: View {
                 await refreshData()
             }
         }
-        .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(Timer.publish(every: 15, on: .main, in: .common).autoconnect()) { _ in
             Task {
                 await refreshData()
             }

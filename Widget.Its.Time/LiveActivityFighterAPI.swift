@@ -52,7 +52,7 @@ class LiveActivityFighterAPIExample {
         }
         
         print("✅ Sistema de atualizações automáticas iniciado!")
-        print("📱 A Live Activity será atualizada a cada 30 segundos")
+        print("📱 A Live Activity será atualizada a cada 15 segundos")
         print("🎯 Os nomes dos lutadores da luta ao vivo serão atualizados automaticamente")
     }
     
